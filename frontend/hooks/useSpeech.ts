@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 
-export function useSpeech() {
+export function useSpeech(client = api) {
   const [autoplay, setAutoplay] = useState(true);
   const [slow, setSlow] = useState(false);
   const [notice, setNotice] = useState("");
@@ -100,7 +100,7 @@ export function useSpeech() {
     const abort = new AbortController();
     controller.current = abort;
     try {
-      const blob = await api.synthesize(text, abort.signal);
+      const blob = await client.synthesize(text, abort.signal);
       if (current !== generation.current) return;
       const url = URL.createObjectURL(blob);
       objectUrl.current = url;

@@ -23,3 +23,6 @@ out/
 # Local tooling
 .DS_Store
 *.log
+
+# Generated standalone UI demo
+frontend/public/parlons-demo.html

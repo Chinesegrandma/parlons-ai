@@ -58,6 +58,32 @@ evaluations/
 scripts/check.sh          # Complete checks with mock mode forced on
 ```
 
+## Interactive studio and offline demo
+
+The studio now includes four conversation scenes, phrase starters, a transcript
+review step, an independent feedback panel, playback preferences and a usage guide.
+The layout adapts to desktop and mobile. Practice counts reflect actual messages,
+not invented scores or proficiency ratings.
+
+The normal frontend route uses the backend. `/demo` is a separate **local scripted
+experience** requiring no backend, API key, network request or microphone access.
+Its recording button demonstrates the workflow using sample text, and playback
+produces a short tone. It does not recognize speech or evaluate language quality.
+Demo conversations are retained locally in this browser; avoid entering sensitive data.
+
+For a single HTML file you can download and open in a modern browser:
+
+```bash
+cd frontend
+npm run build:demo
+```
+
+Open `frontend/public/parlons-demo.html` (relative to the repository root).
+It contains its own JavaScript and styles, requires no installation on the device
+opening it, and makes no API requests. The file is generated and ignored by Git;
+`npm run dev` and `npm run build` regenerate it automatically. The regular page's
+“No key” demo link also opens the demo route when the frontend is running.
+
 ## Local setup
 
 Requires Python 3.11+ and Node.js 20.9+ (Node 22 or 24 LTS recommended).
