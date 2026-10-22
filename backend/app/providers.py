@@ -86,10 +86,20 @@ class TutorReply(BaseModel):
     correction: str = Field(max_length=2000)
 
 
+def configured_openai_key() -> str:
+    """Prefer the cloud-compatible name; retain local .env compatibility.
+
+    Do not log this return value. Mock provider calls never use either credential.
+    """
+    return (
+        os.getenv("PARLONS_OPENAI_API_KEY", "").strip() or os.getenv("OPENAI_API_KEY", "").strip()
+    )
+
+
 async def tutor_reply(app, messages: list[dict]) -> TutorReply:
     async with provider_http(app) as http:
         client = AsyncOpenAI(
-            api_key="mock-not-a-secret" if mock_enabled() else os.environ["OPENAI_API_KEY"],
+            api_key="mock-not-a-secret" if mock_enabled() else configured_openai_key(),
             http_client=http,
             max_retries=0,
         )
@@ -108,11 +118,11 @@ async def tutor_reply(app, messages: list[dict]) -> TutorReply:
 
 
 def eleven_key() -> str:
-    return "mock-not-a-secret" if mock_enabled() else os.getenv("ELEVENLABS_API_KEY", "")
+    return "mock-not-a-secret" if mock_enabled() else os.getenv("ELEVENLABS_API_KEY", "").strip()
 
 
 def voice_id() -> str:
-    return "mock-voice" if mock_enabled() else os.getenv("ELEVENLABS_VOICE_ID", "")
+    return "mock-voice" if mock_enabled() else os.getenv("ELEVENLABS_VOICE_ID", "").strip()
 
 
 async def speech_to_text(app, filename: str, data: bytes, mime: str) -> str:

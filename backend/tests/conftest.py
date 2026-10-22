@@ -14,11 +14,16 @@ from app import main, providers  # noqa: E402
 def no_external_network(monkeypatch):
     monkeypatch.setenv("MOCK_AI", "true")
 
+    attempts = []
+
     def blocked(*_args, **_kwargs):
+        attempts.append(True)
         raise AssertionError("Real network access is forbidden in tests")
 
     monkeypatch.setattr(socket.socket, "connect", blocked)
     monkeypatch.setattr(socket.socket, "connect_ex", blocked)
+    yield
+    assert not attempts, "A test attempted real networking, even if the app caught the error"
 
 
 @pytest.fixture

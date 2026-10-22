@@ -99,7 +99,8 @@ Back up any valuable database before a version upgrade.
 | Variable | Meaning |
 | --- | --- |
 | `MOCK_AI` | Defaults to `true`; only the explicit value `false` enables live provider paths. Keep `true` throughout development and tests. |
-| `OPENAI_API_KEY` | Server-side key, used only with mock mode disabled. Without it, live-mode text chat uses canned demo replies. |
+| `PARLONS_OPENAI_API_KEY` | Preferred server-side key name, supported by cloud network secrets; used only with mock mode disabled. Without either key, live-mode text chat uses canned demo replies. |
+| `OPENAI_API_KEY` | Legacy local configuration fallback. A nonblank `PARLONS_OPENAI_API_KEY` takes priority. The cloud secret configuration reserves the `OPENAI_` prefix. |
 | `OPENAI_MODEL` | Text model; default `gpt-4.1-mini`. |
 | `ELEVENLABS_API_KEY` | Server-side key for real STT/TTS, ignored in mock mode. |
 | `ELEVENLABS_VOICE_ID` | French-capable voice for real TTS. |

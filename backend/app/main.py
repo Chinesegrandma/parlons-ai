@@ -160,7 +160,7 @@ def health():
     mock = providers.mock_enabled()
     return {
         "status": "ok",
-        "mode": "mock" if mock else "ai" if os.getenv("OPENAI_API_KEY") else "demo",
+        "mode": "mock" if mock else "ai" if providers.configured_openai_key() else "demo",
         "speech_ready": bool(providers.eleven_key() and providers.voice_id()),
         "stt_ready": bool(providers.eleven_key()),
         "mock_ai": mock,
@@ -239,7 +239,7 @@ async def chat(payload: MessageCreate):
         *context,
         {"role": "user", "content": payload.message},
     ]
-    if providers.mock_enabled() or os.getenv("OPENAI_API_KEY"):
+    if providers.mock_enabled() or providers.configured_openai_key():
         try:
             result = await providers.tutor_reply(app, messages)
         except Exception as exc:
