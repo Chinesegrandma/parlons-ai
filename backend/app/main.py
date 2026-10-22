@@ -5,13 +5,14 @@ from contextlib import asynccontextmanager, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
+from urllib.parse import quote
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, HTTPException, Response, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
-from app import providers
+from app import providers, security
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 DB_PATH = Path(
@@ -78,6 +79,7 @@ def init_db():
             "(id TEXT PRIMARY KEY, session_id TEXT NOT NULL, original_text TEXT NOT NULL, "
             "created_at TEXT NOT NULL, FOREIGN KEY(session_id) REFERENCES sessions(id))"
         )
+        security.init_tables(db)
         # Old sessions never stored their frontend opener; backfill exactly once.
         for session in db.execute("SELECT * FROM sessions").fetchall():
             insert_opening(db, session["id"], session["topic"], session["created_at"])
@@ -93,6 +95,8 @@ def insert_opening(db, session_id: str, topic: str, created_at: str):
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    if security.public_enabled():
+        security.settings()
     init_db()
     yield
 
@@ -105,6 +109,9 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+
+
+app.add_middleware(security.PublicSiteMiddleware, db_factory=connect)
 
 
 class SessionCreate(BaseModel):
@@ -158,13 +165,16 @@ def session_messages(db, session_id: str) -> list[dict]:
 @app.get("/health")
 def health():
     mock = providers.mock_enabled()
-    return {
+    result = {
         "status": "ok",
         "mode": "mock" if mock else "ai" if providers.configured_openai_key() else "demo",
         "speech_ready": bool(providers.eleven_key() and providers.voice_id()),
         "stt_ready": bool(providers.eleven_key()),
         "mock_ai": mock,
     }
+    if security.public_enabled():
+        result["private_site"] = True
+    return result
 
 
 @app.post("/sessions")
@@ -320,3 +330,29 @@ async def synthesize(payload: SpeechRequest):
     except Exception as exc:
         raise HTTPException(502, "Speech synthesis failed.") from exc
     return Response(audio, media_type=mime, headers={"Cache-Control": "no-store"})
+
+
+@app.api_route("/{path:path}", methods=["GET", "HEAD"], include_in_schema=False)
+async def frontend_gateway(path: str, request: Request):
+    """Production gateway: the sole public port protects both UI and API."""
+    if not security.public_enabled():
+        raise HTTPException(404, "Not found")
+    import httpx
+
+    port = int(os.getenv("FRONTEND_PORT", "3000"))
+    transport = getattr(app.state, "frontend_transport", None) if providers.mock_enabled() else None
+    try:
+        async with httpx.AsyncClient(trust_env=False, timeout=30, transport=transport) as client:
+            response = await client.request(
+                request.method,
+                f"http://127.0.0.1:{port}/{quote(path, safe='/')}",
+                params=request.query_params.multi_items(),
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(503, "The web studio is starting; please retry shortly.") from exc
+    headers = {
+        key: value
+        for key, value in response.headers.items()
+        if key.lower() in {"content-type", "location"}
+    }
+    return Response(response.content, status_code=response.status_code, headers=headers)

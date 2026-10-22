@@ -116,6 +116,13 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                         ? "真实 API 模式"
                         : "文字演示模式"}
             </span>
+            {health?.private_site && (
+              <form method="post" action="/auth/logout">
+                <button className="help-button" type="submit">
+                  退出登录
+                </button>
+              </form>
+            )}
             <button
               className="help-button"
               onClick={() => setShowHelp(!showHelp)}

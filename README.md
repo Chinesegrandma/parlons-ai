@@ -8,6 +8,13 @@ prototype, not a production deployment or a validated language assessment tool.
 smoke tests until explicitly approved. No real API calls are needed for setup,
 tests, builds, or the included offline evaluations.**
 
+## 手机打开临时测试网址
+
+已支持“本地运行 + Cloudflare 临时隧道”，保留口令登录与限流，
+不需要 Render。运行 `python scripts/run_local.py --tunnel` 先验证模拟流程；
+真实调用使用 `--tunnel --real`。终端会显示 HTTPS 地址和本次访问口令。
+安装、密钥输入和关闭方法见 [临时隧道指南](docs/TEMPORARY_TUNNEL.md)。
+
 ## Features
 
 - A backend-owned opening message is saved atomically with each session and always

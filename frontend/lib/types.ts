@@ -13,6 +13,7 @@ export type Health = {
   speech_ready: boolean;
   stt_ready: boolean;
   mock_ai: boolean;
+  private_site?: boolean;
 };
 export type Transcript = { id: string; original_text: string };
 export const topics: { id: Topic; name: string; emoji: string }[] = [

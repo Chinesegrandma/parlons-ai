@@ -4,6 +4,7 @@ import argparse
 import getpass
 import json
 import os
+import secrets
 import shutil
 import signal
 import socket
@@ -69,6 +70,11 @@ def main():
     parser.add_argument(
         "--real", action="store_true", help="Enable real API use; billable on interaction"
     )
+    parser.add_argument(
+        "--tunnel",
+        action="store_true",
+        help="Publish a password-protected temporary HTTPS URL using cloudflared",
+    )
     parser.add_argument("--port", type=int, default=3000)
     parser.add_argument("--api-port", type=int, default=8000)
     parser.add_argument("--no-browser", action="store_true")
@@ -78,6 +84,10 @@ def main():
     args = parser.parse_args()
     if sys.version_info < (3, 11):
         parser.error("Python 3.11 or later is required")
+    if args.tunnel and not shutil.which("cloudflared"):
+        parser.error(
+            "Install cloudflared first: https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/downloads/"
+        )
     node, npm = shutil.which("node"), shutil.which("npm")
     if not node or not npm:
         parser.error("Install Node.js 22 or 24 LTS (including npm) first")
@@ -91,7 +101,11 @@ def main():
     free_port(args.port)
     free_port(args.api_port)
     env = os.environ.copy()
-    env.update(MOCK_AI="false" if args.real else "true", NEXT_TELEMETRY_DISABLED="1")
+    env.update(
+        MOCK_AI="false" if args.real else "true",
+        NEXT_TELEMETRY_DISABLED="1",
+        PARLONS_PUBLIC_SITE="true" if args.tunnel else "false",
+    )
     python = args.backend_python
     if python is None:
         venv = ROOT / "backend/.venv"
@@ -145,6 +159,30 @@ def main():
     # Always use the same-origin proxy when launched this way, even with an old .env.local.
     env["NEXT_PUBLIC_API_URL"] = "/api/backend"
     env["FRONTEND_ORIGIN"] = f"http://localhost:{args.port}"
+    frontend_env = env.copy()
+    for name in [
+        "SITE_PASSWORD",
+        "SESSION_SECRET",
+        "PARLONS_OPENAI_API_KEY",
+        "OPENAI_API_KEY",
+        "ELEVENLABS_API_KEY",
+    ]:
+        frontend_env.pop(name, None)
+    if args.tunnel:
+        env["SITE_PASSWORD"] = os.getenv("SITE_PASSWORD") or secrets.token_urlsafe(18)
+        env["SESSION_SECRET"] = secrets.token_urlsafe(48)
+        env["FRONTEND_PORT"] = str(args.port)
+        # Persistent on the machine running this command, independent of tunnel URLs.
+        env.setdefault("DATABASE_PATH", str(ROOT / "backend/parlons.sqlite3"))
+        build_env = frontend_env.copy()
+        build_env["MOCK_AI"] = "true"
+        subprocess.run([npm, "run", "build"], cwd=ROOT / "frontend", env=build_env, check=True)
+        standalone = ROOT / "frontend/.next/standalone"
+        shutil.copytree(
+            ROOT / "frontend/.next/static", standalone / ".next/static", dirs_exist_ok=True
+        )
+        shutil.copytree(ROOT / "frontend/public", standalone / "public", dirs_exist_ok=True)
+        frontend_env.update(PORT=str(args.port), HOSTNAME="127.0.0.1", NODE_ENV="production")
     processes = []
 
     def interrupt(_signal, _frame):
@@ -153,6 +191,9 @@ def main():
     signal.signal(signal.SIGINT, interrupt)
     signal.signal(signal.SIGTERM, interrupt)
     try:
+        if args.tunnel:
+            processes.append(launch([node, "server.js"], standalone, frontend_env))
+            wait_for(f"http://127.0.0.1:{args.port}/", processes)
         processes.append(
             launch(
                 [
@@ -169,6 +210,30 @@ def main():
                 env,
             )
         )
+        if args.tunnel:
+            wait_for(f"http://127.0.0.1:{args.api_port}/health/live", processes)
+            print(
+                f"\nPrivate tunnel site password: {env['SITE_PASSWORD']}\n"
+                "Open the https://….trycloudflare.com URL printed below. "
+                "Keep this terminal running; Ctrl+C stops access.\n",
+                flush=True,
+            )
+            processes.append(
+                launch(
+                    [
+                        shutil.which("cloudflared"),
+                        "tunnel",
+                        "--url",
+                        f"http://127.0.0.1:{args.api_port}",
+                        "--no-autoupdate",
+                    ],
+                    ROOT,
+                    frontend_env,
+                )
+            )
+            while all(process.poll() is None for process in processes):
+                time.sleep(0.5)
+            raise RuntimeError("A service or tunnel stopped unexpectedly")
         health = json.loads(wait_for(f"http://127.0.0.1:{args.api_port}/health", processes))
         if health["mock_ai"] == args.real:
             raise RuntimeError("Backend mode does not match the requested mode")
@@ -178,7 +243,7 @@ def main():
             launch(
                 [npm, "run", "dev", "--", "--hostname", "127.0.0.1", "--port", str(args.port)],
                 ROOT / "frontend",
-                env,
+                frontend_env,
             )
         )
         wait_for(f"http://127.0.0.1:{args.port}", processes)
