@@ -2,27 +2,47 @@
 
 **Architecture:** Next.js frontend → FastAPI backend → ElevenLabs (speech-to-text + text-to-speech); OpenAI (optional text tutor/corrections); SQLite local chat history. This is a workflow MVP, **not yet an autonomous agent**.
 
-## macOS setup
+## Repository structure
+
+```text
+backend/
+  app/                  # FastAPI application
+  tests/                # API tests (no paid API calls)
+  requirements.txt
+  .env.example
+frontend/
+  app/                  # Next.js App Router pages and styles
+  package.json
+  package-lock.json
+  tsconfig.json
+  .env.local.example
+```
+
+The backend stores local chat history in `backend/parlons.sqlite3`.
+Local secrets, databases, dependencies, and build outputs are ignored by Git.
+
+## Local setup
 
 Install Python 3.11+ and Node.js 20+ (e.g. `brew install python@3.12 node`).
 
 **Terminal 1:**
 ```bash
-cd parlons-ai-elevenlabs-v0.2/backend
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env to add ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID
+# Add ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID only if you need speech.
+# Leave keys empty to run text demo mode.
 # Optional: add OPENAI_API_KEY for real AI chat/corrections
 uvicorn app.main:app --reload --port 8000
 ```
 
 **Terminal 2:**
 ```bash
-cd parlons-ai-elevenlabs-v0.2/frontend
+cd frontend
 cp .env.local.example .env.local
-npm install
+npm ci
 npm run dev
 ```
 
@@ -42,7 +62,7 @@ Open http://localhost:3000 . Backend API docs: http://localhost:8000/docs . Clic
 ```bash
 cd backend
 source .venv/bin/activate
-pytest -q
+python -m pytest -q
 ```
 
 Test suite uses demo mode and **does not make paid API calls**. Run `npm run build` in `frontend` for a production build check.
