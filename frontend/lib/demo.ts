@@ -2,6 +2,10 @@ import type { api } from "./api";
 import type { Session, Topic } from "./types";
 
 const openings: Record<Topic, string> = {
+  restaurant: "Bonsoir ! Avez-vous une réservation ?",
+  shopping: "Bonjour ! Vous cherchez quelque chose en particulier ?",
+  doctor: "Bonjour, cabinet médical. Vous souhaitez prendre rendez-vous ?",
+  friends: "Salut ! Tu es libre ce week-end ?",
   daily: "Salut ! Comment s’est passée ta journée ?",
   cafe: "Bonjour et bienvenue ! Qu’est-ce que je vous sers aujourd’hui ?",
   travel: "Bonjour ! Quelle ville française aimerais-tu découvrir ?",
@@ -100,6 +104,14 @@ export const demoApi: typeof api = {
       correction =
         "示例反馈：aller 的过去分词是 allé。这里可说 Je suis allé au café.；女性说话者用 allée。";
     const reply = {
+      restaurant:
+        "Bien sûr ! Je vous recommande le plat du jour. Souhaitez-vous voir la carte ?",
+      shopping:
+        "Avec plaisir ! Quelle taille cherchez-vous ? Vous pouvez l’essayer ici.",
+      doctor:
+        "Nous avons un créneau demain à dix heures. Est-ce que cela vous convient ?",
+      friends:
+        "Avec plaisir ! Samedi après-midi, ça te va ? On peut se retrouver devant le cinéma.",
       cafe: "Avec plaisir ! Vous préférez un espresso ou un café allongé ? Et avec ça, un croissant ?",
       daily: "Merci de partager ça ! Qu’est-ce que tu aimerais faire ensuite ?",
       travel:

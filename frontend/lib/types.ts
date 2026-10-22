@@ -1,4 +1,12 @@
-export type Topic = "daily" | "interview" | "travel" | "cafe";
+export type Topic =
+  | "daily"
+  | "interview"
+  | "travel"
+  | "cafe"
+  | "restaurant"
+  | "shopping"
+  | "doctor"
+  | "friends";
 export type Message = {
   id: number;
   role: "user" | "assistant";
@@ -21,4 +29,8 @@ export const topics: { id: Topic; name: string; emoji: string }[] = [
   { id: "interview", name: "Entretien", emoji: "💼" },
   { id: "travel", name: "Voyage", emoji: "✈️" },
   { id: "cafe", name: "Au café", emoji: "☕" },
+  { id: "restaurant", name: "Au restaurant", emoji: "🍽️" },
+  { id: "shopping", name: "Les boutiques", emoji: "🛍️" },
+  { id: "doctor", name: "Un rendez-vous", emoji: "📅" },
+  { id: "friends", name: "Entre amis", emoji: "🌿" },
 ];

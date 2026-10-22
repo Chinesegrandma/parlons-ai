@@ -1,5 +1,10 @@
+import { useEffect, useRef } from "react";
 import {
   ArrowUpRight,
+  Utensils,
+  ShoppingBag,
+  CalendarDays,
+  Users,
   Coffee,
   Compass,
   MessageCircle,
@@ -10,6 +15,10 @@ import {
 import { topics, type Topic } from "../lib/types";
 import { scenarios } from "../lib/scenarios";
 const icons = {
+  restaurant: Utensils,
+  shopping: ShoppingBag,
+  doctor: CalendarDays,
+  friends: Users,
   daily: MessageCircle,
   cafe: Coffee,
   travel: Compass,
@@ -24,6 +33,19 @@ export function TopicSidebar({
   disabled: boolean;
   onSelect: (topic: Topic) => void;
 }) {
+  const navigation = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = navigation.current;
+    const active = nav?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!nav || !active || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollTo?.({
+      left:
+        active.offsetLeft -
+        nav.offsetLeft -
+        (nav.clientWidth - active.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [topic]);
   return (
     <aside className="sidebar">
       <a className="brand" href="#studio" aria-label="Parlons AI 首页">
@@ -41,9 +63,13 @@ export function TopicSidebar({
         <span className="live-dot" /> 你的法语练习空间
       </div>
       <div className="sideheading">
-        选择一个话题 <span>01 — 04</span>
+        选择一个话题 <span>01 — 08</span>
       </div>
-      <nav className="topiclist" aria-label="Conversation themes">
+      <nav
+        ref={navigation}
+        className="topiclist"
+        aria-label="Conversation themes"
+      >
         {topics.map((item, index) => {
           const Icon = icons[item.id];
           return (

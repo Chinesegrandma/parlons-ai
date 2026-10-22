@@ -17,6 +17,17 @@ tests, builds, or the included offline evaluations.**
 
 ## Features
 
+- Eight practice scenes: daily life, café, travel, interviews, restaurants,
+  shopping, medical appointment scheduling, and meeting friends. The scene library
+  supports Chinese/French search; each scene has three self-reported practice tasks,
+  vocabulary and optional phrase hints. Hints only fill an empty draft and never
+  send a message or trigger an API call. Task checks are session-local self-reflection,
+  not AI assessment or automatically verified mastery. CEFR labels are suggested
+  scene difficulty, not a placement test.
+- Phone navigation uses named, horizontally scrollable scene chips and a full-width
+  chat workspace. Recording shows elapsed time; transcription has a separate waiting
+  state. Multiline drafts support Shift+Enter; Enter sends unless IME composition is active.
+
 - A backend-owned opening message is saved atomically with each session and always
   included in LLM context alongside the most recent 12 non-opening messages.
 - The browser remembers the session ID. Refresh resumes its stored history;

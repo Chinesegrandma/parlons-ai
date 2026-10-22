@@ -8,6 +8,8 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
+import { PracticeGuide } from "./PracticeGuide";
+import { ScenarioLibrary } from "./ScenarioLibrary";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessageList";
 import { PlaybackControls } from "./PlaybackControls";
@@ -18,6 +20,7 @@ import { useRecorder } from "../hooks/useRecorder";
 import { useSpeech } from "../hooks/useSpeech";
 import { api } from "../lib/api";
 import { demoApi } from "../lib/demo";
+import { practice } from "../lib/practice";
 import { scenarios } from "../lib/scenarios";
 import type { Health, Topic } from "../lib/types";
 
@@ -181,6 +184,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               ✺
             </span>
           </section>
+          <ScenarioLibrary disabled={busy || listening} onSelect={start} />
           <div className="studio-grid">
             <section className="chat-card" aria-label="法语对话工作台">
               <div className="chat-card-header">
@@ -194,7 +198,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                       Parlons français <span>✦</span>
                     </h2>
                     <p>
-                      你的法语搭子 <span>·</span> B1–B2 自由练习
+                      你的法语搭子 <span>·</span> {practice[topic].level}
                     </p>
                   </div>
                 </div>
@@ -226,9 +230,21 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 </span>
                 <small>{turns} 次表达</small>
               </div>
+              <PracticeGuide
+                key={conversation.session?.id || topic}
+                topic={topic}
+                disabled={busy || listening || !conversation.session}
+                hasDraft={Boolean(conversation.input)}
+                onUse={conversation.setInput}
+              />
               <MessageList
                 messages={messages}
                 busy={busy}
+                busyLabel={
+                  recorder.transcribing
+                    ? "正在把录音转成文字…"
+                    : "正在准备回复…"
+                }
                 speechReady={speechReady}
                 onSpeak={(text) => void speech.speak(text)}
               />
@@ -241,7 +257,10 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                     <button
                       key={text}
                       disabled={
-                        busy || listening || Boolean(conversation.transcript)
+                        busy ||
+                        listening ||
+                        Boolean(conversation.input) ||
+                        Boolean(conversation.transcript)
                       }
                       onClick={() => conversation.setInput(text)}
                     >
@@ -263,6 +282,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 onStop={speech.stop}
               />
               <Composer
+                transcribing={recorder.transcribing}
                 input={conversation.input}
                 transcript={conversation.transcript}
                 disabled={busy || !conversation.session}

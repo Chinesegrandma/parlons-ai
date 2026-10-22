@@ -19,12 +19,23 @@ DB_PATH = Path(
     os.getenv("DATABASE_PATH", str(Path(__file__).resolve().parents[1] / "parlons.sqlite3"))
 )
 TOPICS = {
+    "restaurant": "commander au restaurant ; tu joues le serveur ou la serveuse",
+    "shopping": "acheter un vêtement ; tu joues le vendeur ou la vendeuse",
+    "doctor": (
+        "prendre rendez-vous au cabinet médical ; tu joues le secrétariat, "
+        "sans donner de diagnostic ni de conseil médical"
+    ),
+    "friends": "organiser une sortie ; tu joues un ami ou une amie",
     "daily": "la vie quotidienne",
     "interview": "un entretien d’embauche",
     "travel": "un voyage en France",
     "cafe": "commander dans un café",
 }
 OPENERS = {
+    "restaurant": "Bonsoir et bienvenue ! Avez-vous une réservation ?",
+    "shopping": "Bonjour ! Vous cherchez quelque chose en particulier ?",
+    "doctor": "Bonjour, cabinet médical. Vous souhaitez prendre rendez-vous ?",
+    "friends": "Salut ! Tu es libre ce week-end ? On pourrait faire quelque chose ensemble !",
     "daily": "Salut ! Comment s’est passée ta journée ?",
     "interview": "Bonjour ! Pouvez-vous vous présenter en quelques phrases ?",
     "travel": "Bonjour ! Où aimerais-tu voyager en France ?",
@@ -116,7 +127,9 @@ app.add_middleware(security.PublicSiteMiddleware, db_factory=connect)
 
 class SessionCreate(BaseModel):
     id: uuid.UUID | None = None
-    topic: Literal["daily", "interview", "travel", "cafe"] = "daily"
+    topic: Literal[
+        "daily", "interview", "travel", "cafe", "restaurant", "shopping", "doctor", "friends"
+    ] = "daily"
 
 
 class MessageCreate(BaseModel):

@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { ArrowUp, Mic, Square, ScanText, X } from "lucide-react";
 import type { Transcript } from "../lib/types";
 export function Composer({
   input,
+  transcribing = false,
   transcript,
   disabled,
   listening,
@@ -14,6 +16,7 @@ export function Composer({
   demo = false,
 }: {
   input: string;
+  transcribing?: boolean;
   transcript: Transcript | null;
   disabled: boolean;
   listening: boolean;
@@ -25,6 +28,16 @@ export function Composer({
   onDiscard: () => void;
   demo?: boolean;
 }) {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    setSeconds(0);
+    if (!listening) return;
+    const timer = window.setInterval(
+      () => setSeconds((value) => Math.min(value + 1, 60)),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [listening]);
   return (
     <div className="composerarea">
       {error && (
@@ -57,7 +70,15 @@ export function Composer({
           {demo
             ? "正在演示录音流程，不会开启麦克风。再次点击以查看示例转写。"
             : "正在听你说… 点击停止后可检查转写。"}
+          <time className="recording-timer">
+            0:{String(seconds).padStart(2, "0")} / 1:00
+          </time>
           <span className="sound-bars">▂ ▅ ▃ ▇ ▄ ▂ ▆ ▃</span>
+        </div>
+      )}
+      {transcribing && (
+        <div className="transcription-status" role="status">
+          <ScanText size={16} /> 正在转写，完成后可以检查和编辑，暂未发送。
         </div>
       )}
       <div className={`composer ${listening ? "is-listening" : ""}`}>
@@ -80,7 +101,8 @@ export function Composer({
             <Mic size={21} />
           )}
         </button>
-        <input
+        <textarea
+          rows={2}
           aria-label={transcript ? "Edit transcript" : "Message"}
           value={input}
           maxLength={2000}
@@ -91,8 +113,10 @@ export function Composer({
               !event.shiftKey &&
               !event.nativeEvent.isComposing &&
               !listening
-            )
+            ) {
+              event.preventDefault();
               onSend();
+            }
           }}
           placeholder={
             listening

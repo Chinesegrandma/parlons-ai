@@ -4,11 +4,13 @@ import type { Message } from "../lib/types";
 export function MessageList({
   messages,
   busy,
+  busyLabel = "正在准备回复…",
   speechReady,
   onSpeak,
 }: {
   messages: Message[];
   busy: boolean;
+  busyLabel?: string;
   speechReady: boolean;
   onSpeak: (text: string) => void;
 }) {
@@ -74,7 +76,7 @@ export function MessageList({
           <span />
           <span />
           <span />
-          <small>正在准备回复…</small>
+          <small>{busyLabel}</small>
         </div>
       )}
       <div ref={bottom} />

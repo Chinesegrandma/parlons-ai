@@ -11,6 +11,74 @@ export const scenarios: Record<
     vocabulary: [string, string][];
   }
 > = {
+  restaurant: {
+    label: "餐厅晚餐",
+    subtitle: "UNE TABLE POUR DEUX",
+    title: "今晚，用法语点一道菜。",
+    description: "从订位、点餐到结账，把一顿晚餐聊得从容。",
+    prompt: "说明人数，询问一道菜的配料，再礼貌地结账。",
+    starters: [
+      "Une table pour deux, s’il vous plaît.",
+      "Qu’est-ce que vous conseillez ?",
+      "L’addition, s’il vous plaît.",
+    ],
+    vocabulary: [
+      ["une entrée", "前菜"],
+      ["le plat du jour", "今日推荐主菜"],
+      ["l’addition", "账单"],
+    ],
+  },
+  shopping: {
+    label: "逛街购物",
+    subtitle: "UN PETIT COUP DE CŒUR",
+    title: "找到喜欢的，也说出喜欢。",
+    description: "询问尺码、试穿和价格，练习真实的购物对话。",
+    prompt: "告诉店员你想买什么，询问尺码，并说明你的预算。",
+    starters: [
+      "Je cherche une veste.",
+      "Vous avez cette taille ?",
+      "Est-ce que je peux l’essayer ?",
+    ],
+    vocabulary: [
+      ["la taille", "尺码"],
+      ["essayer", "试穿"],
+      ["la cabine d’essayage", "试衣间"],
+    ],
+  },
+  doctor: {
+    label: "预约看诊",
+    subtitle: "TROUVER LES BONS MOTS",
+    title: "把需要，清楚地说出来。",
+    description: "练习向诊所预约和说明来意，仅作语言练习。",
+    prompt: "向诊所前台说明预约来意，询问时间并确认信息。这不是医疗建议。",
+    starters: [
+      "Je voudrais prendre rendez-vous.",
+      "Avez-vous une place demain ?",
+      "Pouvez-vous répéter l’heure ?",
+    ],
+    vocabulary: [
+      ["un rendez-vous", "预约"],
+      ["disponible", "有空的／可预约的"],
+      ["confirmer", "确认"],
+    ],
+  },
+  friends: {
+    label: "朋友邀约",
+    subtitle: "ON SE RETROUVE ?",
+    title: "从一句邀请，开始一个周末。",
+    description: "提议、回应、商量时间，让法语更像自然聊天。",
+    prompt: "约朋友做一件事，听听对方的想法，再定下时间地点。",
+    starters: [
+      "Ça te dit d’aller au cinéma ?",
+      "Tu es libre samedi ?",
+      "On se retrouve où ?",
+    ],
+    vocabulary: [
+      ["ça te dit de…", "你想不想……"],
+      ["se retrouver", "碰面"],
+      ["avec plaisir", "很乐意"],
+    ],
+  },
   daily: {
     label: "日常生活",
     subtitle: "LES PETITS MOMENTS",
