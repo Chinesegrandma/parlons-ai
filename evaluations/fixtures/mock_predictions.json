@@ -1,0 +1,98 @@
+{
+  "source": "mock_fixture",
+  "description": "Hand-scripted outputs for testing the scorer, not OpenAI or ElevenLabs outputs. WER values are arithmetic fixtures, not measured recognition.",
+  "predictions": [
+    {
+      "id": "fr-01",
+      "correction": "Scripted fixture correction, not a model evaluation.",
+      "corrected_text": "Je vais au marché."
+    },
+    {
+      "id": "fr-02",
+      "correction": "Scripted fixture correction, not a model evaluation.",
+      "corrected_text": "Je n’ai pas de frères."
+    },
+    {
+      "id": "fr-03",
+      "correction": ""
+    },
+    {
+      "id": "fr-04",
+      "correction": "Scripted fixture correction, not a model evaluation.",
+      "corrected_text": "Nous mangeons au restaurant."
+    },
+    {
+      "id": "fr-05",
+      "correction": ""
+    },
+    {
+      "id": "fr-06",
+      "correction": ""
+    },
+    {
+      "id": "fr-07",
+      "correction": "Scripted fixture correction, not a model evaluation.",
+      "corrected_text": "La maison est grande."
+    },
+    {
+      "id": "fr-08",
+      "correction": ""
+    },
+    {
+      "id": "fr-09",
+      "correction": ""
+    },
+    {
+      "id": "fr-10",
+      "correction": ""
+    },
+    {
+      "id": "fr-11",
+      "correction": "Deliberate false positive for metric testing."
+    },
+    {
+      "id": "fr-12",
+      "correction": ""
+    },
+    {
+      "id": "fr-13",
+      "correction": ""
+    },
+    {
+      "id": "fr-14",
+      "correction": ""
+    },
+    {
+      "id": "fr-15",
+      "correction": ""
+    },
+    {
+      "id": "fr-16",
+      "correction": ""
+    },
+    {
+      "id": "fr-17",
+      "correction": "",
+      "transcript": "Tu as tout vu ?",
+      "audio_sha256": "e51f1ba017c2f892f1512acf8edd85072ba29ff1eb735cccc4f65a0d7e9000b8"
+    },
+    {
+      "id": "fr-18",
+      "correction": "",
+      "transcript": "Un bon vin blanc.",
+      "audio_sha256": "44997bed5790b14cac03fb547f0dd8ba628708caca3e26975a6bd178cff57b1f"
+    },
+    {
+      "id": "fr-19",
+      "correction": "",
+      "transcript": "Les amis arrivent à huit heures.",
+      "audio_sha256": "54389b49254c22c7577f844114ff2b26c0c3beb9b03b3bcfc2c4e55eeaade083"
+    },
+    {
+      "id": "fr-20",
+      "correction": "",
+      "transcript": "Je voudrais réserver une chambre.",
+      "audio_sha256": "822e0c69929feb0247309831299761d3887b76bcc389a0a7292ef7085261f5e4"
+    }
+  ]
+}

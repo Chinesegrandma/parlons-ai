@@ -1,0 +1,2 @@
+# Optional OFFLINE fixture regeneration only. Not needed to run the evaluator.
+espeakng-loader==0.2.4

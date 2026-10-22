@@ -1,20 +1,125 @@
-'use client';
-import {useEffect, useRef, useState} from 'react';
-import {BookOpen, Mic, MicOff, Send, Volume2, Sparkles, RotateCcw} from 'lucide-react';
+"use client";
+import { useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
+import { Composer } from "../components/Composer";
+import { MessageList } from "../components/MessageList";
+import { PlaybackControls } from "../components/PlaybackControls";
+import { TopicSidebar } from "../components/TopicSidebar";
+import { useConversation } from "../hooks/useConversation";
+import { useRecorder } from "../hooks/useRecorder";
+import { useSpeech } from "../hooks/useSpeech";
+import { api } from "../lib/api";
+import { topics, type Health, type Topic } from "../lib/types";
 
-type Message = {role:'user'|'assistant';content:string;correction?:string};
-const API=process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const topics = [{id:'daily',name:'Vie quotidienne',emoji:'☀️'},{id:'interview',name:'Entretien',emoji:'💼'},{id:'travel',name:'Voyage',emoji:'✈️'},{id:'cafe',name:'Au café',emoji:'☕'}];
-const openers:Record<string,string>={daily:'Salut ! Comment s’est passée ta journée ?',interview:'Bonjour ! Pouvez-vous vous présenter en quelques phrases ?',travel:'Bonjour ! Où aimerais-tu voyager en France ?',cafe:'Bonjour ! Qu’est-ce que je vous sers ?'};
-export default function Home(){
- const [topic,setTopic]=useState('daily'); const [session,setSession]=useState(''); const [messages,setMessages]=useState<Message[]>([]); const [input,setInput]=useState(''); const [busy,setBusy]=useState(false); const [listening,setListening]=useState(false); const [mode,setMode]=useState('...'); const [error,setError]=useState('');
- const bottom=useRef<HTMLDivElement>(null); const recorder=useRef<MediaRecorder|null>(null); const chunks=useRef<Blob[]>([]); const stream=useRef<MediaStream|null>(null); const audio=useRef<HTMLAudioElement|null>(null);
- useEffect(()=>{bottom.current?.scrollIntoView({behavior:'smooth'})},[messages]);
- useEffect(()=>{fetch(`${API}/health`).then(r=>r.json()).then(d=>setMode(d.mode)).catch(()=>setMode('offline'))},[]);
- async function start(t:string){setTopic(t);setBusy(true);setError('');setMessages([]);setSession('');try{const r=await fetch(`${API}/sessions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:t})});if(!r.ok)throw Error('Cannot create session');const d=await r.json();setSession(d.id);setMessages([{role:'assistant',content:openers[t]}]);}catch{setError('无法连接后端。请确认 FastAPI 正在 localhost:8000 运行。')}finally{setBusy(false)}}
- useEffect(()=>{start('daily')},[]);
- async function send(){const value=input.trim();if(!value||busy||!session)return;setInput('');setBusy(true);setError('');setMessages(m=>[...m,{role:'user',content:value}]);try{const r=await fetch(`${API}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:session,message:value})});if(!r.ok)throw Error('Request failed');const d=await r.json();setMessages(m=>[...m,{role:'assistant',content:d.reply,correction:d.correction}]);}catch{setError('AI 回复失败。请检查后端日志、API 密钥或网络，然后重试。');setInput(value)}finally{setBusy(false)}}
- async function speak(text:string){try{setError('');const r=await fetch(`${API}/speech/synthesize`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});if(!r.ok)throw Error('ElevenLabs TTS unavailable');const blob=await r.blob();const url=URL.createObjectURL(blob);audio.current?.pause();const player=new Audio(url);audio.current=player;player.onended=()=>URL.revokeObjectURL(url);player.onerror=()=>URL.revokeObjectURL(url);await player.play();}catch{setError('语音朗读失败。请检查 ElevenLabs API Key、Voice ID、额度及网络。')}}
- async function listen(){if(listening){recorder.current?.stop();setListening(false);return;}if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){setError('当前浏览器不支持录音。请使用新版 Chrome 或 Safari。');return;}try{setError('');const mic=await navigator.mediaDevices.getUserMedia({audio:true});stream.current=mic;const preferred=['audio/webm;codecs=opus','audio/webm','audio/mp4'];const format=preferred.find(x=>MediaRecorder.isTypeSupported(x));const rec=new MediaRecorder(mic,format?{mimeType:format}:undefined);recorder.current=rec;chunks.current=[];rec.ondataavailable=e=>{if(e.data.size)chunks.current.push(e.data)};rec.onstop=async()=>{mic.getTracks().forEach(t=>t.stop());setListening(false);const blob=new Blob(chunks.current,{type:rec.mimeType||'audio/webm'});if(!blob.size)return;const ext=blob.type.includes('mp4')?'m4a':'webm';const body=new FormData();body.append('file',blob,`recording.${ext}`);setBusy(true);try{const r=await fetch(`${API}/speech/transcribe`,{method:'POST',body});if(!r.ok)throw Error('STT failed');const d=await r.json();setInput(old=>(old?old+' ':'')+d.text)}catch{setError('语音识别失败。请检查 ElevenLabs 配置或改用文字输入。')}finally{setBusy(false)}};rec.start();setListening(true);}catch{setError('无法启动录音。请允许浏览器使用麦克风。')}}
- return <main className="shell"><aside className="sidebar"><div className="brand"><span className="brandmark">p.</span><div><strong>parlons<span className="accent">ai</span></strong><small>French speaking studio</small></div></div><div className="sideheading">CONVERSATION THEMES</div><div className="topiclist">{topics.map(t=><button key={t.id} className={'topic '+(topic===t.id?'active':'')} disabled={busy} onClick={()=>start(t.id)}><span>{t.emoji}</span>{t.name}</button>)}</div><div className="sidefoot"><BookOpen size={17}/><span>Learn by speaking.<br/>Grow with every session.</span></div></aside><section className="main"><header className="header"><div><div className="eyebrow">YOUR PERSONAL FRENCH TUTOR</div><h1>Parlons français <span>✳</span></h1><p>Practice naturally. Improve with confidence.</p></div><div className="status"><span className={'dot '+(mode==='ai'?'green':'')}></span>{mode==='ai'?'AI connected':mode==='demo'?'Text demo mode':'Connecting...'}</div></header><div className="sessionbar"><div><Sparkles size={17}/><strong>{topics.find(t=>t.id===topic)?.name}</strong><span>· B1–B2 practice</span></div><button onClick={()=>start(topic)} disabled={busy} title="New conversation"><RotateCcw size={16}/> New session</button></div><div className="conversation">{messages.map((m,i)=><div className={'message '+m.role} key={i}><div className="avatar">{m.role==='assistant'?'✳':'You'}</div><div className="bubblewrap"><div className="bubble">{m.content}</div>{m.role==='assistant'&&<button className="speak" onClick={()=>speak(m.content)}><Volume2 size={15}/> Écouter</button>}{m.correction&&<div className="correction"><strong>✦ Feedback</strong><p>{m.correction}</p></div>}</div></div>)}{busy&&<div className="typing">Parlons réfléchit…</div>}<div ref={bottom}/></div><div className="composerarea">{error&&<div className="error">{error}</div>}<div className="composer"><button className={'mic '+(listening?'recording':'')} onClick={listen} title="Speak French">{listening?<MicOff size={20}/>:<Mic size={20}/>}</button><input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey)send()}} placeholder={listening?'Listening…':'Écris ou parle en français…'} disabled={busy}/><button className="send" onClick={send} disabled={!input.trim()||busy||!session} title="Send"><Send size={19}/></button></div><p className="hint">Press Enter to send · Click microphone to record, click again to transcribe · Conversations saved locally</p></div></section></main>
+export default function Home() {
+  const conversation = useConversation();
+  const speech = useSpeech();
+  const recorder = useRecorder(
+    conversation.acceptTranscript,
+    conversation.setError,
+  );
+  const [health, setHealth] = useState<Health | null>(null);
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    let active = true;
+    api
+      .health()
+      .then((value) => {
+        if (active) setHealth(value);
+      })
+      .catch(() => {
+        if (active) setOffline(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  const busy = conversation.busy || recorder.transcribing;
+  const topic = conversation.session?.topic || "daily";
+  const speechReady = health?.speech_ready ?? false;
+
+  async function send() {
+    speech.stop();
+    const reply = await conversation.send();
+    if (reply) await speech.playResponse(reply, speechReady);
+  }
+  function start(nextTopic?: Topic) {
+    speech.stop();
+    recorder.cancel();
+    void conversation.start(nextTopic);
+  }
+  return (
+    <main className="shell">
+      <TopicSidebar
+        topic={topic}
+        disabled={busy || recorder.listening}
+        onSelect={start}
+      />
+      <section className="main">
+        <header className="header">
+          <div>
+            <div className="eyebrow">YOUR PERSONAL FRENCH TUTOR</div>
+            <h1>
+              Parlons français <span>✳</span>
+            </h1>
+            <p>Practice naturally. Improve with confidence.</p>
+          </div>
+          <div className="status">
+            {offline
+              ? "Backend offline"
+              : !health
+                ? "Connecting…"
+                : health.mode === "mock"
+                  ? "Mock mode · synthetic audio"
+                  : health.mode === "ai"
+                    ? "AI connected"
+                    : "Text demo mode"}
+          </div>
+        </header>
+        <div className="sessionbar">
+          <strong>{topics.find((item) => item.id === topic)?.name}</strong>
+          <button
+            disabled={busy || recorder.listening}
+            onClick={() => start(conversation.session ? topic : undefined)}
+          >
+            <RotateCcw size={16} />
+            {conversation.session ? "New session" : "Retry connection"}
+          </button>
+        </div>
+        <PlaybackControls
+          autoplay={speech.autoplay}
+          slow={speech.slow}
+          ready={speechReady}
+          blocked={speech.blocked}
+          notice={speech.notice}
+          onAutoplay={speech.toggleAutoplay}
+          onSlow={speech.toggleSlow}
+          onRetry={() => void speech.retry()}
+          onStop={speech.stop}
+        />
+        <MessageList
+          messages={conversation.session?.messages || []}
+          busy={busy}
+          speechReady={speechReady}
+          onSpeak={(text) => void speech.speak(text)}
+        />
+        <Composer
+          input={conversation.input}
+          transcript={conversation.transcript}
+          disabled={busy || !conversation.session}
+          listening={recorder.listening}
+          sttReady={health?.stt_ready ?? false}
+          error={conversation.error}
+          onChange={conversation.setInput}
+          onRecord={() => {
+            speech.stop();
+            if (conversation.session)
+              void recorder.toggle(conversation.session.id);
+          }}
+          onSend={() => void send()}
+          onDiscard={conversation.discard}
+        />
+      </section>
+    </main>
+  );
 }

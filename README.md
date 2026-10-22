@@ -1,80 +1,193 @@
-# Parlons AI v0.2 — ElevenLabs speech MVP
+# Parlons AI — French speaking practice
 
-**Architecture:** Next.js frontend → FastAPI backend → ElevenLabs (speech-to-text + text-to-speech); OpenAI (optional text tutor/corrections); SQLite local chat history. This is a workflow MVP, **not yet an autonomous agent**.
+Next.js frontend → FastAPI backend → OpenAI for text tutoring and ElevenLabs for
+STT/TTS. SQLite retains conversation and transcript text. This is a local
+prototype, not a production deployment or a validated language assessment tool.
+
+**Development defaults to `MOCK_AI=true`. Do not disable it or run real provider
+smoke tests until explicitly approved. No real API calls are needed for setup,
+tests, builds, or the included offline evaluations.**
+
+## Features
+
+- A backend-owned opening message is saved atomically with each session and always
+  included in LLM context alongside the most recent 12 non-opening messages.
+- The browser remembers the session ID. Refresh resumes its stored history;
+  idempotent session creation and a unique database index prevent duplicate openers,
+  including React StrictMode retries. “New session” explicitly creates another ID.
+- Microphone recordings are transcribed into a **reviewable draft**, never sent
+  automatically. The exact provider transcript is immutable in SQLite; the edited
+  message is stored separately when sent. History exposes both versions.
+- Raw recording blobs are released after upload and are not deliberately saved by
+  the app. Multipart parsing may use temporary spooled files, closed after each
+  request. Provider-side retention is separate and needs review before real use.
+- AI replies play automatically when speech is available. Autoplay can be disabled;
+  slow playback uses 0.8× speed. Both preferences persist locally. A browser autoplay
+  rejection exposes a manual “Play response” button using the already-fetched audio.
+  New playback cancels pending synthesis and stops old audio. Audio stops when
+  recording or changing sessions, and on unmount.
+- `/health` supplies `speech_ready` for playback and `stt_ready` for recording.
+  Missing speech configuration disables the relevant controls while keeping text
+  chat usable. Status indicates configured capabilities, not a live provider probe.
+- Mock STT returns a fixed sentence; mock tutoring returns a fixed reply without
+  correction; mock TTS produces a short synthetic **tone, not spoken French**.
 
 ## Repository structure
 
 ```text
 backend/
-  app/                  # FastAPI application
-  tests/                # API tests (no paid API calls)
-  requirements.txt
+  app/main.py             # HTTP API, lifespan, SQLite persistence and migration
+  app/providers.py        # Validated provider responses and network-free mock transport
+  tests/                  # API, persistence and offline evaluator regression tests
+  requirements.txt        # Runtime dependencies
+  requirements-dev.txt    # Runtime + pytest and Ruff
   .env.example
 frontend/
-  app/                  # Next.js App Router pages and styles
-  package.json
+  app/                    # Page composition, layout and styles
+  components/             # Topics, transcript composer, messages and playback settings
+  hooks/                  # Session state, recording and audio lifecycle
+  lib/                    # Typed API client and shared types
+  tests/                  # React/jsdom interaction and lifecycle tests
   package-lock.json
-  tsconfig.json
   .env.local.example
+evaluations/
+  french_cases.json       # 20 hand-authored French examples
+  fixtures/audio/         # 4 labeled offline synthetic speech WAV fixtures
+  fixtures/mock_predictions.json # Scripted scorer inputs, not provider outputs
+  evaluate.py             # Offline metrics; never calls a provider
+scripts/check.sh          # Complete checks with mock mode forced on
 ```
-
-The backend stores local chat history in `backend/parlons.sqlite3`.
-Local secrets, databases, dependencies, and build outputs are ignored by Git.
 
 ## Local setup
 
-Install Python 3.11+ and Node.js 20+ (e.g. `brew install python@3.12 node`).
+Requires Python 3.11+ and Node.js 20.9+ (Node 22 or 24 LTS recommended).
+Commands below are run from the repository root unless noted. Do not overwrite
+existing local environment files; copy examples only when the target is absent.
 
-**Terminal 1:**
+Backend, terminal 1:
+
 ```bash
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Add ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID only if you need speech.
-# Leave keys empty to run text demo mode.
-# Optional: add OPENAI_API_KEY for real AI chat/corrections
-uvicorn app.main:app --reload --port 8000
+pip install -r requirements-dev.txt
+# Optional: cp .env.example .env (only if .env does not exist)
+MOCK_AI=true uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-**Terminal 2:**
+Frontend, terminal 2:
+
 ```bash
 cd frontend
-cp .env.local.example .env.local
 npm ci
-npm run dev
+# Optional: cp .env.local.example .env.local (only if it does not exist)
+MOCK_AI=true npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
-Open http://localhost:3000 . Backend API docs: http://localhost:8000/docs . Click microphone once to start recording, again to stop and transcribe; press Send to chat; click Écouter on a tutor message for ElevenLabs audio.
+Use the local frontend on port 3000, with browser origin `http://localhost:3000`
+matching the default backend CORS setting. Backend documentation is at `/docs` on
+port 8000. No API keys are required in mock mode. `MOCK_AI` is enforced by the
+backend; the frontend displays the backend's mode and readiness flags.
+
+The default database is `backend/parlons.sqlite3`; `DATABASE_PATH` can override it.
+Startup uses FastAPI lifespan and applies an additive, repeatable migration for
+v0.2 databases, preserving old messages and adding one opening per old session.
+Back up any valuable database before a version upgrade.
 
 ## Configuration
 
-- `ELEVENLABS_API_KEY`: ElevenLabs API key, **server-side only**.
-- `ELEVENLABS_VOICE_ID`: French-capable voice ID from your ElevenLabs account; required for TTS.
-- `ELEVENLABS_TTS_MODEL`: default `eleven_multilingual_v2` (verify current model availability in your account).
-- `ELEVENLABS_STT_MODEL`: default `scribe_v1` (verify current model availability in your account).
-- `OPENAI_API_KEY`: optional; **ElevenLabs does not replace the text reasoning model**. Without OpenAI key, the chat uses canned demo replies and does not really correct French.
-- `FRONTEND_ORIGIN`: CORS origin, default `http://localhost:3000`.
+| Variable | Meaning |
+| --- | --- |
+| `MOCK_AI` | Defaults to `true`; only the explicit value `false` enables live provider paths. Keep `true` throughout development and tests. |
+| `OPENAI_API_KEY` | Server-side key, used only with mock mode disabled. Without it, live-mode text chat uses canned demo replies. |
+| `OPENAI_MODEL` | Text model; default `gpt-4.1-mini`. |
+| `ELEVENLABS_API_KEY` | Server-side key for real STT/TTS, ignored in mock mode. |
+| `ELEVENLABS_VOICE_ID` | French-capable voice for real TTS. |
+| `ELEVENLABS_TTS_MODEL` | Default `eleven_multilingual_v2`; check account availability before real tests. |
+| `ELEVENLABS_STT_MODEL` | Default `scribe_v1`; check account availability before real tests. |
+| `FRONTEND_ORIGIN` | Default `http://localhost:3000`. |
+| `NEXT_PUBLIC_API_URL` | Public backend URL, default `http://localhost:8000`; never place keys here. |
+| `DATABASE_PATH` | Optional SQLite path; its parent directory must exist. |
 
-## Tests
+## Automated checks — mock mode only
+
+Install backend development and frontend dependencies first. From the root:
+
+```bash
+PARLONS_PYTHON="$PWD/backend/.venv/bin/python" bash scripts/check.sh
+```
+
+Or run separately:
 
 ```bash
 cd backend
-source .venv/bin/activate
-python -m pytest -q
+MOCK_AI=true .venv/bin/python -m pytest -q
+MOCK_AI=true .venv/bin/python -m ruff check --config pyproject.toml app tests ../evaluations
+MOCK_AI=true .venv/bin/python -m ruff format --config pyproject.toml --check app tests ../evaluations
+cd ../frontend
+MOCK_AI=true npm run format:check
+MOCK_AI=true npm run lint
+MOCK_AI=true npm run typecheck
+MOCK_AI=true npm test
+MOCK_AI=true NEXT_TELEMETRY_DISABLED=1 npm run build
 ```
 
-Test suite uses demo mode and **does not make paid API calls**. Run `npm run build` in `frontend` for a production build check.
+Formatting: run the Ruff command without `--check`, and `npm run format`.
+Stop the frontend dev server before building in the same directory. Do not run
+`npm ci` concurrently with frontend builds or services.
 
-## Limitations / security
+Backend tests force mock mode, use in-memory HTTP transports, block socket
+connections and isolate SQLite in temporary directories. Frontend tests use jsdom,
+mocked media APIs, and a default rejecting fetch stub. They do not contact backend
+or external services. An upstream Starlette TestClient/httpx deprecation warning
+may appear; app startup itself no longer uses deprecated `on_event` handlers.
 
-- Prototype is local-only; no auth or rate limiting, so **do not expose backend publicly**.
-- Audio is uploaded to ElevenLabs for transcription; confirm user consent and provider data practices before production use.
-- No pronunciation scoring; STT transcripts alone are not reliable pronunciation assessments.
-- Browser MediaRecorder formats vary. Chrome on macOS is a good first test; Safari compatibility needs validation.
-- Recording is intentionally non-streaming; real-time interruption/turn-taking comes later.
-- TTS returns full MP3 bytes; long messages increase latency and usage costs.
-- `.env`, database, build artifacts and dependencies are excluded from git/ZIP.
-- On failed requests, check server logs; do not paste secrets into chat or GitHub.
-- Next step: move from workflow to a bounded tutor agent with learner memory, explicit tools and evals.
+## Language evaluation
+
+See [evaluations/README.md](evaluations/README.md) for input formats, formulas,
+coverage reporting and audio provenance. Run from the root:
+
+```bash
+MOCK_AI=true python3 evaluations/evaluate.py
+MOCK_AI=true python3 evaluations/evaluate.py \
+  --predictions evaluations/fixtures/mock_predictions.json
+```
+
+The first command reports no evaluated predictions and null scores. The second
+checks arithmetic with **hand-scripted mock outputs** and labeled synthetic audio;
+its numbers are not real correction or recognition-quality measurements. Speech
+scoring requires actual audio, its matching fingerprint and a reference transcript.
+Text-only pronunciation prompts are never counted as speech recognition tests.
+
+## Known limitations
+
+- Real OpenAI corrections, French voice quality, STT accuracy, costs and provider
+  latency have not been evaluated. There are no pronunciation scores.
+- The starter dataset and synthetic eSpeak speech are not representative learner
+  recordings. Real quality needs consented recordings and independently reviewed
+  reference transcripts/correction labels.
+- jsdom tests simulate playback restrictions and recording. Physical microphones,
+  codecs, mobile browsers and real browser autoplay policies still need manual QA.
+- Unsent drafts are held in page memory and are lost on refresh. Stored transcript
+  text remains in the database, including discarded drafts, until a retention policy
+  is implemented. Browser session restoration needs working local storage.
+- Chat submission has no server-side idempotency key: an ambiguous network failure
+  after commit can require checking history before retrying. Only session creation
+  is idempotent. History context is bounded, without long-term learner memory.
+- Health flags describe configuration/mock capabilities, not provider availability.
+- Uploads are limited to 8 MB; browser recording stops after 60 seconds. Recognition
+  may normalize mistakes; correcting transcript text does not evaluate pronunciation.
+
+## Before production
+
+Do not expose this prototype publicly. Add authentication and per-user ownership
+checks for sessions/transcripts, authorization tests, rate limits, quotas and abuse
+controls, HTTPS and correct origin restrictions, and secure secrets management.
+Add streaming/request-level upload limits (before multipart buffering), audio
+content validation, concurrent-turn controls and idempotent chat submissions.
+Establish consent, provider retention/data-processing settings, transcript/history
+retention and deletion, access-controlled backups and privacy-safe monitoring.
+Review dependency advisories and run browser/accessibility/security testing before
+release. Never send API keys to the browser or commit them.
+
+No deployment or real provider smoke test is part of the current verification.
