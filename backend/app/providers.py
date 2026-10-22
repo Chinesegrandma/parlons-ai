@@ -2,12 +2,13 @@
 
 import io
 import json
+import logging
 import os
 import wave
 from contextlib import asynccontextmanager
 
 import httpx
-from openai import AsyncOpenAI
+from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -159,3 +160,41 @@ async def text_to_speech(app, text: str) -> tuple[bytes, str]:
         if not response.content or mime not in {"audio/mpeg", "audio/wav"}:
             raise ValueError("Invalid audio response")
         return response.content, mime
+
+
+def failure_detail(provider: str, operation: str, error: Exception) -> str:
+    """Only fixed labels and status numbers may leave this exception boundary."""
+    status = None
+    if isinstance(error, APIStatusError):
+        status = error.status_code
+    elif isinstance(error, httpx.HTTPStatusError):
+        status = error.response.status_code
+    if isinstance(error, (APITimeoutError, httpx.TimeoutException)):
+        code, advice = "timeout", "请求超时，请检查电脑网络后再试。"
+    elif isinstance(error, (APIConnectionError, httpx.RequestError)):
+        code, advice = "connection", "连接失败，请检查电脑网络、代理及证书配置。"
+    elif status == 401:
+        code, advice = "authentication", "密钥认证失败，请核对该服务的 API 密钥。"
+    elif status == 403:
+        code, advice = "permission", "访问被拒绝，请检查密钥权限、模型权限及地区限制。"
+    elif status == 402:
+        code, advice = "billing", "服务要求付费或补充额度，请检查该服务的账单。"
+    elif status == 429:
+        code, advice = "quota_or_rate_limit", "额度不足或请求过于频繁，请检查余额及速率限制。"
+    elif status in {400, 404, 422}:
+        code, advice = "request_rejected", "请求被拒绝，请检查模型配置或录音格式。"
+    elif status is not None:
+        code, advice = "upstream", "上游服务返回错误，请稍后再试。"
+    elif isinstance(error, (ValueError, IndexError, KeyError, TypeError, AttributeError)):
+        code, advice = "invalid_response", "服务返回的数据格式不符合要求。"
+    else:
+        code, advice = "internal", "调用失败，需要进一步检查本地配置。"
+    logging.getLogger(__name__).warning(
+        "provider_failure provider=%s operation=%s category=%s upstream_status=%s",
+        provider,
+        operation,
+        code,
+        status if status is not None else "none",
+    )
+    status_label = f" HTTP {status}" if status is not None else ""
+    return f"{provider} [{code}{status_label}]：{advice}"

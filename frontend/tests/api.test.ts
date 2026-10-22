@@ -44,3 +44,24 @@ it("sends an editable transcript recording through the same-origin proxy", async
   expect(options?.signal).toBe(signal);
   expect((options?.body as FormData).get("session_id")).toBe("session-1");
 });
+
+it("preserves safe backend diagnostics for failed chat calls", async () => {
+  vi.mocked(fetch).mockResolvedValueOnce(
+    new Response(
+      JSON.stringify({
+        detail: "OpenAI [authentication HTTP 401]：密钥认证失败。",
+      }),
+      { status: 502 },
+    ),
+  );
+  await expect(api.chat("session-1", "Bonjour")).rejects.toThrow(
+    "authentication HTTP 401",
+  );
+});
+
+it("does not display HTML proxy error pages", async () => {
+  vi.mocked(fetch).mockResolvedValueOnce(
+    new Response("<html>proxy failure</html>", { status: 502 }),
+  );
+  await expect(api.health()).rejects.toThrow("Request failed (502)");
+});

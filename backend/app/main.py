@@ -253,7 +253,7 @@ async def chat(payload: MessageCreate):
         try:
             result = await providers.tutor_reply(app, messages)
         except Exception as exc:
-            raise HTTPException(502, "AI service unavailable or returned invalid data.") from exc
+            raise HTTPException(502, providers.failure_detail("OpenAI", "chat", exc)) from exc
         reply, correction = result.reply, result.correction
         mode = "mock" if providers.mock_enabled() else "ai"
     else:
@@ -309,7 +309,9 @@ async def transcribe(file: UploadFile = File(...), session_id: str = Form(...)):
                 app, file.filename or "recording.webm", data, mime
             )
         except Exception as exc:
-            raise HTTPException(502, "Speech transcription failed.") from exc
+            raise HTTPException(
+                502, providers.failure_detail("ElevenLabs", "transcribe", exc)
+            ) from exc
         transcript_id = str(uuid.uuid4())
         with connect() as db:
             db.execute(
@@ -328,7 +330,7 @@ async def synthesize(payload: SpeechRequest):
     try:
         audio, mime = await providers.text_to_speech(app, payload.text)
     except Exception as exc:
-        raise HTTPException(502, "Speech synthesis failed.") from exc
+        raise HTTPException(502, providers.failure_detail("ElevenLabs", "synthesize", exc)) from exc
     return Response(audio, media_type=mime, headers={"Cache-Control": "no-store"})
 
 

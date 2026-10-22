@@ -1,9 +1,28 @@
 import type { Health, Session, Topic, Transcript } from "./types";
 
+export class ApiError extends Error {}
+async function failure(response: Response): Promise<ApiError> {
+  let detail = `Request failed (${response.status})`;
+  try {
+    const body: unknown = await response.json();
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      "detail" in body &&
+      typeof body.detail === "string" &&
+      body.detail.length <= 500
+    )
+      detail = body.detail;
+  } catch {
+    /* Non-JSON proxy errors use the HTTP status fallback. */
+  }
+  return new ApiError(detail);
+}
+
 const API = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API}${path}`, init);
-  if (!response.ok) throw new Error(`Request failed (${response.status})`);
+  if (!response.ok) throw await failure(response);
   return response.json() as Promise<T>;
 }
 const json = (body: unknown): RequestInit => ({
@@ -40,7 +59,7 @@ export const api = {
       ...json({ text }),
       signal,
     });
-    if (!response.ok) throw new Error("Speech synthesis unavailable");
+    if (!response.ok) throw await failure(response);
     return response.blob();
   },
 };

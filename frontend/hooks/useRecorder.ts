@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../lib/api";
+import { api, ApiError } from "../lib/api";
 import type { Transcript } from "../lib/types";
 
 export function useRecorder(
@@ -94,9 +94,12 @@ export function useRecorder(
         try {
           const result = await api.transcribe(sessionId, blob, abort.signal);
           if (current === generation.current) onTranscript(result);
-        } catch {
+        } catch (error) {
           if (current === generation.current)
-            onError("转写失败，请重试或使用文字输入。 / Transcription failed.");
+            onError(
+              (error instanceof ApiError ? `${error.message} ` : "") +
+                "转写失败，请重试或使用文字输入。 / Transcription failed.",
+            );
         } finally {
           if (current === generation.current) setTranscribing(false);
         }

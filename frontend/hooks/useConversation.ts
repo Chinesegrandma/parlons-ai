@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../lib/api";
+import { api, ApiError } from "../lib/api";
 import {
   topics,
   type Session,
@@ -90,10 +90,11 @@ export function useConversation(client = api, storageKey = STORAGE_KEY) {
       setInput("");
       setTranscript(null);
       return result.reply;
-    } catch {
+    } catch (error) {
       if (current === generation.current)
         setError(
-          "回复失败，草稿已保留。请检查会话记录后再重试。 / Reply failed; draft retained.",
+          (error instanceof ApiError ? `${error.message} ` : "") +
+            "回复失败，草稿已保留。请检查会话记录后再重试。 / Reply failed; draft retained.",
         );
       return null;
     } finally {
