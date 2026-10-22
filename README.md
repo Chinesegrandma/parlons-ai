@@ -84,6 +84,31 @@ opening it, and makes no API requests. The file is generated and ignored by Git;
 `npm run dev` and `npm run build` regenerate it automatically. The regular page's
 “No key” demo link also opens the demo route when the frontend is running.
 
+## 在自己电脑启动真实语音网页
+
+安装 Python 3.11+ 和 Node.js 22/24 LTS，下载或克隆当前项目后，在项目根目录运行：
+
+```bash
+python3 scripts/run_local.py --real
+```
+
+Windows 如果没有 `python3` 命令，可用 `python scripts/run_local.py --real`。
+启动器会在首次运行时准备后端虚拟环境和前端依赖，随后自动打开浏览器。
+如果本机没有配置密钥，会在**终端隐藏输入**中请求 OpenAI 与 ElevenLabs 密钥；
+输入不会回显，也不会写入文件或网页。已有的 `backend/.env` 不会被修改。
+云环境中的密钥不会自动复制到你的电脑，因此本机首次启动可能需要重新输入。
+Voice ID 可直接按 Enter 使用当前选定的声音。
+
+请打开启动器自动打开的**根页面**，不是 `/demo` 或离线 HTML。
+页面应显示「真实 API 模式」和「真实调用已开启」。允许浏览器使用麦克风，
+点击录音、再次点击结束，编辑转写后发送，随后听回复并查看文字纠错。
+录音转写、发送和朗读可能消耗额度；自动朗读可以关闭。打开页面和健康检查
+不会主动生成语音或调用文字模型。按 Ctrl+C 停止两个服务。
+
+不加 `--real` 则默认保持 mock 模式。前端通过 `/api/backend` 转发到本机后端，
+不用手动配置浏览器的后端地址。可用 `--port`、`--api-port` 更改被占用的端口。
+此启动器仅绑定本机回环地址；不要把无访问保护的服务公开到互联网。
+
 ## Local setup
 
 Requires Python 3.11+ and Node.js 20.9+ (Node 22 or 24 LTS recommended).
@@ -133,7 +158,8 @@ Back up any valuable database before a version upgrade.
 | `ELEVENLABS_TTS_MODEL` | Default `eleven_multilingual_v2`; check account availability before real tests. |
 | `ELEVENLABS_STT_MODEL` | Default `scribe_v1`; check account availability before real tests. |
 | `FRONTEND_ORIGIN` | Default `http://localhost:3000`. |
-| `NEXT_PUBLIC_API_URL` | Public backend URL, default `http://localhost:8000`; never place keys here. |
+| `NEXT_PUBLIC_API_URL` | Optional browser API override; defaults to same-origin `/api/backend`. Never place keys here. |
+| `PARLONS_BACKEND_URL` | Frontend server-only proxy destination, default `http://127.0.0.1:8000`. |
 | `DATABASE_PATH` | Optional SQLite path; its parent directory must exist. |
 
 ## Automated checks — mock mode only

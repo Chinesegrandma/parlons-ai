@@ -1478,3 +1478,32 @@ button:active:not(:disabled) {
   font-size: 7px;
   white-space: nowrap;
 }
+
+.live-session-banner {
+  margin: 20px 46px 0;
+  padding: 14px 18px;
+  border: 1px solid #dfc99a;
+  border-radius: 12px;
+  background: #fcf6e8;
+  color: #816329;
+  font-size: 12px;
+}
+.live-session-banner strong {
+  font-weight: 600;
+}
+.live-session-banner p {
+  line-height: 1.7;
+  margin: 7px 0;
+}
+.live-session-banner div {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .live-session-banner {
+    margin: 15px 14px 0;
+    padding: 12px;
+  }
+}

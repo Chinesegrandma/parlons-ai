@@ -145,6 +145,22 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             </div>
           </section>
         )}
+        {health && !mock && !demo && (
+          <section className="live-session-banner" aria-label="真实服务状态">
+            <strong>真实调用已开启</strong>
+            <p>
+              点击录音、发送消息或朗读将消耗 API
+              额度。反馈针对转写文字，不包含发音评分。
+            </p>
+            <div>
+              <span>
+                文字回复：{health.mode === "ai" ? "已配置" : "演示回复"}
+              </span>
+              <span>录音转写：{health.stt_ready ? "已配置" : "未配置"}</span>
+              <span>语音朗读：{speechReady ? "已配置" : "未配置"}</span>
+            </div>
+          </section>
+        )}
         <div className="workspace-content">
           <section className="welcome">
             <div>

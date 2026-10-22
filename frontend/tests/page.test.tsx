@@ -196,3 +196,19 @@ it("does not send unfinished IME composition on Enter", async () => {
   fireEvent.keyDown(input, { key: "Enter", isComposing: true });
   expect(api.chat).not.toHaveBeenCalled();
 });
+
+it("shows real-mode billing and configuration status without generating anything on load", async () => {
+  vi.mocked(api.health).mockResolvedValue({
+    mode: "ai",
+    speech_ready: true,
+    stt_ready: true,
+    mock_ai: false,
+  });
+  render(<Home />);
+  const status = await screen.findByRole("region", { name: "真实服务状态" });
+  expect(status).toHaveTextContent("真实调用已开启");
+  expect(status).toHaveTextContent("语音朗读：已配置");
+  expect(status).toHaveTextContent("消耗 API 额度");
+  expect(api.chat).not.toHaveBeenCalled();
+  expect(api.synthesize).not.toHaveBeenCalled();
+});
