@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, Mic, Square, ScanText, X } from "lucide-react";
+import { ArrowUp, Mic, Square, ScanText, X, Keyboard } from "lucide-react";
 import type { Transcript } from "../lib/types";
 export function Composer({
   input,
@@ -14,6 +14,7 @@ export function Composer({
   onSend,
   onDiscard,
   demo = false,
+  compact = false,
 }: {
   input: string;
   transcribing?: boolean;
@@ -27,7 +28,11 @@ export function Composer({
   onSend: () => void;
   onDiscard: () => void;
   demo?: boolean;
+  compact?: boolean;
 }) {
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const showEditor =
+    !compact || keyboardOpen || !!input || !!transcript || !sttReady;
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
     setSeconds(0);
@@ -46,32 +51,28 @@ export function Composer({
         </div>
       )}
       {transcript && (
-        <section className="transcript-review" aria-label="Review transcript">
+        <section className="transcript-review" aria-label="检查转写">
           <div>
             <strong>
               <ScanText size={15} />
-              Your original words · saved
+              原始转写已保留
             </strong>
             <button
               disabled={disabled}
               onClick={onDiscard}
-              aria-label="Discard draft"
+              aria-label="放弃草稿"
             >
               <X size={15} />
             </button>
           </div>
           <p>{transcript.original_text}</p>
-          <small>
-            Review or edit below, then send. Your original words stay saved.
-          </small>
+          <small>检查后发送，修改不会覆盖原始转写。</small>
         </section>
       )}
       {listening && (
         <div className="recording-status" role="status">
           <span className="live-dot" />
-          {demo
-            ? "Demo recording · no microphone used. Tap again to review."
-            : "Listening… tap again when you’re ready."}
+          {demo ? "模拟录音，再点一次查看转写。" : "正在听你说，再点一次结束。"}
           <time className="recording-timer">
             0:{String(seconds).padStart(2, "0")} / 1:00
           </time>
@@ -83,12 +84,14 @@ export function Composer({
           <ScanText size={16} /> Transcribing… review your words before sending.
         </div>
       )}
-      <div className={`composer ${listening ? "is-listening" : ""}`}>
+      <div
+        className={`composer ${listening ? "is-listening" : ""} ${showEditor ? "with-editor" : "voice-only"}`}
+      >
         <button
           className={`mic ${listening ? "recording" : ""}`}
           disabled={disabled || !sttReady || (!listening && Boolean(input))}
           onClick={onRecord}
-          aria-label={listening ? "Stop recording" : "Record French"}
+          aria-label={listening ? "结束录音" : "开始录音"}
           title={
             !sttReady
               ? "语音识别不可用"
@@ -100,47 +103,58 @@ export function Composer({
           {listening ? (
             <Square size={17} fill="currentColor" />
           ) : (
-            <Mic size={21} />
+            <Mic size={28} />
           )}
         </button>
-        <textarea
-          rows={2}
-          aria-label={transcript ? "Edit transcript" : "Message"}
-          value={input}
-          maxLength={2000}
-          onChange={(event) => onChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" &&
-              !event.shiftKey &&
-              !event.nativeEvent.isComposing &&
-              !listening
-            ) {
-              event.preventDefault();
-              onSend();
-            }
-          }}
-          placeholder={
-            listening ? "Prenez votre temps…" : "Or write a little French…"
-          }
-          disabled={disabled || listening}
-        />
-        <button
-          className="send"
-          onClick={onSend}
-          disabled={!input.trim() || disabled || listening}
-          aria-label="Send"
-        >
-          <ArrowUp size={21} />
-        </button>
+        {showEditor && (
+          <textarea
+            rows={2}
+            aria-label={transcript ? "编辑转写" : "输入内容"}
+            value={input}
+            maxLength={2000}
+            onChange={(event) => onChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing &&
+                !listening
+              ) {
+                event.preventDefault();
+                onSend();
+              }
+            }}
+            placeholder={listening ? "Prenez votre temps…" : "用法语写下来…"}
+            disabled={disabled || listening}
+          />
+        )}
+        {showEditor && (
+          <button
+            className="send"
+            onClick={onSend}
+            disabled={!input.trim() || disabled || listening}
+            aria-label="发送"
+          >
+            <ArrowUp size={21} />
+          </button>
+        )}
+        {compact && (
+          <button
+            className="keyboard-toggle"
+            aria-label={keyboardOpen ? "收起键盘" : "键盘输入"}
+            aria-expanded={showEditor}
+            disabled={listening || disabled}
+            onClick={() => setKeyboardOpen(!keyboardOpen)}
+          >
+            <Keyboard size={22} />
+          </button>
+        )}
       </div>
       <div className="composer-hint">
         <span>
-          {demo
-            ? "Demo · scripted replies & sample audio"
-            : "Tap to speak · up to 60 seconds"}
+          {demo ? "演示内容 · 模拟回复与提示音" : "点击录音 · 最长 60 秒"}
         </span>
-        <span>Enter to send ↵</span>
+        <span className="desktop-hint">Enter 发送 ↵</span>
       </div>
     </div>
   );

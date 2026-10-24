@@ -19,11 +19,7 @@ export function MessageList({
     bottom.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
   }, [messages, busy]);
   return (
-    <div
-      className="conversation"
-      aria-label="Conversation history"
-      aria-live="polite"
-    >
+    <div className="conversation" aria-label="对话记录" aria-live="polite">
       <div className="conversation-date">
         <span />
         UNE NOUVELLE CONVERSATION
@@ -45,7 +41,7 @@ export function MessageList({
             {message.role === "assistant" && (
               <button
                 className="speak"
-                aria-label="Écouter"
+                aria-label="朗读"
                 disabled={!speechReady}
                 onClick={() => onSpeak(message.content)}
               >

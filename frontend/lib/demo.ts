@@ -155,7 +155,7 @@ export const demoApi: typeof api = {
             ? text.replace(/je suis aller/gi, "Je suis allé")
             : "",
         review_prompt: correction
-          ? "Order a different drink politely, using the correct article."
+          ? "换一种饮品，试着用正确的冠词礼貌点单。"
           : "",
       },
     );

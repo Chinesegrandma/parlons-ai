@@ -25,6 +25,28 @@ To try the same UI, run `npm ci && npm run dev` from `frontend` and open `/demo`
 or download the [standalone demo](../demo/parlons-interactive-demo.zip).
 The `/` route continues to use the existing backend API.
 
-Validation: 51 frontend tests, TypeScript, ESLint, production build, and Chromium
+Validation: 54 frontend tests, TypeScript, ESLint, production build, and Chromium
 interaction checks (start, send, feedback, finish, resume, and mobile layout).
 Browser checks found no page errors or horizontal overflow at mobile width.
+
+## Focused mobile refinement
+
+- Chinese interface with French reserved for learning content; two navigation destinations.
+- Fixed 86px microphone, optional keyboard input, and collapsed practice tools.
+- Corrections compare original and suggested text and highlight only changed tokens. An explicit
+  save action confirms the correction in the notebook.
+- Settings occupy their own view. Level and explanation language use segmented buttons;
+  other preferences and playback controls are progressively disclosed.
+- Custom situations lead the scene browser; preset lists expand on demand. Empty notebooks
+  omit review and filter controls. Obsolete green-sidebar styles have been removed.
+- Checked text/background contrast: secondary text 5.97:1, blue on paper 7.02:1,
+  blue on pale blue 6.34:1, white on blue 7.40:1. This is not a full accessibility audit.
+
+Latest actual demo captures:
+
+- [Mobile practice](refined-practice-mobile.png)
+- [Mobile correction](refined-correction-mobile.png)
+- [Mobile scenes](refined-scenes-mobile.png)
+- [Mobile notebook](refined-notebook-mobile.png)
+- [Mobile settings](refined-settings-mobile.png)
+- [Desktop correction](refined-correction-desktop.png)

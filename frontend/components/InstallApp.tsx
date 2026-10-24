@@ -42,13 +42,12 @@ export function InstallApp() {
           } else setInstructions(!instructions);
         }}
       >
-        Add Parlons to your phone ↗
+        添加到手机主屏幕 ↗
       </button>
       {instructions && (
         <p>
-          Open the HTTPS site on your phone. On iPhone: Share → Add to Home
-          Screen. On Android: browser menu → Install app or Add to Home screen.
-          A connection is required for AI and voice.
+          在手机上打开 HTTPS 网站。iPhone：分享 →
+          添加到主屏幕；Android：浏览器菜单 → 安装应用。AI 对话和语音需要联网。
         </p>
       )}
     </div>

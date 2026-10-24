@@ -18,29 +18,27 @@ it("starts a specific work scenario with real goals and configured preferences",
   const user = userEvent.setup();
   render(<Studio demo />);
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Scenes" })).toBeEnabled(),
+    expect(screen.getByRole("button", { name: "换个场景" })).toBeEnabled(),
   );
-  await user.click(screen.getByRole("button", { name: "Settings" }));
-  await user.selectOptions(screen.getByLabelText("Explain in"), "English");
-  await user.selectOptions(screen.getByLabelText("Your focus"), "grammar");
-  await user.click(screen.getByRole("button", { name: "Settings" }));
-  await user.click(screen.getByRole("button", { name: "Scenes" }));
-  await user.click(screen.getByRole("button", { name: /Your first day/ }));
-  await user.click(screen.getByRole("button", { name: "Practice this scene" }));
-  await screen.findByText("Your first day");
-  await user.click(screen.getByText("Your mission"));
-  expect(
-    screen.getByRole("checkbox", { name: "Introduce yourself" }),
-  ).not.toBeChecked();
-  await user.click(
-    screen.getByRole("checkbox", { name: "Introduce yourself" }),
-  );
-  expect(screen.getByText(/1\/3 · self-check/)).toBeVisible();
+  await user.click(screen.getByRole("button", { name: "设置" }));
+  await user.click(screen.getByRole("button", { name: "英文" }));
+  await user.click(screen.getByText("更多偏好"));
+  await user.selectOptions(screen.getByLabelText("练习重点"), "grammar");
+  await user.click(screen.getByRole("button", { name: "设置" }));
+  await user.click(screen.getByRole("button", { name: "换个场景" }));
+  await user.click(screen.getByRole("button", { name: /第一天入职/ }));
+  await user.click(screen.getByRole("button", { name: "练习这个场景" }));
+  await screen.findByText("第一天入职");
+  await user.click(screen.getByText("练习工具"));
+  await user.click(screen.getByText("本次目标"));
+  expect(screen.getByRole("checkbox", { name: "介绍自己" })).not.toBeChecked();
+  await user.click(screen.getByRole("checkbox", { name: "介绍自己" }));
+  expect(screen.getByText(/1\/3 · 自行确认/)).toBeVisible();
   const saved = JSON.parse(
     localStorage.getItem("parlons-local-demo-data") || "[]",
   ).at(-1);
   expect(saved.options).toMatchObject({
-    scene: "Your first day",
+    scene: "第一天入职",
     focus: "grammar",
     explanation_language: "English",
   });
@@ -49,26 +47,24 @@ it("saves expressions, reviews them, and persists notes after remount", async ()
   const user = userEvent.setup();
   const view = render(<Studio demo />);
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Notebook" })).toBeEnabled(),
+    expect(screen.getByRole("button", { name: "笔记本" })).toBeEnabled(),
   );
-  await user.click(screen.getByRole("button", { name: "Notebook" }));
+  await user.click(screen.getByRole("button", { name: "笔记本" }));
   await user.type(
-    screen.getByLabelText("An expression you want to keep"),
+    screen.getByLabelText("收藏一句表达"),
     "Ça te dit de sortir ?",
   );
-  await user.click(screen.getByRole("button", { name: "Save expression" }));
-  await user.click(screen.getByRole("button", { name: "Review" }));
-  await user.click(screen.getByRole("button", { name: "Reveal my note" }));
-  await user.click(
-    screen.getByRole("button", { name: "I recalled it independently" }),
-  );
-  expect(screen.getByText(/1 independent self-check/)).toBeVisible();
+  await user.click(screen.getByRole("button", { name: "保存表达" }));
+  await user.click(screen.getByRole("button", { name: "开始复习" }));
+  await user.click(screen.getByRole("button", { name: "查看笔记" }));
+  await user.click(screen.getByRole("button", { name: "我独立想起来了" }));
+  expect(screen.getByText(/1 次独立回想/)).toBeVisible();
   view.unmount();
   render(<Studio demo />);
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Notebook" })).toBeEnabled(),
+    expect(screen.getByRole("button", { name: "笔记本" })).toBeEnabled(),
   );
-  await user.click(screen.getByRole("button", { name: "Notebook" }));
+  await user.click(screen.getByRole("button", { name: "笔记本" }));
   expect(screen.getByText("Ça te dit de sortir ?")).toBeVisible();
 });
 it("API sends learning preferences and selected voices", async () => {
@@ -97,24 +93,20 @@ it("defers corrections until the end when the learner chooses uninterrupted prac
   const user = userEvent.setup();
   render(<Studio demo />);
   await waitFor(() =>
-    expect(
-      screen.getByRole("button", { name: "Start speaking" }),
-    ).toBeEnabled(),
+    expect(screen.getByRole("button", { name: "开始练习" })).toBeEnabled(),
   );
-  await user.click(screen.getByRole("button", { name: "Settings" }));
-  await user.selectOptions(
-    screen.getByLabelText("Feedback timing"),
-    "after_session",
-  );
-  await user.click(screen.getByRole("button", { name: "Settings" }));
-  await user.click(screen.getByRole("button", { name: "Start speaking" }));
+  await user.click(screen.getByRole("button", { name: "设置" }));
+  await user.selectOptions(screen.getByLabelText("纠错时机"), "after_session");
+  await user.click(screen.getByRole("button", { name: "设置" }));
+  await user.click(screen.getByRole("button", { name: "开始练习" }));
+  await user.click(screen.getByRole("button", { name: "键盘输入" }));
   await user.type(
-    screen.getByRole("textbox", { name: "Message" }),
+    screen.getByRole("textbox", { name: "输入内容" }),
     "Je voudrais une café.",
   );
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  await user.click(screen.getByRole("button", { name: "发送" }));
   await screen.findByRole("heading", { name: /Avec plaisir/ });
   expect(screen.queryByText(/示例反馈：café/)).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Finish session" }));
+  await user.click(screen.getByRole("button", { name: "结束练习" }));
   expect(screen.getByText(/示例反馈：café/)).toBeVisible();
 });

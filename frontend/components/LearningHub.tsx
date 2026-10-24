@@ -20,18 +20,37 @@ export function SceneBrowser({
 }) {
   const [category, setCategory] = useState("Work");
   const [custom, setCustom] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState<Lesson | null>(null);
   return (
     <main className="learning-page">
-      <span className="overline">FRENCH FOR YOUR REAL LIFE</span>
-      <h1>
-        Find your next
-        <br />
-        <em>little conversation.</em>
-      </h1>
-      <p className="page-intro">
-        A small situation. A clear goal. Your own pace.
-      </p>
+      <h1>换个场景</h1>
+      <form
+        className="custom-scene"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (custom.trim()) onStart("daily", undefined, custom.trim());
+        }}
+      >
+        <label htmlFor="custom-scene">你想练习什么？</label>
+        <p>写下你即将面对的真实对话，中文也可以。</p>
+        <textarea
+          id="custom-scene"
+          maxLength={1000}
+          rows={3}
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          placeholder="比如：明天要向主管解释项目为什么延期…"
+        />
+        <button
+          className="text-button"
+          disabled={disabled || !custom.trim()}
+          type="submit"
+        >
+          开始我的情境 <ArrowRight size={16} />
+        </button>
+      </form>
+      <h2 className="section-title">也可以从这里开始</h2>
       <div className="category-tabs" aria-label="Scene categories">
         {["Work", "Everyday", "Travel"].map((c) => (
           <button
@@ -42,13 +61,21 @@ export function SceneBrowser({
               setSelected(null);
             }}
           >
-            {c}
+            {
+              (
+                { Work: "工作", Everyday: "日常", Travel: "旅行" } as Record<
+                  string,
+                  string
+                >
+              )[c]
+            }
           </button>
         ))}
       </div>
       <div className="lesson-grid">
         {lessons
           .filter((l) => l.category === category)
+          .slice(0, showAll ? undefined : 4)
           .map((l, i) => (
             <button
               className={`lesson-card ${selected?.id === l.id ? "chosen" : ""}`}
@@ -57,7 +84,7 @@ export function SceneBrowser({
               onClick={() => setSelected(selected?.id === l.id ? null : l)}
             >
               <span className="lesson-meta">
-                {String(i + 1).padStart(2, "0")} <span>{l.minutes} MIN</span>
+                {String(i + 1).padStart(2, "0")} <span>{l.minutes} 分钟</span>
               </span>
               <h2>{l.title}</h2>
               <p lang="fr">{l.french}</p>
@@ -67,9 +94,13 @@ export function SceneBrowser({
             </button>
           ))}
       </div>
+      {lessons.filter((l) => l.category === category).length > 4 && (
+        <button className="text-button" onClick={() => setShowAll(!showAll)}>
+          {showAll ? "收起场景" : "更多场景"}
+        </button>
+      )}
       {selected && (
         <section className="lesson-detail" aria-label="Selected scene">
-          <span className="overline">YOUR SMALL MISSION</span>
           <h2>{selected.title}</h2>
           <ol>
             {selected.goals.map((g) => (
@@ -81,37 +112,10 @@ export function SceneBrowser({
             disabled={disabled}
             onClick={() => onStart(selected.topic, selected)}
           >
-            Practice this scene <ArrowRight size={16} />
+            练习这个场景 <ArrowRight size={16} />
           </button>
         </section>
       )}
-      <form
-        className="custom-scene"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (custom.trim()) onStart("daily", undefined, custom.trim());
-        }}
-      >
-        <label htmlFor="custom-scene">Something on your mind?</label>
-        <p>
-          Describe a real conversation you want to prepare for, in any language.
-        </p>
-        <textarea
-          id="custom-scene"
-          maxLength={1000}
-          rows={3}
-          value={custom}
-          onChange={(e) => setCustom(e.target.value)}
-          placeholder="Tomorrow I need to explain a project delay to my manager…"
-        />
-        <button
-          className="text-button"
-          disabled={disabled || !custom.trim()}
-          type="submit"
-        >
-          Make it my practice <ArrowRight size={16} />
-        </button>
-      </form>
     </main>
   );
 }
@@ -131,112 +135,110 @@ export function LearningSettings({
 }) {
   return (
     <div className="learning-settings">
-      <p>These preferences apply to your next conversation.</p>
-      <div className="settings-grid">
-        <label>
-          Your level
-          <select
-            value={options.level}
-            onChange={(e) =>
-              onChange({
-                ...options,
-                level: e.target.value as PracticeOptions["level"],
-              })
+      <fieldset className="segments">
+        <legend>法语水平</legend>
+        {(["A1-A2", "B1-B2", "C1"] as const).map((level) => (
+          <button
+            key={level}
+            aria-pressed={options.level === level}
+            onClick={() => onChange({ ...options, level })}
+          >
+            {level}
+          </button>
+        ))}
+      </fieldset>
+      <fieldset className="segments">
+        <legend>解释语言</legend>
+        {(["Chinese", "English", "French"] as const).map((language) => (
+          <button
+            key={language}
+            aria-pressed={options.explanation_language === language}
+            onClick={() =>
+              onChange({ ...options, explanation_language: language })
             }
           >
-            <option value="A1-A2">A1–A2 · with a little help</option>
-            <option value="B1-B2">B1–B2 · keep it flowing</option>
-            <option value="C1">C1 · nuance and challenge</option>
-          </select>
-        </label>
-        <label>
-          Your focus
-          <select
-            value={options.focus}
-            onChange={(e) =>
-              onChange({
-                ...options,
-                focus: e.target.value as PracticeOptions["focus"],
-              })
-            }
-          >
-            <option value="fluency">Keep the conversation flowing</option>
-            <option value="grammar">Grammar & accuracy</option>
-            <option value="natural">Natural expressions & collocations</option>
-          </select>
-        </label>
-        <label>
-          Conversation partner
-          <select
-            value={options.persona}
-            onChange={(e) =>
-              onChange({
-                ...options,
-                persona: e.target.value as PracticeOptions["persona"],
-              })
-            }
-          >
-            <option value="patient">Patient · helps you find your words</option>
-            <option value="realistic">Everyday · short and natural</option>
-            <option value="challenging">
-              Challenging · asks you to clarify
-            </option>
-          </select>
-        </label>
-        <label>
-          Feedback timing
-          <select
-            value={options.feedback}
-            onChange={(e) =>
-              onChange({
-                ...options,
-                feedback: e.target.value as PracticeOptions["feedback"],
-              })
-            }
-          >
-            <option value="each_turn">After each turn</option>
-            <option value="after_session">At the end of practice</option>
-          </select>
-        </label>
-        <label>
-          Explain in
-          <select
-            value={options.explanation_language}
-            onChange={(e) =>
-              onChange({
-                ...options,
-                explanation_language: e.target
-                  .value as PracticeOptions["explanation_language"],
-              })
-            }
-          >
-            <option>Chinese</option>
-            <option>English</option>
-            <option>French</option>
-          </select>
-        </label>
-        <label>
-          Voice
-          <select
-            value={voices.some((v) => v.id === voice) ? voice : "default"}
-            disabled={voices.length < 2}
-            onChange={(e) => onVoice(e.target.value)}
-          >
-            {voices.length ? (
-              voices.map((v) => (
-                <option value={v.id} key={v.id}>
-                  {v.name}
-                </option>
-              ))
-            ) : (
-              <option value="default">Voice not connected</option>
-            )}
-          </select>
-        </label>
-      </div>
-      <p>
-        Feedback covers your words and expressions. Pronunciation, liaison and
-        nasal-vowel scoring are not available yet.
+            {{ Chinese: "中文", English: "英文", French: "法文" }[language]}
+          </button>
+        ))}
+      </fieldset>
+      <details className="advanced-settings">
+        <summary>更多偏好</summary>
+        <div className="settings-grid">
+          <label>
+            练习重点
+            <select
+              value={options.focus}
+              onChange={(e) =>
+                onChange({
+                  ...options,
+                  focus: e.target.value as PracticeOptions["focus"],
+                })
+              }
+            >
+              <option value="fluency">流畅表达</option>
+              <option value="grammar">语法准确</option>
+              <option value="natural">自然表达与搭配</option>
+            </select>
+          </label>
+          <label>
+            对话角色
+            <select
+              value={options.persona}
+              onChange={(e) =>
+                onChange({
+                  ...options,
+                  persona: e.target.value as PracticeOptions["persona"],
+                })
+              }
+            >
+              <option value="patient">耐心引导</option>
+              <option value="realistic">日常交流</option>
+              <option value="challenging">适度挑战</option>
+            </select>
+          </label>
+          <label>
+            纠错时机
+            <select
+              value={options.feedback}
+              onChange={(e) =>
+                onChange({
+                  ...options,
+                  feedback: e.target.value as PracticeOptions["feedback"],
+                })
+              }
+            >
+              <option value="each_turn">每轮后反馈</option>
+              <option value="after_session">练习结束后反馈</option>
+            </select>
+          </label>
+          <label>
+            声音
+            <select
+              value={voices.some((v) => v.id === voice) ? voice : "default"}
+              disabled={voices.length < 2}
+              onChange={(e) => onVoice(e.target.value)}
+            >
+              {voices.length ? (
+                voices.map((v) => (
+                  <option value={v.id} key={v.id}>
+                    {(
+                      {
+                        default: "默认声音",
+                        warm: "温暖",
+                        clear: "清晰",
+                      } as Record<string, string>
+                    )[v.id] || v.name}
+                  </option>
+                ))
+              ) : (
+                <option value="default">尚未连接声音</option>
+              )}
+            </select>
+          </label>
+        </div>
+      </details>
+      <p className="settings-note">
+        目前根据文字纠错，暂不评估发音、连诵或鼻化元音。
       </p>
     </div>
   );
@@ -287,50 +289,45 @@ export function MemoryNotebook({
   }
   return (
     <main className="learning-page notebook-page">
-      <span className="overline">A FEW WORDS WORTH KEEPING</span>
-      <h1>
-        Your memory
-        <br />
-        <em>notebook.</em>
-      </h1>
-      <p className="page-intro">From “I keep forgetting” to “I’ve got this”.</p>
-      <div className="notebook-summary">
-        <BookOpen size={23} />
-        <div>
-          <strong>{due.length} ready to revisit</strong>
-          <span>Short practice, a little at a time.</span>
+      <h1>笔记本</h1>
+      {cards.length > 0 && (
+        <div className="notebook-summary">
+          <BookOpen size={23} />
+          <div>
+            <strong>{due.length} 个表达待复习</strong>
+            <span>每天复习一点。</span>
+          </div>
+          <button
+            className="text-button"
+            disabled={!due.length}
+            onClick={() => {
+              setReviewing(due[0].id);
+              setRevealed(false);
+              setAnswer("");
+            }}
+          >
+            开始复习 <ArrowRight size={16} />
+          </button>
         </div>
-        <button
-          className="text-button"
-          disabled={!due.length}
-          onClick={() => {
-            setReviewing(due[0].id);
-            setRevealed(false);
-            setAnswer("");
-          }}
-        >
-          Review <ArrowRight size={16} />
-        </button>
-      </div>
+      )}
       <p className="local-note">
-        Saved on this browser. No account sync. Suggested corrections need your
-        confirmation.
+        保存在当前设备。请先确认纠错建议，再加入复习。
       </p>
       {current && (
-        <section className="review-card" aria-label="Memory review">
-          <span className="overline">TRY WITHOUT THE ANSWER</span>
+        <section className="review-card" aria-label="笔记复习">
+          <span className="overline">先不看答案，试一次</span>
           <h2>{current.prompt}</h2>
           <label>
-            Your attempt
+            你的尝试
             <textarea
               rows={2}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Say it aloud, or write your attempt here…"
+              placeholder="说出来，或者在这里写下你的尝试…"
             />
           </label>
           <button className="text-button" onClick={() => setRevealed(true)}>
-            Reveal my note
+            查看笔记
           </button>
           {revealed && (
             <>
@@ -349,7 +346,7 @@ export function MemoryNotebook({
                     setReviewing(null);
                   }}
                 >
-                  Still practising
+                  还需要练习
                 </button>
                 <button
                   onClick={() => {
@@ -357,39 +354,52 @@ export function MemoryNotebook({
                     setReviewing(null);
                   }}
                 >
-                  I recalled it independently
+                  我独立想起来了
                 </button>
               </div>
             </>
           )}
           <button className="text-button" onClick={() => setReviewing(null)}>
-            Close review
+            结束复习
           </button>
         </section>
       )}
-      <div className="category-tabs">
-        {["All", "To check", "Due today"].map((f) => (
-          <button
-            key={f}
-            aria-pressed={filter === f}
-            onClick={() => setFilter(f)}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+      {cards.length > 0 && (
+        <div className="category-tabs">
+          {["All", "To check", "Due today"].map((f) => (
+            <button
+              key={
+                (
+                  {
+                    All: "全部",
+                    "To check": "待确认",
+                    "Due today": "今天复习",
+                  } as Record<string, string>
+                )[f]
+              }
+              aria-pressed={filter === f}
+              onClick={() => setFilter(f)}
+            >
+              {
+                (
+                  {
+                    All: "全部",
+                    "To check": "待确认",
+                    "Due today": "今天复习",
+                  } as Record<string, string>
+                )[f]
+              }
+            </button>
+          ))}
+        </div>
+      )}
       {!visible.length && (
         <div className="notebook-empty">
           <BookOpen size={32} />
           <h2>
-            {cards.length
-              ? "All caught up here."
-              : "Your words will find a home here."}
+            {cards.length ? "这里已经复习完了。" : "把想记住的表达，留在这里。"}
           </h2>
-          <p>
-            Corrections from your conversations appear here. You can also save
-            an expression you love.
-          </p>
+          <p>练习中的纠错会出现在这里，也可以收藏喜欢的表达。</p>
         </div>
       )}
       <div className="memory-list">
@@ -399,46 +409,41 @@ export function MemoryNotebook({
               <span>
                 {card.scene} ·{" "}
                 {card.kind === "expression"
-                  ? "Saved expression"
-                  : `${card.occurrences} occurrence${card.occurrences === 1 ? "" : "s"}`}
+                  ? "收藏表达"
+                  : `${card.occurrences} 次出现`}
               </span>
               <button
                 className="icon-button"
-                aria-label={`Delete note: ${card.sent}`}
+                aria-label={`删除笔记：${card.sent}`}
                 onClick={() => onDelete(card.id)}
               >
                 <Trash2 size={15} />
               </button>
             </div>
             {!card.accepted && (
-              <span className="candidate-tag">SUGGESTION · PLEASE CHECK</span>
+              <span className="candidate-tag">待确认的建议</span>
             )}
             {card.kind === "correction" && (
               <>
                 <span className="note-label">
-                  {card.original !== card.sent
-                    ? "Original transcript"
-                    : "You said / wrote"}
+                  {card.original !== card.sent ? "原始转写" : "你说的或写的"}
                 </span>
                 <p className="original-phrase" lang="fr">
                   {card.original}
                 </p>
                 {card.original !== card.sent && (
-                  <p className="edited-phrase">Sent: {card.sent}</p>
+                  <p className="edited-phrase">发送版本：{card.sent}</p>
                 )}
               </>
             )}
             <span className="note-label">
-              {card.kind === "expression"
-                ? "Keep this expression"
-                : "Suggested expression"}
+              {card.kind === "expression" ? "收藏的表达" : "更自然的说法"}
             </span>
             <p className="corrected-phrase" lang="fr">
-              {card.corrected ||
-                "Open the feedback below to check the suggested wording."}
+              {card.corrected || "展开说明，检查建议的表达。"}
             </p>
             <details>
-              <summary>Why?</summary>
+              <summary>为什么？</summary>
               <p>{card.explanation}</p>
             </details>
             {editing === card.id && (
@@ -456,7 +461,7 @@ export function MemoryNotebook({
                 }}
               >
                 <label>
-                  Corrected expression
+                  修改表达
                   <input
                     maxLength={1200}
                     value={editText}
@@ -464,7 +469,7 @@ export function MemoryNotebook({
                   />
                 </label>
                 <button type="submit" disabled={!editText.trim()}>
-                  Save change
+                  保存修改
                 </button>
               </form>
             )}
@@ -474,7 +479,7 @@ export function MemoryNotebook({
                   disabled={!card.corrected}
                   onClick={() => onUpdate(card.id, { accepted: true })}
                 >
-                  <Check size={14} /> Keep
+                  <Check size={14} /> 保留
                 </button>
               )}
               <button
@@ -483,29 +488,27 @@ export function MemoryNotebook({
                   setEditText(card.corrected || card.sent);
                 }}
               >
-                Edit
+                编辑
               </button>
               <button
                 disabled={!speechReady || !card.corrected}
                 onClick={() => onSpeak(card.corrected)}
               >
-                <Volume2 size={14} /> Listen
+                <Volume2 size={14} /> 朗读
               </button>
               <button
                 disabled={!card.accepted || !card.corrected}
                 onClick={() => onPractice(card)}
               >
-                Try in a new scene <ArrowRight size={14} />
+                换个情境再练 <ArrowRight size={14} />
               </button>
             </div>
             {card.accepted && (
               <small className="review-date">
-                {card.reviews
-                  ? `${card.reviews} independent self-check${card.reviews === 1 ? "" : "s"} · `
-                  : ""}
+                {card.reviews ? `${card.reviews} 次独立回想 · ` : ""}
                 {card.due <= Date.now()
-                  ? "Ready to review"
-                  : `Next review ${new Date(card.due).toLocaleDateString()}`}
+                  ? "可以复习了"
+                  : `下次复习：${new Date(card.due).toLocaleDateString()}`}
               </small>
             )}
           </article>
@@ -521,7 +524,7 @@ export function MemoryNotebook({
           }
         }}
       >
-        <label htmlFor="save-expression">An expression you want to keep</label>
+        <label htmlFor="save-expression">收藏一句表达</label>
         <div>
           <input
             id="save-expression"
@@ -530,7 +533,7 @@ export function MemoryNotebook({
             value={expression}
             onChange={(e) => setExpression(e.target.value)}
           />
-          <button aria-label="Save expression" disabled={!expression.trim()}>
+          <button aria-label="保存表达" disabled={!expression.trim()}>
             <Plus size={19} />
           </button>
         </div>
@@ -540,7 +543,7 @@ export function MemoryNotebook({
         disabled={!cards.length}
         onClick={exportNotes}
       >
-        Export my notes
+        导出笔记
       </button>
     </main>
   );

@@ -2,7 +2,7 @@
 
 ## What works
 
-- Practice / Scenes / Notebook navigation, touch-sized controls, and safe-area padding.
+- Practice / Notebook navigation with scenes accessed through “换个场景”, touch-sized controls, and safe-area padding.
 - Twelve task-based scenes in Work, Everyday, and Travel, plus free-form custom situations.
 - Explicit learner self-checks for scene goals; these are not AI-certified completion.
 - Session preferences stored in SQLite and passed to the tutor: level, fluency/grammar/natural
@@ -50,7 +50,7 @@ The offline page cannot display the notebook until the app is loaded online agai
 
 ## Validation
 
-- 51 frontend tests, TypeScript, ESLint, production Next.js build.
+- 54 frontend tests, TypeScript, ESLint, production Next.js build.
 - 110 backend tests including migration compatibility, preference persistence/provider context,
   structured feedback, and voice allowlist/selection. Provider requests used mocks.
 - Chromium mobile/desktop UI checks: scenario selection, goals, correction capture, confirmation,

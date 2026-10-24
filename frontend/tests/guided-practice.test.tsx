@@ -99,7 +99,7 @@ it("preserves multiline drafts with Shift+Enter and sends with Enter", () => {
       onDiscard={vi.fn()}
     />,
   );
-  const input = screen.getByRole("textbox", { name: "Message" });
+  const input = screen.getByRole("textbox", { name: "输入内容" });
   expect(input.tagName).toBe("TEXTAREA");
   fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
   expect(send).not.toHaveBeenCalled();

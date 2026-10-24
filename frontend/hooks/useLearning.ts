@@ -71,10 +71,10 @@ export function useLearning(demo: boolean, session: Session | null) {
           original: text,
           sent: text,
           corrected: text,
-          explanation: "Saved by you",
-          prompt: "Use this expression in a new sentence.",
+          explanation: "你收藏的表达",
+          prompt: "换个情境，用这个表达说一句话。",
           topic: session?.topic || "daily",
-          scene: session?.options?.scene || "My expression",
+          scene: session?.options?.scene || "我的表达",
           occurrences: 1,
           accepted: true,
           reviews: 0,
@@ -84,7 +84,37 @@ export function useLearning(demo: boolean, session: Session | null) {
         ...b.cards,
       ],
     }));
+  const saveCorrection = (messageId: number) => {
+    if (!session) return;
+    setBook((b) => {
+      const event = `${session.id}:${messageId}`;
+      const message = session.messages.find((m) => m.id === messageId);
+      const index = session.messages.findIndex((m) => m.id === messageId);
+      const user = session.messages
+        .slice(0, index)
+        .reverse()
+        .find((m) => m.role === "user");
+      const existing = b.cards.find(
+        (c) =>
+          c.sent === user?.content &&
+          c.corrected === (message?.corrected_text || ""),
+      );
+      const next = existing
+        ? b
+        : collectMemories(
+            { ...b, seen: b.seen.filter((id) => id !== event) },
+            session,
+          );
+      return {
+        ...next,
+        cards: next.cards.map((c) =>
+          c.id === (existing?.id || event) ? { ...c, accepted: true } : c,
+        ),
+      };
+    });
+  };
   return {
+    saveCorrection,
     options,
     setOptions,
     voice,
