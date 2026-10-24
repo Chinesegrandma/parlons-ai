@@ -85,6 +85,8 @@ class TutorReply(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     reply: str = Field(min_length=1, max_length=1200)
     correction: str = Field(max_length=2000)
+    corrected_text: str = Field(default="", max_length=1200)
+    review_prompt: str = Field(default="", max_length=500)
 
 
 def configured_openai_key() -> str:
@@ -126,6 +128,18 @@ def voice_id() -> str:
     return "mock-voice" if mock_enabled() else os.getenv("ELEVENLABS_VOICE_ID", "").strip()
 
 
+def voice_catalog():
+    catalog = {}
+    if voice_id():
+        catalog["default"] = {"name": "Signature voice", "provider_id": voice_id()}
+    # Explicit server-side allowlist; browser never supplies a provider voice ID.
+    for key, title in (("warm", "Warm"), ("clear", "Clear")):
+        value = os.getenv(f"ELEVENLABS_VOICE_{key.upper()}", "").strip()
+        if value:
+            catalog[key] = {"name": title, "provider_id": value}
+    return catalog
+
+
 async def speech_to_text(app, filename: str, data: bytes, mime: str) -> str:
     async with provider_http(app) as http:
         response = await http.post(
@@ -144,10 +158,10 @@ async def speech_to_text(app, filename: str, data: bytes, mime: str) -> str:
         return text  # Preserve the provider's exact text, including whitespace.
 
 
-async def text_to_speech(app, text: str) -> tuple[bytes, str]:
+async def text_to_speech(app, text: str, voice: str = "default") -> tuple[bytes, str]:
     async with provider_http(app) as http:
         response = await http.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id()}",
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_catalog()[voice]['provider_id']}",
             headers={"xi-api-key": eleven_key(), "Accept": "audio/mpeg"},
             json={
                 "text": text,

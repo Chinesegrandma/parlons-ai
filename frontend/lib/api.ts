@@ -1,4 +1,11 @@
-import type { Health, Session, Topic, Transcript } from "./types";
+import type {
+  Health,
+  Session,
+  Topic,
+  Transcript,
+  PracticeOptions,
+  Voice,
+} from "./types";
 
 export class ApiError extends Error {}
 async function failure(response: Response): Promise<ApiError> {
@@ -32,8 +39,9 @@ const json = (body: unknown): RequestInit => ({
 });
 export const api = {
   health: () => request<Health>("/health"),
-  session: (id: string, topic: Topic) =>
-    request<Session>("/sessions", json({ id, topic })),
+  session: (id: string, topic: Topic, options?: PracticeOptions) =>
+    request<Session>("/sessions", json({ id, topic, options })),
+  voices: () => request<{ voices: Voice[] }>("/voices"),
   history: (id: string) => request<Session>(`/sessions/${id}`),
   chat: (session_id: string, message: string, transcript_id?: string) =>
     request<{ reply: string; correction: string; mode: string }>(
@@ -54,9 +62,9 @@ export const api = {
       signal,
     });
   },
-  synthesize: async (text: string, signal: AbortSignal) => {
+  synthesize: async (text: string, signal: AbortSignal, voice = "default") => {
     const response = await fetch(`${API}/speech/synthesize`, {
-      ...json({ text }),
+      ...json({ text, voice }),
       signal,
     });
     if (!response.ok) throw await failure(response);

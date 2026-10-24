@@ -4,10 +4,16 @@ import {
   ArrowLeft,
   ArrowRight,
   Mic,
+  BookOpen,
+  Compass,
   Settings2,
   Volume2,
   X,
 } from "lucide-react";
+import { InstallApp } from "./InstallApp";
+import { SceneBrowser, LearningSettings, MemoryNotebook } from "./LearningHub";
+import { useLearning } from "../hooks/useLearning";
+import { type Lesson, type Memory } from "../lib/learning";
 import { PracticeGuide } from "./PracticeGuide";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessageList";
@@ -18,7 +24,13 @@ import { useSpeech } from "../hooks/useSpeech";
 import { api } from "../lib/api";
 import { demoApi } from "../lib/demo";
 import { scenarios } from "../lib/scenarios";
-import { topics, type Health, type Topic } from "../lib/types";
+import {
+  topics,
+  type Health,
+  type Topic,
+  type Voice,
+  type PracticeOptions,
+} from "../lib/types";
 
 export function Studio({ demo = false }: { demo?: boolean }) {
   const client = demo ? demoApi : api;
@@ -26,7 +38,25 @@ export function Studio({ demo = false }: { demo?: boolean }) {
     client,
     demo ? "parlons-demo-session" : "parlons-session",
   );
-  const speech = useSpeech(client);
+  const learning = useLearning(demo, conversation.session);
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const speech = useSpeech(
+    client,
+    voices.some((v) => v.id === learning.voice) ? learning.voice : "default",
+  );
+  const [completedGoals, setCompletedGoals] = useState<string[]>([]);
+  useEffect(() => {
+    let active = true;
+    client
+      .voices()
+      .then((v) => {
+        if (active) setVoices(v.voices);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [client]);
   const recorder = useRecorder(
     conversation.acceptTranscript,
     conversation.setError,
@@ -36,11 +66,17 @@ export function Studio({ demo = false }: { demo?: boolean }) {
   const [offline, setOffline] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [settings, setSettings] = useState(false);
-  const [view, setView] = useState<"home" | "practice" | "summary">("home");
+  const [view, setView] = useState<
+    "home" | "practice" | "summary" | "scenes" | "memory"
+  >("home");
   const [selected, setSelected] = useState<Topic>("cafe");
   const [moreScenes, setMoreScenes] = useState(false);
   const [startedAt, setStartedAt] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [view]);
   useEffect(() => {
     let active = true;
     setOffline(false);
@@ -68,7 +104,13 @@ export function Studio({ demo = false }: { demo?: boolean }) {
   const latest = [...messages].reverse().find((m) => m.role === "assistant");
   const speechReady = health?.speech_ready ?? false;
   const mock = health?.mock_ai ?? false;
-  const topicName = topics.find((t) => t.id === topic)?.name;
+  const activeOptions = conversation.session?.options;
+  const deferredFeedback = activeOptions?.feedback === "after_session";
+  const dueCount = learning.book.cards.filter(
+    (c) => c.accepted && c.due <= Date.now(),
+  ).length;
+  const topicName =
+    activeOptions?.scene || topics.find((t) => t.id === topic)?.name;
   const examples = [
     ...new Set(messages.filter((m) => m.role === "user").map((m) => m.content)),
   ].slice(-3);
@@ -79,13 +121,28 @@ export function Studio({ demo = false }: { demo?: boolean }) {
     const reply = await conversation.send();
     if (reply) await speech.playResponse(reply, speechReady);
   }
-  function start(nextTopic: Topic) {
+  function start(
+    nextTopic: Topic,
+    lesson?: Lesson,
+    custom?: string,
+    review?: Memory,
+  ) {
     speech.stop();
     recorder.cancel();
     setDemoListening(false);
     setStartedAt(Date.now());
     setView("practice");
-    void conversation.start(nextTopic);
+    setCompletedGoals([]);
+    const options: PracticeOptions = {
+      ...learning.options,
+      scene:
+        lesson?.title ||
+        (custom ? "Your own scene" : review ? "Revisit an expression" : ""),
+      situation: lesson?.situation || custom || (review ? review.prompt : ""),
+      goals: lesson?.goals || [],
+      review_targets: review ? [review.corrected] : [],
+    };
+    void conversation.start(nextTopic, options);
   }
   function resume() {
     setStartedAt(Date.now());
@@ -143,6 +200,14 @@ export function Studio({ demo = false }: { demo?: boolean }) {
       {settings && (
         <section className="minimal-settings" aria-label="Settings">
           <h2>Make yourself comfortable.</h2>
+          {!demo && <InstallApp />}
+          <LearningSettings
+            options={learning.options}
+            onChange={learning.setOptions}
+            voices={voices}
+            voice={learning.voice}
+            onVoice={learning.setVoice}
+          />
           <PlaybackControls
             autoplay={speech.autoplay}
             slow={speech.slow}
@@ -159,8 +224,8 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             sending.
           </p>
           <p>
-            Feedback is based on your transcript. Explanations currently appear
-            in Chinese.
+            Feedback is based on your transcript. The demo uses fixed examples;
+            your chosen preferences guide live conversations.
           </p>
           <button
             className="text-button"
@@ -176,6 +241,11 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             </form>
           )}
         </section>
+      )}
+      {learning.storageError && (
+        <p className="connection-note" role="alert">
+          {learning.storageError}
+        </p>
       )}
       {offline && (
         <div className="connection-note" role="alert">
@@ -254,6 +324,16 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                   ))}
               </div>
             )}
+            <div className="home-learning-links">
+              <button onClick={() => setView("scenes")}>
+                Find a real-life scene <ArrowRight size={14} />
+              </button>
+              {dueCount > 0 && (
+                <button onClick={() => setView("memory")}>
+                  {dueCount} expressions to revisit <BookOpen size={14} />
+                </button>
+              )}
+            </div>
             {turns > 0 && (
               <button className="resume-link" disabled={busy} onClick={resume}>
                 Continue your last conversation <ArrowRight size={14} />
@@ -271,6 +351,21 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             <span>03 — MAKE IT A HABIT</span>
           </div>
         </main>
+      )}
+      {view === "scenes" && (
+        <SceneBrowser disabled={busy || offline} onStart={start} />
+      )}
+      {view === "memory" && (
+        <MemoryNotebook
+          cards={learning.book.cards}
+          onUpdate={learning.update}
+          onDelete={learning.remove}
+          onReview={learning.review}
+          onPractice={(card) => start(card.topic, undefined, undefined, card)}
+          onAdd={learning.add}
+          onSpeak={(text) => void speech.speak(text)}
+          speechReady={speechReady}
+        />
       )}
       {view === "practice" && (
         <main className="minimal-practice">
@@ -294,6 +389,44 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               Finish session <ArrowRight size={15} />
             </button>
           </div>
+          {activeOptions?.goals?.length ? (
+            <details className="mission-strip">
+              <summary>
+                Your mission{" "}
+                <span>
+                  {completedGoals.length}/{activeOptions.goals.length} ·
+                  self-check
+                </span>
+              </summary>
+              {activeOptions.goals.map((goal) => (
+                <label key={goal}>
+                  <input
+                    type="checkbox"
+                    checked={completedGoals.includes(goal)}
+                    onChange={(e) =>
+                      setCompletedGoals((g) =>
+                        e.target.checked
+                          ? [...g, goal]
+                          : g.filter((v) => v !== goal),
+                      )
+                    }
+                  />
+                  {goal}
+                </label>
+              ))}
+            </details>
+          ) : null}
+          {activeOptions?.review_targets?.length ? (
+            <p className="review-context">
+              {activeOptions.situation}{" "}
+              <small>Try from memory. Your note stays in the notebook.</small>
+            </p>
+          ) : activeOptions?.situation ? (
+            <details className="mission-strip">
+              <summary>Practice brief</summary>
+              <p>{activeOptions.situation}</p>
+            </details>
+          ) : null}
           <section
             className="current-reply"
             aria-label="Current response"
@@ -318,14 +451,33 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               <Volume2 size={17} /> Listen again
             </button>
           </section>
-          {latest?.correction && (
+          {latest?.correction && !deferredFeedback && (
             <aside className="gentle-correction">
               <span>A LITTLE LANGUAGE NOTE</span>
               <details>
                 <summary>
                   A more natural way to say it <span>View feedback +</span>
                 </summary>
+                {latest.corrected_text && (
+                  <p className="correction-pair">
+                    <span>
+                      You said:{" "}
+                      {
+                        messages.filter((m) => m.role === "user").at(-1)
+                          ?.content
+                      }
+                    </span>
+                    <strong lang="fr">{latest.corrected_text}</strong>
+                  </p>
+                )}
                 <p>{latest.correction}</p>
+                <button
+                  className="text-button"
+                  disabled={busy || listening}
+                  onClick={() => setView("memory")}
+                >
+                  Check in my notebook <BookOpen size={14} />
+                </button>
               </details>
             </aside>
           )}
@@ -401,7 +553,11 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 Transcript <span>{messages.length} messages</span>
               </summary>
               <MessageList
-                messages={messages}
+                messages={
+                  deferredFeedback
+                    ? messages.map((m) => ({ ...m, correction: null }))
+                    : messages
+                }
                 busy={busy}
                 speechReady={speechReady && !listening}
                 onSpeak={(text) => void speech.speak(text)}
@@ -443,6 +599,22 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               </p>
             ))}
           </section>
+          {messages.some((m) => m.correction) && (
+            <section className="session-feedback">
+              <h2>Your language notes</h2>
+              {messages
+                .filter((m) => m.correction)
+                .map((m) => (
+                  <div key={m.id}>
+                    {m.corrected_text && <p lang="fr">{m.corrected_text}</p>}
+                    <p>{m.correction}</p>
+                  </div>
+                ))}
+              <button className="text-button" onClick={() => setView("memory")}>
+                Open memory notebook <ArrowRight size={14} />
+              </button>
+            </section>
+          )}
           <button className="primary-button" onClick={resume}>
             Keep talking <ArrowRight size={18} />
           </button>
@@ -451,6 +623,34 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           </button>
         </main>
       )}
+      <nav className="app-tabs" aria-label="Main navigation">
+        {(
+          [
+            { id: "home", label: "Practice", icon: Mic },
+            { id: "scenes", label: "Scenes", icon: Compass },
+            { id: "memory", label: "Notebook", icon: BookOpen },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            disabled={busy || listening}
+            aria-current={
+              view === tab.id ||
+              (tab.id === "home" && (view === "practice" || view === "summary"))
+                ? "page"
+                : undefined
+            }
+            onClick={() => {
+              speech.stop();
+              setView(tab.id);
+            }}
+          >
+            <tab.icon size={20} />
+            <span>{tab.label}</span>
+            {tab.id === "memory" && dueCount > 0 && <i>{dueCount}</i>}
+          </button>
+        ))}
+      </nav>
       <footer className="minimal-footer">
         <span>A little French, every day.</span>
         <span>

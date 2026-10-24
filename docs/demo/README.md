@@ -13,3 +13,7 @@ are stored locally in the browser. It makes no external network requests.
 
 The archive was generated using `npm run build:demo` in `frontend`. Regenerate it
 from `frontend/public/parlons-demo.html` after changing the UI.
+
+The demo now includes the mobile scene library and memory notebook. Notebook data
+stays in this browser. Settings are saved but demo conversation content is scripted.
+See [mobile learning details](../MOBILE_LEARNING.md).

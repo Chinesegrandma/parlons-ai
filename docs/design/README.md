@@ -5,8 +5,8 @@ single blue speaking action. The practice screen emphasizes the latest reply,
 with corrections, inspiration, and transcript history available on demand.
 All eight scenarios, editable original transcripts, autoplay, slow playback,
 and text-only fallback are retained. Session summaries show actual user turns,
-not inferred proficiency scores. Explanation language remains the backend's
-existing Chinese output; no nonfunctional language selector is presented.
+not inferred proficiency scores. The new learning release adds configurable explanation language, scene goals,
+and a browser-local memory notebook. See [Mobile learning](../MOBILE_LEARNING.md).
 
 ## Actual browser captures
 
@@ -25,6 +25,6 @@ To try the same UI, run `npm ci && npm run dev` from `frontend` and open `/demo`
 or download the [standalone demo](../demo/parlons-interactive-demo.zip).
 The `/` route continues to use the existing backend API.
 
-Validation: 44 frontend tests, TypeScript, ESLint, production build, and Chromium
+Validation: 51 frontend tests, TypeScript, ESLint, production build, and Chromium
 interaction checks (start, send, feedback, finish, resume, and mobile layout).
 Browser checks found no page errors or horizontal overflow at mobile width.
