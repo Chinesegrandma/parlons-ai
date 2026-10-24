@@ -59,21 +59,44 @@ it("uses speech_ready to disable playback and preserves text-only chat", async (
   });
   const user = userEvent.setup();
   render(<Home />);
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Start speaking" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument(),
+  );
   expect(
     await screen.findByText("Speech unavailable · text chat available"),
   ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Écouter" })).toBeDisabled();
+  for (const button of screen.getAllByRole("button", { name: "Écouter" }))
+    expect(button).toBeDisabled();
   expect(screen.getByRole("button", { name: "Record French" })).toBeDisabled();
   await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
   await user.click(screen.getByRole("button", { name: "Send" }));
-  expect(await screen.findByText("Avec plaisir !")).toBeInTheDocument();
+  expect(
+    await screen.findByRole("heading", { name: "Avec plaisir !" }),
+  ).toBeInTheDocument();
   expect(api.synthesize).not.toHaveBeenCalled();
 });
 
 it("automatically plays newly generated replies", async () => {
   const user = userEvent.setup();
   render(<Home />);
-  await screen.findByText("Speech available");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Start speaking" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument(),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Record French" })).toBeEnabled(),
+  );
   await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
   await user.click(screen.getByRole("button", { name: "Send" }));
   await waitFor(() =>
@@ -87,11 +110,23 @@ it("automatically plays newly generated replies", async () => {
 it("provides a working autoplay checkbox", async () => {
   const user = userEvent.setup();
   render(<Home />);
-  await screen.findByText("Speech available");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Start speaking" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument(),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Record French" })).toBeEnabled(),
+  );
+  await user.click(screen.getByRole("button", { name: "Settings" }));
   await user.click(screen.getByRole("checkbox", { name: "Autoplay replies" }));
   await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
   await user.click(screen.getByRole("button", { name: "Send" }));
-  await screen.findByText("Avec plaisir !");
+  await screen.findByRole("heading", { name: "Avec plaisir !" });
   expect(api.synthesize).not.toHaveBeenCalled();
 });
 
@@ -133,7 +168,18 @@ it("reviews and edits a recorded transcript before sending", async () => {
   });
   const user = userEvent.setup();
   render(<Home />);
-  await screen.findByText("Speech available");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Start speaking" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument(),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Record French" })).toBeEnabled(),
+  );
   await user.click(screen.getByRole("button", { name: "Record French" }));
   await user.click(
     await screen.findByRole("button", { name: "Stop recording" }),
@@ -173,7 +219,18 @@ it("offers manual playback fallback when autoplay is blocked", async () => {
   );
   const user = userEvent.setup();
   render(<Home />);
-  await screen.findByText("Speech available");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Start speaking" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument(),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Record French" })).toBeEnabled(),
+  );
   await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
   await user.click(screen.getByRole("button", { name: "Send" }));
   await user.click(
@@ -190,25 +247,34 @@ it("offers manual playback fallback when autoplay is blocked", async () => {
 
 it("does not send unfinished IME composition on Enter", async () => {
   render(<Home />);
-  await screen.findByText("Speech available");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Start speaking" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument(),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Record French" })).toBeEnabled(),
+  );
   const input = screen.getByRole("textbox", { name: "Message" });
   fireEvent.change(input, { target: { value: "Bonjour" } });
   fireEvent.keyDown(input, { key: "Enter", isComposing: true });
   expect(api.chat).not.toHaveBeenCalled();
 });
 
-it("shows real-mode billing and configuration status without generating anything on load", async () => {
-  vi.mocked(api.health).mockResolvedValue({
-    mode: "ai",
-    speech_ready: true,
-    stt_ready: true,
-    mock_ai: false,
-  });
+it("keeps provider actions idle on the landing page", async () => {
   render(<Home />);
-  const status = await screen.findByRole("region", { name: "真实服务状态" });
-  expect(status).toHaveTextContent("真实调用已开启");
-  expect(status).toHaveTextContent("语音朗读：已配置");
-  expect(status).toHaveTextContent("消耗 API 额度");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Start speaking" }),
+    ).toBeEnabled(),
+  );
+  expect(
+    screen.getByRole("heading", { name: "Un café et on parle ?" }),
+  ).toBeInTheDocument();
   expect(api.chat).not.toHaveBeenCalled();
   expect(api.synthesize).not.toHaveBeenCalled();
 });

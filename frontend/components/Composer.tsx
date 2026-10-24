@@ -50,7 +50,7 @@ export function Composer({
           <div>
             <strong>
               <ScanText size={15} />
-              原始转写 · 已保留
+              Your original words · saved
             </strong>
             <button
               disabled={disabled}
@@ -61,15 +61,17 @@ export function Composer({
             </button>
           </div>
           <p>{transcript.original_text}</p>
-          <small>在下方修改后再发送，原始转写不会被覆盖。</small>
+          <small>
+            Review or edit below, then send. Your original words stay saved.
+          </small>
         </section>
       )}
       {listening && (
         <div className="recording-status" role="status">
           <span className="live-dot" />
           {demo
-            ? "正在演示录音流程，不会开启麦克风。再次点击以查看示例转写。"
-            : "正在听你说… 点击停止后可检查转写。"}
+            ? "Demo recording · no microphone used. Tap again to review."
+            : "Listening… tap again when you’re ready."}
           <time className="recording-timer">
             0:{String(seconds).padStart(2, "0")} / 1:00
           </time>
@@ -78,7 +80,7 @@ export function Composer({
       )}
       {transcribing && (
         <div className="transcription-status" role="status">
-          <ScanText size={16} /> 正在转写，完成后可以检查和编辑，暂未发送。
+          <ScanText size={16} /> Transcribing… review your words before sending.
         </div>
       )}
       <div className={`composer ${listening ? "is-listening" : ""}`}>
@@ -119,9 +121,7 @@ export function Composer({
             }
           }}
           placeholder={
-            listening
-              ? "Prenez votre temps… 慢慢说"
-              : "说点什么，或者用法语写下来…"
+            listening ? "Prenez votre temps…" : "Or write a little French…"
           }
           disabled={disabled || listening}
         />
@@ -137,10 +137,10 @@ export function Composer({
       <div className="composer-hint">
         <span>
           {demo
-            ? "本地演示 · 预设回复 · 播放为提示音"
-            : "点击麦克风录音，再次点击结束 · 最长 60 秒"}
+            ? "Demo · scripted replies & sample audio"
+            : "Tap to speak · up to 60 seconds"}
         </span>
-        <span>Enter 发送 ↵</span>
+        <span>Enter to send ↵</span>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ and corrections are scripted examples; playback is a short tone. This is a UI
 experience, not a real speech or correction quality evaluation. Demo conversations
 are stored locally in the browser. It makes no external network requests.
 
-[Desktop preview](parlons-preview.png)
+[New minimalist homepage](../design/home-desktop.png) · [Practice screen](../design/practice-desktop.png) · [Mobile](../design/practice-mobile.png)
 
 The archive was generated using `npm run build:demo` in `frontend`. Regenerate it
 from `frontend/public/parlons-demo.html` after changing the UI.

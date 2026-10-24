@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 export function useSpeech(client = api) {
   const [autoplay, setAutoplay] = useState(true);
   const [slow, setSlow] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const [notice, setNotice] = useState("");
   const [blocked, setBlocked] = useState(false);
   const player = useRef<HTMLAudioElement | null>(null);
@@ -16,6 +17,7 @@ export function useSpeech(client = api) {
 
   const stop = useCallback(() => {
     generation.current++;
+    setSpeaking(false);
     controller.current?.abort();
     controller.current = null;
     if (player.current) {
@@ -70,6 +72,7 @@ export function useSpeech(client = api) {
       await player.current?.play();
       if (generation.current === current) {
         setBlocked(false);
+        setSpeaking(true);
         setNotice("");
       }
     } catch (error) {
@@ -132,6 +135,7 @@ export function useSpeech(client = api) {
   }
   return {
     autoplay,
+    speaking,
     slow,
     notice,
     blocked,
