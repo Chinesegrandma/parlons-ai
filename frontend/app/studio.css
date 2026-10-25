@@ -1143,3 +1143,31 @@
     flex-wrap: wrap;
   }
 }
+.assistant-identity {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+  margin: 8px 0 23px;
+}
+.assistant-identity strong {
+  display: block;
+  font:
+    20px Georgia,
+    serif;
+  color: #3f614c;
+}
+.assistant-identity small {
+  display: block;
+  font-size: 11px;
+  color: #94a284;
+  margin-top: 6px;
+}
+.assistant-portrait {
+  display: block;
+  flex: none;
+}
+.focused-chat .avatar:has(.assistant-portrait) {
+  background: none;
+  overflow: visible;
+}

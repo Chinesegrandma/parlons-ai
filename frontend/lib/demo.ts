@@ -1,9 +1,10 @@
+import { assistantOpening } from "./persona";
 import { catalog } from "./catalog";
 import type { api } from "./api";
 import type { Session, Topic } from "./types";
 
 const openings = Object.fromEntries(
-  catalog.map((scene) => [scene.id, scene.opening]),
+  catalog.map((scene) => [scene.id, assistantOpening(scene.opening)]),
 ) as Record<Topic, string>;
 const sessions = new Map<string, Session>();
 const KEY = "parlons-local-demo-data";
@@ -84,7 +85,9 @@ export const demoApi: typeof api = {
             id: 1,
             role: "assistant",
             content: options?.situation
-              ? "Bonjour ! On joue cette situation ensemble. À toi de commencer !"
+              ? assistantOpening(
+                  "Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?",
+                )
               : openings[topic],
           },
         ],

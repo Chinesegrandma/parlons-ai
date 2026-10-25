@@ -140,5 +140,12 @@ export function useRecorder(
       starting.current = false;
     }
   }
-  return { listening, transcribing, toggle, cancel };
+  function finish() {
+    if (recorder.current?.state === "recording") {
+      recorder.current.stop();
+      return true;
+    }
+    return false;
+  }
+  return { listening, transcribing, toggle, cancel, finish };
 }

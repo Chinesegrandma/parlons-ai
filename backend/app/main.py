@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app import providers, security
 from app.learning import PracticeOptions, load_options
+from app.persona import introduce
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 DB_PATH = Path(
@@ -22,7 +23,7 @@ DB_PATH = Path(
 )
 CATALOG = json.loads(Path(__file__).with_name("catalog.json").read_text(encoding="utf-8"))
 TOPICS = {scene["id"]: scene["role"] for scene in CATALOG}
-OPENERS = {scene["id"]: scene["opening"] for scene in CATALOG}
+OPENERS = {scene["id"]: introduce(scene["opening"]) for scene in CATALOG}
 
 
 def now() -> str:
@@ -89,12 +90,12 @@ def opening_text(db, session_id, topic):
     row = db.execute("SELECT options FROM sessions WHERE id=?", (session_id,)).fetchone()
     options = load_options(row["options"]) if row else PracticeOptions()
     if options.review_targets:
-        return (
+        return introduce(
             "Bonjour ! On va réutiliser une expression dans une nouvelle situation. "
             "Que souhaitez-vous demander dans cette situation ?"
         )
     if options.situation:
-        return "Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?"
+        return introduce("Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?")
     return OPENERS[topic]
 
 
@@ -266,6 +267,8 @@ async def chat(payload: MessageCreate):
             original = transcript["original_text"]
     options = load_options(session["options"])
     instructions = (
+        "Tu t’appelles Camille, une assistante IA de français. Ta présentation est déjà dans "
+        "le message initial ; ne la répète pas à chaque réponse. "
         "Tu es un partenaire de français chaleureux. Adapte le vocabulaire au niveau observé "
         "et utilise des phrases courtes et accessibles. "
         f"Le sujet est {TOPICS[session['topic']]}. Réponds en français en 1 à 3 phrases "
@@ -291,6 +294,14 @@ async def chat(payload: MessageCreate):
     )
     language_name = options.explanation_language
     instructions += f" Écris toute explication de correction en {language_name}."
+    if language_name == "English":
+        instructions += (
+            " LANGUAGE CONTRACT: reply and corrected_text are French. "
+            "correction and review_prompt MUST be English explanations, not French paragraphs. "
+            "French is allowed only as the example being discussed. "
+            'Example correction: "Use un café: café is a masculine noun." '
+            'Example review_prompt: "Order another drink using the correct article."'
+        )
     if payload.practice_mode == "conversation":
         instructions += (
             " Mode conversation : continue le jeu de rôle sans interrompre pour enseigner. "
@@ -307,8 +318,15 @@ async def chat(payload: MessageCreate):
             result = await providers.tutor_reply(app, messages)
         except Exception as exc:
             raise HTTPException(502, providers.failure_detail("OpenAI", "chat", exc)) from exc
-        reply, correction = result.reply, result.correction
+        if payload.practice_mode != "conversation" and language_name == "English":
+            try:
+                result = await providers.ensure_english_feedback(app, result)
+            except Exception as exc:
+                raise HTTPException(
+                    502, providers.failure_detail("OpenAI", "feedback_language", exc)
+                ) from exc
         corrected_text, review_prompt = result.corrected_text, result.review_prompt
+        reply, correction = result.reply, result.correction
         if payload.practice_mode == "conversation":
             correction = corrected_text = review_prompt = ""
         mode = "mock" if providers.mock_enabled() else "ai"

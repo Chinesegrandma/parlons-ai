@@ -1,6 +1,7 @@
+import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { CorrectionCard } from "./CorrectionCard";
 import { useEffect, useRef } from "react";
-import { AudioLines, Sparkles, Volume2 } from "lucide-react";
+import { Sparkles, Volume2 } from "lucide-react";
 import type { Message, Language } from "../lib/types";
 export function MessageList({
   language = "zh",
@@ -43,7 +44,7 @@ export function MessageList({
         <article className={`message ${message.role}`} key={message.id}>
           <div className="avatar">
             {message.role === "assistant" ? (
-              <AudioLines size={17} />
+              <AssistantAvatar size={30} language={language} />
             ) : (
               t("你", "You")
             )}
@@ -51,7 +52,10 @@ export function MessageList({
           <div className="bubblewrap">
             <div className="message-author">
               {message.role === "assistant"
-                ? t("Parlons · 你的法语搭子", "Parlons · Your French partner")
+                ? t(
+                    `${ASSISTANT_NAME} · 你的 AI 法语助理`,
+                    `${ASSISTANT_NAME} · Your AI French assistant`,
+                  )
                 : t("你", "You")}
               <span>{message.role === "assistant" ? "FR" : "VOUS"}</span>
             </div>

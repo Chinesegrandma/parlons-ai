@@ -1,3 +1,4 @@
+import { assistantOpening } from "../lib/persona";
 import {
   act,
   fireEvent,
@@ -87,7 +88,9 @@ beforeEach(() => {
       {
         id: 1,
         role: "assistant",
-        content: catalog.find((item) => item.id === topic)!.opening,
+        content: assistantOpening(
+          catalog.find((item) => item.id === topic)!.opening,
+        ),
       },
     ];
     return { id, topic, messages };
@@ -145,7 +148,7 @@ async function enter() {
   const user = userEvent.setup();
   render(<Home />);
   await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
-  await screen.findByText(catalog[0].opening);
+  await screen.findByText(assistantOpening(catalog[0].opening));
   await waitFor(() => expect(api.synthesize).toHaveBeenCalledOnce());
   act(() => MockAudio.current.onended?.());
   return user;
@@ -198,7 +201,7 @@ it("preserves text-only practice without speech configuration", async () => {
   const user = userEvent.setup();
   render(<Home />);
   await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
-  await screen.findByText(catalog[0].opening);
+  await screen.findByText(assistantOpening(catalog[0].opening));
   expect(
     screen.getByRole("button", { name: /^(Record French|录制法语)$/ }),
   ).toBeDisabled();
@@ -275,7 +278,7 @@ it("supports opening autoplay opt-out", async () => {
   const user = userEvent.setup();
   render(<Home />);
   await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
-  await screen.findByText(catalog[0].opening);
+  await screen.findByText(assistantOpening(catalog[0].opening));
   expect(api.synthesize).not.toHaveBeenCalled();
 });
 it("hands-free mode sends after silence, waits for playback end, then listens again", async () => {
@@ -298,11 +301,11 @@ it("hands-free mode sends after silence, waits for playback end, then listens ag
   expect(screen.queryByText("Example correction")).not.toBeInTheDocument();
   act(() => MockAudio.current.onended?.());
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
-  await user.click(screen.getByRole("button", { name: "暂停" }));
+  await user.click(screen.getByRole("button", { name: "逐句练习" }));
   expect(Recorder.current.state).toBe("inactive");
   expect(api.transcribe).toHaveBeenCalledOnce();
 });
-it("pausing during a pending reply never restarts the microphone or audio", async () => {
+it("explicit cancellation during a pending reply never restarts the microphone or audio", async () => {
   let resolve: (value: {
     reply: string;
     correction: string;
@@ -321,6 +324,7 @@ it("pausing during a pending reply never restarts the microphone or audio", asyn
   act(() => detector.end?.());
   await waitFor(() => expect(api.chat).toHaveBeenCalledOnce());
   await user.click(screen.getByRole("button", { name: "暂停" }));
+  await user.click(screen.getByRole("button", { name: "取消处理" }));
   await act(async () =>
     resolve({ reply: "Late reply", correction: "", mode: "mock" }),
   );
@@ -390,4 +394,34 @@ it("a failed automated reply stops the loop and retains the transcript draft", a
   expect(api.chat).toHaveBeenCalledOnce();
   expect(api.synthesize).toHaveBeenCalledOnce();
   expect(Recorder.current.state).toBe("inactive");
+});
+
+it("Pause submits the current spoken turn, responds and does not restart listening", async () => {
+  const user = await enter();
+  await user.click(screen.getByRole("button", { name: "连续对话" }));
+  await user.click(screen.getByRole("button", { name: "开启连续对话" }));
+  await waitFor(() => expect(Recorder.current.state).toBe("recording"));
+  await user.click(screen.getByRole("button", { name: "暂停" }));
+  await screen.findByText("Avec plaisir ! Et ensuite ?");
+  await waitFor(() => expect(api.synthesize).toHaveBeenCalledTimes(2));
+  expect(api.transcribe).toHaveBeenCalledOnce();
+  expect(api.chat).toHaveBeenCalledOnce();
+  expect(Recorder.current.state).toBe("inactive");
+  act(() => MockAudio.current.onended?.());
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "开启连续对话" })).toBeEnabled(),
+  );
+  expect(Recorder.current.state).toBe("inactive");
+});
+
+it("shows Camille’s female assistant avatar and plays her opening introduction once", async () => {
+  await enter();
+  expect(screen.getByText("Camille", { exact: true })).toBeInTheDocument();
+  expect(
+    screen.getAllByRole("img", { name: /Camille/ }).length,
+  ).toBeGreaterThan(0);
+  expect(api.synthesize).toHaveBeenCalledWith(
+    expect.stringContaining("Camille, ton assistante"),
+    expect.any(AbortSignal),
+  );
 });

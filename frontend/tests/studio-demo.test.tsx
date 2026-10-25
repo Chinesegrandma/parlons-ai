@@ -1,3 +1,4 @@
+import { assistantOpening } from "../lib/persona";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -20,7 +21,9 @@ it("runs a categorized offline practice and review without network access", asyn
   render(<Studio demo />);
   await user.click(screen.getByRole("button", { name: "日常" }));
   await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
-  await screen.findByText("Bonjour ! Qu’est-ce que je vous sers ?");
+  await screen.findByText(
+    assistantOpening("Bonjour ! Qu’est-ce que je vous sers ?"),
+  );
   await user.type(
     screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
     "Je voudrais une café.",
@@ -43,7 +46,9 @@ it("switches the entire demo interface to English and keeps French practice cont
     screen.getByRole("button", { name: "Start chatting" }),
   ).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Start chatting" }));
-  await screen.findByText("Salut ! Comment s’est passée ta journée ?");
+  await screen.findByText(
+    assistantOpening("Salut ! Comment s’est passée ta journée ?"),
+  );
   expect(
     screen.getByRole("button", { name: "Guided practice" }),
   ).toBeInTheDocument();

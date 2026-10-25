@@ -1,3 +1,4 @@
+import { assistantOpening } from "../lib/persona";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -93,7 +94,9 @@ it("defers inline corrections in conversation mode and offers an end review", as
   const user = userEvent.setup();
   render(<Studio demo />);
   await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
-  await screen.findByText("Salut ! Comment s’est passée ta journée ?");
+  await screen.findByText(
+    assistantOpening("Salut ! Comment s’est passée ta journée ?"),
+  );
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.type(
     screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),

@@ -26,7 +26,8 @@ tests, builds, or the included offline evaluations.**
   temporary tunnel addresses.
 - Guided practice keeps transcript review and feedback per turn. Conversation mode
   detects a pause locally, transcribes and sends automatically, speaks the reply, then
-  listens again. Pause, mode switching, leaving the page and errors stop capture.
+  listens again. Pause now submits the current utterance and finishes its reply before
+  pausing; Cancel, mode switching, leaving the page and errors stop unfinished capture.
   This is sequential STT → LLM → TTS, **not streaming or interruptible full-duplex audio**.
 - Finish & review examines the full stored text history for both strengths and
   corrections. Evidence quotes must occur in learner messages. Very long sessions are
@@ -35,6 +36,10 @@ tests, builds, or the included offline evaluations.**
 - Chinese and English settings apply to the interface and newly generated explanations
   and reviews. French remains the practice language. Previous generated feedback is not
   retroactively translated. Settings call this “Language” and “Practice preferences.”
+- Camille is the default female AI assistant persona, with an inline illustrated avatar
+  and a short introduction persisted once in each new conversation opening.
+- New English feedback has an explicit language contract and a bounded repair for
+  clearly non-English explanations; French dialogue and corrected examples remain French.
 - Openings now autoplay once after entering a new conversation, respecting the saved
   autoplay setting. A blocked browser exposes a cached-audio playback fallback.
 - A backend-owned opening message is saved atomically with each session and always

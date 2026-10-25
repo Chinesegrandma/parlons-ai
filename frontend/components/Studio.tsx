@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, AudioLines, Mic, Pause } from "lucide-react";
 import { StudioHeader, PracticeSettings } from "./AppChrome";
+import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessageList";
 import { PracticeHome } from "./PracticeHome";
@@ -51,6 +52,8 @@ export function Studio({ demo = false }: { demo?: boolean }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [offline, setOffline] = useState(false);
   const [voiceActive, setVoiceActive] = useState(false);
+  const [pausing, setPausing] = useState(false);
+  const pauseAfterTurn = useRef(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [openingId, setOpeningId] = useState<string | null>(null);
   const playedOpenings = useRef(new Set<string>());
@@ -197,6 +200,8 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           : message;
   }
   function pauseVoice() {
+    pauseAfterTurn.current = false;
+    setPausing(false);
     running.current = false;
     epoch.current++;
     setOpeningId(null);
@@ -204,6 +209,19 @@ export function Studio({ demo = false }: { demo?: boolean }) {
     setPhase("paused");
     recorder.cancel();
     speech.stop();
+  }
+  function requestPause() {
+    if (pausing) {
+      pauseVoice();
+      return;
+    }
+    if (recorder.listening || recorder.transcribing || phase === "thinking") {
+      pauseAfterTurn.current = true;
+      setPausing(true);
+      if (recorder.listening) recorder.finish();
+      return;
+    }
+    pauseVoice();
   }
   function recordingError(message: string) {
     pauseVoice();
@@ -235,11 +253,15 @@ export function Studio({ demo = false }: { demo?: boolean }) {
     if (current !== epoch.current || !running.current) return;
     if (!played) {
       running.current = false;
+      pauseAfterTurn.current = false;
+      setPausing(false);
+      recorder.cancel();
       setVoiceActive(false);
       setPhase("paused");
       return;
     }
-    setPhase("idle");
+    if (pauseAfterTurn.current) pauseVoice();
+    else setPhase("idle");
   }
   function cancelReview() {
     reviewController.current?.abort();
@@ -363,12 +385,20 @@ export function Studio({ demo = false }: { demo?: boolean }) {
       if (!abort.signal.aborted) setReviewLoading(false);
     }
   }
-  const status =
-    phase === "listening"
-      ? t(
-          "正在听你说… 停顿后自动发送",
-          "Listening… pause to send automatically",
-        )
+  const status = pausing
+    ? t("正在处理这句话，回复后暂停…", "Finishing this turn, then pausing…")
+    : phase === "listening"
+      ? recorder.transcribing
+        ? t("正在转写这句话…", "Transcribing your turn…")
+        : recorder.listening
+          ? t(
+              "正在听你说… 停顿后自动发送",
+              "Listening… pause to send automatically",
+            )
+          : t(
+              "正在请求麦克风，请允许录音…",
+              "Waiting for microphone permission…",
+            )
       : phase === "thinking"
         ? t("正在准备回复…", "Preparing a reply…")
         : phase === "speaking"
@@ -494,6 +524,15 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               {t("结束并总结", "Finish & review")}
             </button>
           </div>
+          <div className="assistant-identity">
+            <AssistantAvatar size={48} language={language} />
+            <div>
+              <strong>{ASSISTANT_NAME}</strong>
+              <small>
+                {t("你的 AI 法语女助理", "Your AI French assistant")}
+              </small>
+            </div>
+          </div>
           <div
             className="mode-switch"
             aria-label={t("对话模式", "Practice mode")}
@@ -555,11 +594,13 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                       speech.working ||
                       speech.blocked))
                 }
-                onClick={() => (voiceActive ? pauseVoice() : startVoice())}
+                onClick={() => (voiceActive ? requestPause() : startVoice())}
               >
                 {voiceActive ? <Pause size={18} /> : <Mic size={18} />}
                 {voiceActive
-                  ? t("暂停", "Pause")
+                  ? pausing
+                    ? t("取消处理", "Cancel")
+                    : t("暂停", "Pause")
                   : t("开启连续对话", "Start conversation")}
               </button>
             </section>
