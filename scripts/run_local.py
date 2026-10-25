@@ -17,6 +17,13 @@ import webbrowser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_VOICE_ID = "cuo3D4C6LVenyV7b2Kpd"
+
+
+def configure_voice(env, present):
+    """Use the project's selected voice without an interactive configuration step."""
+    if not present.get("ELEVENLABS_VOICE_ID"):
+        env["ELEVENLABS_VOICE_ID"] = DEFAULT_VOICE_ID
 
 
 def free_port(port):
@@ -145,10 +152,7 @@ def main():
             if not value:
                 parser.error(f"{name} is required for the full voice workflow")
             env[name] = value
-        if not present["ELEVENLABS_VOICE_ID"]:
-            env["ELEVENLABS_VOICE_ID"] = (
-                input("Voice ID [cuo3D4C6LVenyV7b2Kpd]: ").strip() or "cuo3D4C6LVenyV7b2Kpd"
-            )
+        configure_voice(env, present)
         print(
             "REAL API MODE: text, transcription and playback may consume API credits.",
             flush=True,

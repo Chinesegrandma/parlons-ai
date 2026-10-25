@@ -4,6 +4,7 @@ import io
 import json
 import logging
 import os
+import re
 import wave
 from contextlib import asynccontextmanager
 
@@ -169,6 +170,29 @@ def voice_catalog():
         value = os.getenv(f"ELEVENLABS_VOICE_{key.upper()}", "").strip()
         if value:
             catalog[key] = {"name": title, "provider_id": value}
+    # An extensible server-owned list; no per-voice prompts or browser provider IDs.
+    raw = os.getenv("ELEVENLABS_VOICES_JSON", "").strip()
+    if raw:
+        try:
+            extra = json.loads(raw)
+            if not isinstance(extra, dict) or len(extra) > 64:
+                raise ValueError("Invalid voice list")
+            for alias, entry in extra.items():
+                if (
+                    alias == "default"
+                    or not re.fullmatch(r"[a-z][a-z0-9_-]{0,39}", alias)
+                    or not isinstance(entry, dict)
+                    or not isinstance(entry.get("name"), str)
+                    or not 1 <= len(entry["name"].strip()) <= 80
+                    or not isinstance(entry.get("voice_id"), str)
+                    or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", entry["voice_id"])
+                ):
+                    continue
+                catalog[alias] = {"name": entry["name"].strip(), "provider_id": entry["voice_id"]}
+        except (ValueError, TypeError):
+            logging.getLogger(__name__).warning(
+                "Invalid ELEVENLABS_VOICES_JSON; using existing voices"
+            )
     return catalog
 
 

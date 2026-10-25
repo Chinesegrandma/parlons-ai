@@ -78,3 +78,19 @@ iPhone Safari 可能拦截自动播放；出现播放按钮时手动点击即可
 终端中的 `provider_failure` 行只记录固定服务名、操作名、分类和上游状态码，
 不会打印原始响应正文、异常文本、请求头、密钥或录音/对话内容。
 先根据分类检查对应服务；不要仅凭本地 502 判断需要充值。
+
+
+## 声音不再在终端逐个配置
+
+启动时只在缺少 API 密钥时提示输入密钥，不再询问 Voice ID。
+未设置默认声音时沿用项目之前选定的声音；已有环境变量或后端 `.env` 设置会保留。
+在网页“设置 → 声音”里切换。除兼容的 WARM/CLEAR 配置外，管理员可用一个
+`ELEVENLABS_VOICES_JSON` JSON 对象批量添加最多 64 个自定义声音：
+
+```dotenv
+ELEVENLABS_VOICES_JSON={"claire":{"name":"Claire","voice_id":"your_claire_id"},"julien":{"name":"Julien","voice_id":"your_julien_id"}}
+```
+
+修改服务端配置后重启应用。网页只发送声音别名，后端校验声音白名单；
+这不会自动请求 ElevenLabs 账号中的全部声音，也不会在启动时调用 TTS 验证。
+配置的声音是否有使用权限、额度和合适口音仍以实际测试为准。

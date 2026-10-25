@@ -124,7 +124,8 @@ Windows 如果没有 `python3` 命令，可用 `python scripts/run_local.py --re
 如果本机没有配置密钥，会在**终端隐藏输入**中请求 OpenAI 与 ElevenLabs 密钥；
 输入不会回显，也不会写入文件或网页。已有的 `backend/.env` 不会被修改。
 云环境中的密钥不会自动复制到你的电脑，因此本机首次启动可能需要重新输入。
-Voice ID 可直接按 Enter 使用当前选定的声音。
+启动器不再询问 Voice ID；未配置时自动使用项目当前默认声音，已有配置保持不变。
+多个声音可通过服务端 `ELEVENLABS_VOICES_JSON` 一次配置，在网页“设置 → 声音”中选择。
 
 请打开启动器自动打开的**根页面**，不是 `/demo` 或离线 HTML。
 页面应显示「真实 API 模式」和「真实调用已开启」。允许浏览器使用麦克风，
@@ -181,7 +182,8 @@ Back up any valuable database before a version upgrade.
 | `OPENAI_API_KEY` | Legacy local configuration fallback. A nonblank `PARLONS_OPENAI_API_KEY` takes priority. The cloud secret configuration reserves the `OPENAI_` prefix. |
 | `OPENAI_MODEL` | Text model; default `gpt-4.1-mini`. |
 | `ELEVENLABS_API_KEY` | Server-side key for real STT/TTS, ignored in mock mode. |
-| `ELEVENLABS_VOICE_ID` | French-capable voice for real TTS. |
+| `ELEVENLABS_VOICE_ID` | Default TTS voice; the launcher supplies the project default when absent. |
+| `ELEVENLABS_VOICES_JSON` | Optional JSON object of voice aliases to `{name, voice_id}`; up to 64 custom entries. |
 | `ELEVENLABS_TTS_MODEL` | Default `eleven_multilingual_v2`; check account availability before real tests. |
 | `ELEVENLABS_STT_MODEL` | Default `scribe_v1`; check account availability before real tests. |
 | `FRONTEND_ORIGIN` | Default `http://localhost:3000`. |
