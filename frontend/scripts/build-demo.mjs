@@ -16,13 +16,24 @@ const result = await build({
     "process.env.NEXT_PUBLIC_API_URL": '""',
   },
 });
-const css = (
+let css = (
   await Promise.all(
-    ["globals.css", "studio.css"].map((file) =>
+    ["globals.css", "studio.css", "sage-glass.css"].map((file) =>
       readFile(path.join(root, "app", file), "utf8"),
     ),
   )
 ).join("\n");
+// Embed local font assets so the downloadable single-file demo also works offline.
+for (const name of ["inter", "fraunces"]) {
+  for (const subset of ["latin", "latin-ext"]) {
+    const file = `${name}-${subset}-wght-normal.woff2`;
+    const bytes = await readFile(path.join(root, "public/fonts", file));
+    css = css.replaceAll(
+      `/fonts/${file}`,
+      `data:font/woff2;base64,${bytes.toString("base64")}`,
+    );
+  }
+}
 const js = result.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
 await mkdir(path.join(root, "public"), { recursive: true });
 await writeFile(

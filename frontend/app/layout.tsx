@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./studio.css";
+import "./sage-glass.css";
 export const viewport = {
   themeColor: "#faf9f6",
   width: "device-width",

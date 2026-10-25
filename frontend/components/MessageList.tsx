@@ -1,6 +1,6 @@
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { CorrectionCard } from "./CorrectionCard";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { Sparkles, Volume2 } from "lucide-react";
 import type { Message, Language } from "../lib/types";
 export function MessageList({
@@ -27,7 +27,12 @@ export function MessageList({
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const bottom = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    bottom.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+    bottom.current?.scrollIntoView?.({
+      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+      block: "nearest",
+    });
   }, [messages, busy]);
   return (
     <div
@@ -41,7 +46,15 @@ export function MessageList({
         <span />
       </div>
       {messages.map((message, index) => (
-        <article className={`message ${message.role}`} key={message.id}>
+        <article
+          className={`message ${message.role}`}
+          key={message.id}
+          style={
+            {
+              "--message-stagger": `${Math.min(index, 4) * 50}ms`,
+            } as CSSProperties
+          }
+        >
           <div className="avatar">
             {message.role === "assistant" ? (
               <AssistantAvatar size={30} language={language} />

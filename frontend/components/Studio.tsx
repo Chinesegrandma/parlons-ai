@@ -13,6 +13,7 @@ import { InstallApp } from "./InstallApp";
 import { useConversation } from "../hooks/useConversation";
 import { useRecorder } from "../hooks/useRecorder";
 import { useSpeech } from "../hooks/useSpeech";
+import { GlassNotice } from "./GlassNotice";
 import { prepareSilence } from "../lib/silence";
 import { useLanguage } from "../lib/language";
 import { api } from "../lib/api";
@@ -408,7 +409,14 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             )
           : t("准备好时，开启连续对话。", "Start when you are ready.");
   return (
-    <div className="parlons-app">
+    <div
+      className={`parlons-app ${page === "chat" ? "sage-conversation" : ""}`}
+    >
+      <div className="sage-atmosphere" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
       <StudioHeader
         language={language}
         status={
@@ -495,6 +503,14 @@ export function Studio({ demo = false }: { demo?: boolean }) {
         />
       ) : (
         <main className="conversation-page">
+          {health && !speechReady && (
+            <GlassNotice language={language}>
+              {t(
+                "语音暂不可用，仍可使用文字对话。",
+                "Speech unavailable. You can still chat by text.",
+              )}
+            </GlassNotice>
+          )}
           <div className="chat-heading">
             <button
               className="back-scenes"
@@ -650,9 +666,9 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               </button>
             )}
             {speech.notice && (
-              <p className="audio-notice" role="status">
+              <GlassNotice key={speech.notice} language={language}>
                 {localizedError(speech.notice)}
-              </p>
+              </GlassNotice>
             )}
             {!voiceActive && (
               <Composer
