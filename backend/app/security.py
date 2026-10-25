@@ -100,9 +100,9 @@ def take_limits(db_factory, limits):
     return None
 
 
-def login_page(error=""):
+def login_page(error="", language="zh"):
     message = f'<p class="error" role="alert">{html.escape(error)}</p>' if error else ""
-    return HTMLResponse(
+    markup = (
         """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>登录 · Parlons AI</title><style>
@@ -130,6 +130,30 @@ autocomplete="current-password"><button type="submit">进入练习空间 →</bu
 <footer>登录后，主动发送、转写或朗读可能消耗 API 额度。<br>
 请勿在这里输入 OpenAI 或 ElevenLabs 密钥。</footer></main></body></html>"""
     )
+
+    replacements = {
+        "zh-CN": "en",
+        "登录 · Parlons AI": "Log in · Parlons AI",
+        "欢迎回到你的法语空间。": "Welcome to your French space.",
+        "这是一个私人测试站。输入站点密码，继续练习。": (
+            "This is a private practice site. Enter the site password to continue."
+        ),
+        "站点密码": "Site password",
+        "进入练习空间 →": "Enter practice →",
+        "登录后，主动发送、转写或朗读可能消耗 API 额度。": (
+            "Sending, transcribing and playback may use API credits."
+        ),
+        "请勿在这里输入 OpenAI 或 ElevenLabs 密钥。": (
+            "Do not enter OpenAI or ElevenLabs API keys here."
+        ),
+    }
+    if language == "en":
+        for original, translated in replacements.items():
+            markup = markup.replace(original, translated)
+    switch = (
+        '<p><a href="/auth/login?lang=en">English</a> · <a href="/auth/login?lang=zh">中文</a></p>'
+    )
+    return HTMLResponse(markup.replace("</main>", switch + "</main>"))
 
 
 def secure_headers(response):
@@ -181,8 +205,25 @@ class PublicSiteMiddleware:
                 "sec-fetch-site"
             ) == "cross-site":
                 return await respond(JSONResponse({"detail": "Cross-site request blocked"}, 403))
+        language_cookie = next(
+            (
+                part.strip().partition("=")[2]
+                for part in headers.get("cookie", "").split(";")
+                if part.strip().startswith("parlons_language=")
+            ),
+            "zh",
+        )
+        language = "en" if language_cookie == "en" else "zh"
         if path == "/auth/login" and method == "GET":
-            return await respond(login_page())
+            selected = parse_qs(scope.get("query_string", b"").decode(errors="replace")).get(
+                "lang", [language]
+            )[0]
+            language = "en" if selected == "en" else "zh"
+            response = login_page(language=language)
+            response.set_cookie(
+                "parlons_language", language, max_age=31536000, secure=True, samesite="strict"
+            )
+            return await respond(response)
         cookies = {}
         for pair in headers.get("cookie", "").split(";"):
             name, separator, value = pair.strip().partition("=")
@@ -234,7 +275,12 @@ class PublicSiteMiddleware:
             except UnicodeError:
                 password = ""
             if not hmac.compare_digest(password.encode(), settings()[0].encode()):
-                response = login_page("密码不正确，请重试。")
+                response = login_page(
+                    "Incorrect password. Please try again."
+                    if language == "en"
+                    else "密码不正确，请重试。",
+                    language,
+                )
                 response.status_code = 401
                 return await respond(response)
             response = RedirectResponse("/", status_code=303)
@@ -248,7 +294,9 @@ class PublicSiteMiddleware:
                 samesite="strict",
             )
             return await respond(response)
-        if method == "POST" and path in BILLABLE_PATHS:
+        if method == "POST" and (
+            path in BILLABLE_PATHS or (path.startswith("/sessions/") and path.endswith("/review"))
+        ):
             retry = take_limits(
                 self.db_factory,
                 [

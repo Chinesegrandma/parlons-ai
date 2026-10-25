@@ -1,12 +1,15 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { watchSilence, releaseSilence } from "../lib/silence";
 import { api, ApiError } from "../lib/api";
 import type { Transcript } from "../lib/types";
 
 export function useRecorder(
   onTranscript: (value: Transcript) => void,
   onError: (message: string) => void,
+  automatic = false,
 ) {
+  const silenceCleanup = useRef<(() => void) | null>(null);
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -18,6 +21,9 @@ export function useRecorder(
   const starting = useRef(false);
 
   const cancel = useCallback(() => {
+    silenceCleanup.current?.();
+    silenceCleanup.current = null;
+    releaseSilence();
     generation.current++;
     if (timer.current) clearTimeout(timer.current);
     controller.current?.abort();
@@ -79,6 +85,8 @@ export function useRecorder(
         onError("录音失败，请改用文字输入。 / Recording failed.");
       };
       rec.onstop = async () => {
+        silenceCleanup.current?.();
+        silenceCleanup.current = null;
         if (timer.current) clearTimeout(timer.current);
         mic.getTracks().forEach((track) => track.stop());
         stream.current = null;
@@ -105,6 +113,20 @@ export function useRecorder(
         }
       };
       rec.start(1000);
+      if (automatic) {
+        silenceCleanup.current = watchSilence(
+          mic,
+          () => {
+            if (rec.state === "recording") rec.stop();
+          },
+          () => {
+            cancel();
+            onError(
+              "没有检测到清晰语音，请在安静环境重新开始。 / No clear speech detected; restart in a quiet environment.",
+            );
+          },
+        );
+      }
       setListening(true);
       timer.current = setTimeout(() => {
         if (rec.state !== "inactive") rec.stop();

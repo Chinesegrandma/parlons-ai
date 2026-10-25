@@ -1,4 +1,12 @@
-import type { Health, Session, Topic, Transcript } from "./types";
+import type {
+  Health,
+  Session,
+  Topic,
+  Transcript,
+  Language,
+  PracticeMode,
+  Review,
+} from "./types";
 
 export class ApiError extends Error {}
 async function failure(response: Response): Promise<ApiError> {
@@ -35,11 +43,21 @@ export const api = {
   session: (id: string, topic: Topic) =>
     request<Session>("/sessions", json({ id, topic })),
   history: (id: string) => request<Session>(`/sessions/${id}`),
-  chat: (session_id: string, message: string, transcript_id?: string) =>
+  chat: (
+    session_id: string,
+    message: string,
+    transcript_id?: string,
+    preferences?: { language: Language; practice_mode: PracticeMode },
+  ) =>
     request<{ reply: string; correction: string; mode: string }>(
       "/chat",
-      json({ session_id, message, transcript_id }),
+      json({ session_id, message, transcript_id, ...preferences }),
     ),
+  review: (id: string, language: Language, signal?: AbortSignal) =>
+    request<Review>(`/sessions/${id}/review`, {
+      ...json({ language }),
+      signal,
+    }),
   transcribe: (sessionId: string, audio: Blob, signal: AbortSignal) => {
     const form = new FormData();
     form.append("session_id", sessionId);

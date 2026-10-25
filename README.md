@@ -17,17 +17,22 @@ tests, builds, or the included offline evaluations.**
 
 ## Features
 
-- Eight practice scenes: daily life, café, travel, interviews, restaurants,
-  shopping, medical appointment scheduling, and meeting friends. The scene library
-  supports Chinese/French search; each scene has three self-reported practice tasks,
-  vocabulary and optional phrase hints. Hints only fill an empty draft and never
-  send a message or trigger an API call. Task checks are session-local self-reflection,
-  not AI assessment or automatically verified mastery. CEFR labels are suggested
-  scene difficulty, not a placement test.
-- Phone navigation uses named, horizontally scrollable scene chips and a full-width
-  chat workspace. Recording shows elapsed time; transcription has a separate waiting
-  state. Multiline drafts support Shift+Enter; Enter sends unless IME composition is active.
-
+- A category-first practice home: life admin, everyday life, social life, study/work,
+  and interviews. Bank, hospital and university groups expand into specific situations;
+  selecting a leaf enters chat immediately. A separate button starts free chat.
+- Guided practice keeps transcript review and feedback per turn. Conversation mode
+  detects a pause locally, transcribes and sends automatically, speaks the reply, then
+  listens again. Pause, mode switching, leaving the page and errors stop capture.
+  This is sequential STT → LLM → TTS, **not streaming or interruptible full-duplex audio**.
+- Finish & review examines the full stored text history for both strengths and
+  corrections. Evidence quotes must occur in learner messages. Very long sessions are
+  rejected explicitly rather than silently reviewed only in part. Reviews can miss errors;
+  they do not assess pronunciation and are not retained across refreshes.
+- Chinese and English settings apply to the interface and newly generated explanations
+  and reviews. French remains the practice language. Previous generated feedback is not
+  retroactively translated. Settings call this “Language” and “Practice preferences.”
+- Openings now autoplay once after entering a new conversation, respecting the saved
+  autoplay setting. A blocked browser exposes a cached-audio playback fallback.
 - A backend-owned opening message is saved atomically with each session and always
   included in LLM context alongside the most recent 12 non-opening messages.
 - The browser remembers the session ID. Refresh resumes its stored history;

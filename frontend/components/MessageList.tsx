@@ -1,19 +1,24 @@
 import { useEffect, useRef } from "react";
 import { AudioLines, Sparkles, Volume2 } from "lucide-react";
-import type { Message } from "../lib/types";
+import type { Message, Language } from "../lib/types";
 export function MessageList({
+  language = "zh",
+  hideCorrections = false,
   messages,
   busy,
   busyLabel = "正在准备回复…",
   speechReady,
   onSpeak,
 }: {
+  language?: Language;
+  hideCorrections?: boolean;
   messages: Message[];
   busy: boolean;
   busyLabel?: string;
   speechReady: boolean;
   onSpeak: (text: string) => void;
 }) {
+  const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const bottom = useRef<HTMLDivElement>(null);
   useEffect(() => {
     bottom.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
@@ -32,11 +37,17 @@ export function MessageList({
       {messages.map((message) => (
         <article className={`message ${message.role}`} key={message.id}>
           <div className="avatar">
-            {message.role === "assistant" ? <AudioLines size={17} /> : "你"}
+            {message.role === "assistant" ? (
+              <AudioLines size={17} />
+            ) : (
+              t("你", "You")
+            )}
           </div>
           <div className="bubblewrap">
             <div className="message-author">
-              {message.role === "assistant" ? "Parlons · 你的法语搭子" : "你"}
+              {message.role === "assistant"
+                ? t("Parlons · 你的法语搭子", "Parlons · Your French partner")
+                : t("你", "You")}
               <span>{message.role === "assistant" ? "FR" : "VOUS"}</span>
             </div>
             <div className="bubble" lang="fr">
@@ -45,27 +56,38 @@ export function MessageList({
             {message.role === "assistant" && (
               <button
                 className="speak"
-                aria-label="Écouter"
+                aria-label={t("朗读", "Listen")}
                 disabled={!speechReady}
                 onClick={() => onSpeak(message.content)}
               >
                 <Volume2 size={13} />
-                听一遍
+                {t("听一遍", "Listen")}
               </button>
             )}
-            {message.correction && (
+            {!hideCorrections && message.correction && (
               <div className="correction">
                 <strong>
-                  <Sparkles size={13} /> 一个小建议
+                  <Sparkles size={13} /> {t("一个小建议", "A small suggestion")}
                 </strong>
                 <p>{message.correction}</p>
               </div>
             )}
             {message.original_transcript != null && (
               <details className="transcript-history">
-                <summary>查看原始转写与发送版本</summary>
-                <p>原始：{message.original_transcript}</p>
-                <p>发送：{message.edited_transcript}</p>
+                <summary>
+                  {t(
+                    "查看原始转写与发送版本",
+                    "View original transcript and sent version",
+                  )}
+                </summary>
+                <p>
+                  {t("原始：", "Original: ")}
+                  {message.original_transcript}
+                </p>
+                <p>
+                  {t("发送：", "Sent: ")}
+                  {message.edited_transcript}
+                </p>
               </details>
             )}
           </div>

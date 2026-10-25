@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { ArrowUp, Mic, Square, ScanText, X } from "lucide-react";
-import type { Transcript } from "../lib/types";
+import type { Transcript, Language } from "../lib/types";
 export function Composer({
+  language = "zh",
+  hideMicrophone = false,
   input,
   transcribing = false,
   transcript,
@@ -15,6 +17,8 @@ export function Composer({
   onDiscard,
   demo = false,
 }: {
+  language?: Language;
+  hideMicrophone?: boolean;
   input: string;
   transcribing?: boolean;
   transcript: Transcript | null;
@@ -28,6 +32,7 @@ export function Composer({
   onDiscard: () => void;
   demo?: boolean;
 }) {
+  const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
     setSeconds(0);
@@ -50,7 +55,7 @@ export function Composer({
           <div>
             <strong>
               <ScanText size={15} />
-              原始转写 · 已保留
+              {t("原始转写 · 已保留", "Original transcript · preserved")}
             </strong>
             <button
               disabled={disabled}
@@ -61,15 +66,31 @@ export function Composer({
             </button>
           </div>
           <p>{transcript.original_text}</p>
-          <small>在下方修改后再发送，原始转写不会被覆盖。</small>
+          <small>
+            {t(
+              "在下方修改后再发送，原始转写不会被覆盖。",
+              "Edit below before sending. The original stays unchanged.",
+            )}
+          </small>
         </section>
       )}
       {listening && (
         <div className="recording-status" role="status">
           <span className="live-dot" />
-          {demo
-            ? "正在演示录音流程，不会开启麦克风。再次点击以查看示例转写。"
-            : "正在听你说… 点击停止后可检查转写。"}
+          {hideMicrophone
+            ? t(
+                "也可以输入文字继续对话。",
+                "You can also type to continue the conversation.",
+              )
+            : demo
+              ? t(
+                  "正在演示录音流程，不会开启麦克风。再次点击以查看示例转写。",
+                  "Demo recording only. Tap again for a sample transcript.",
+                )
+              : t(
+                  "正在听你说… 点击停止后可检查转写。",
+                  "Listening… stop to review your transcript.",
+                )}
           <time className="recording-timer">
             0:{String(seconds).padStart(2, "0")} / 1:00
           </time>
@@ -78,29 +99,38 @@ export function Composer({
       )}
       {transcribing && (
         <div className="transcription-status" role="status">
-          <ScanText size={16} /> 正在转写，完成后可以检查和编辑，暂未发送。
+          <ScanText size={16} />{" "}
+          {t(
+            "正在转写，完成后可以检查和编辑，暂未发送。",
+            "Transcribing. You can edit before sending.",
+          )}
         </div>
       )}
       <div className={`composer ${listening ? "is-listening" : ""}`}>
-        <button
-          className={`mic ${listening ? "recording" : ""}`}
-          disabled={disabled || !sttReady || (!listening && Boolean(input))}
-          onClick={onRecord}
-          aria-label={listening ? "Stop recording" : "Record French"}
-          title={
-            !sttReady
-              ? "语音识别不可用"
-              : demo
-                ? "演示录音流程（不录音）"
-                : "开始录音"
-          }
-        >
-          {listening ? (
-            <Square size={17} fill="currentColor" />
-          ) : (
-            <Mic size={21} />
-          )}
-        </button>
+        {!hideMicrophone && (
+          <button
+            className={`mic ${listening ? "recording" : ""}`}
+            disabled={disabled || !sttReady || (!listening && Boolean(input))}
+            onClick={onRecord}
+            aria-label={listening ? "Stop recording" : "Record French"}
+            title={
+              !sttReady
+                ? t("语音识别不可用", "Speech recognition unavailable")
+                : demo
+                  ? t(
+                      "演示录音流程（不录音）",
+                      "Demo recording (no microphone)",
+                    )
+                  : t("开始录音", "Start recording")
+            }
+          >
+            {listening ? (
+              <Square size={17} fill="currentColor" />
+            ) : (
+              <Mic size={21} />
+            )}
+          </button>
+        )}
         <textarea
           rows={2}
           aria-label={transcript ? "Edit transcript" : "Message"}
@@ -120,8 +150,14 @@ export function Composer({
           }}
           placeholder={
             listening
-              ? "Prenez votre temps… 慢慢说"
-              : "说点什么，或者用法语写下来…"
+              ? t(
+                  "Prenez votre temps… 慢慢说",
+                  "Prenez votre temps… Take your time",
+                )
+              : t(
+                  "说点什么，或者用法语写下来…",
+                  "Say something, or write in French…",
+                )
           }
           disabled={disabled || listening}
         />
@@ -136,11 +172,27 @@ export function Composer({
       </div>
       <div className="composer-hint">
         <span>
-          {demo
-            ? "本地演示 · 预设回复 · 播放为提示音"
-            : "点击麦克风录音，再次点击结束 · 最长 60 秒"}
+          {hideMicrophone
+            ? t(
+                "也可以输入文字继续对话。",
+                "You can also type to continue the conversation.",
+              )
+            : demo
+              ? t(
+                  "本地演示 · 预设回复 · 播放为提示音",
+                  "Local demo · scripted replies · playback uses a tone",
+                )
+              : t(
+                  "点击麦克风录音，再次点击结束 · 最长 60 秒",
+                  "Tap to record, tap again to stop · up to 60 seconds",
+                )}
         </span>
-        <span>Enter 发送 ↵</span>
+        <span>
+          {t(
+            "Enter 发送 · Shift+Enter 换行",
+            "Enter to send · Shift+Enter for a new line",
+          )}
+        </span>
       </div>
     </div>
   );

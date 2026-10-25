@@ -1,9 +1,16 @@
+import { catalog } from "./catalog";
 import type { Topic } from "./types";
 
 export const practice: Record<
   Topic,
   { level: string; goals: [string, string, string] }
-> = {
+> = Object.fromEntries(
+  catalog.map((scene) => [
+    scene.id,
+    { level: "A2", goals: ["说明来意", "回应问题", "确认信息"] },
+  ]),
+) as Record<Topic, { level: string; goals: [string, string, string] }>;
+Object.assign(practice, {
   daily: {
     level: "A2 · 日常叙述",
     goals: ["说说今天发生的小事", "表达你的喜好与原因", "聊一个接下来的计划"],
@@ -36,4 +43,4 @@ export const practice: Record<
     level: "A2 · 自然聊天",
     goals: ["向朋友发出邀请", "商量一个合适的时间", "确认见面地点"],
   },
-};
+});

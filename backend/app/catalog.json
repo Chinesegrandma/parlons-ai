@@ -1,0 +1,191 @@
+[
+  {
+    "id": "daily",
+    "category": "social",
+    "group": "",
+    "zh": "自由聊天",
+    "en": "Free chat",
+    "role": "la vie quotidienne ; guide une conversation naturelle",
+    "opening": "Salut ! Comment s’est passée ta journée ?"
+  },
+  {
+    "id": "bank_card",
+    "category": "admin",
+    "group": "bank",
+    "zh": "办理银行卡",
+    "en": "Open a bank account",
+    "role": "un rendez-vous à la banque pour ouvrir un compte ; tu es le conseiller bancaire",
+    "opening": "Bonjour ! Vous souhaitez ouvrir un compte ? Quel type de compte recherchez-vous ?"
+  },
+  {
+    "id": "bank_transfer",
+    "category": "admin",
+    "group": "bank",
+    "zh": "银行转账",
+    "en": "Make a bank transfer",
+    "role": "un virement bancaire ; tu es le conseiller bancaire, utilise uniquement des données fictives",
+    "opening": "Bonjour ! Vous souhaitez faire un virement en France ou à l’étranger ?"
+  },
+  {
+    "id": "doctor",
+    "category": "admin",
+    "group": "hospital",
+    "zh": "挂号预约",
+    "en": "Book an appointment",
+    "role": "prendre rendez-vous au cabinet médical ; tu joues le secrétariat, sans diagnostic ni conseil médical",
+    "opening": "Bonjour, cabinet médical. Vous souhaitez prendre rendez-vous ?"
+  },
+  {
+    "id": "symptoms",
+    "category": "admin",
+    "group": "hospital",
+    "zh": "描述症状",
+    "en": "Describe symptoms",
+    "role": "décrire des symptômes fictifs pour pratiquer le français ; pas de diagnostic ni conseil médical",
+    "opening": "Bonjour ! Pour cet exercice de français, pouvez-vous expliquer ce qui vous amène ?"
+  },
+  {
+    "id": "renting",
+    "category": "admin",
+    "group": "",
+    "zh": "租房",
+    "en": "Rent a home",
+    "role": "visiter et louer un logement ; tu es un agent immobilier",
+    "opening": "Bonjour ! Vous recherchez un appartement dans quel quartier ?"
+  },
+  {
+    "id": "post",
+    "category": "admin",
+    "group": "",
+    "zh": "邮局",
+    "en": "At the post office",
+    "role": "envoyer un colis ; tu es au guichet de la poste",
+    "opening": "Bonjour ! Vous souhaitez envoyer une lettre ou un colis ?"
+  },
+  {
+    "id": "customer_service",
+    "category": "admin",
+    "group": "",
+    "zh": "打客服电话",
+    "en": "Call customer support",
+    "role": "appeler le service client ; tu es le conseiller, invente des références fictives",
+    "opening": "Bonjour, service client. Comment puis-je vous aider aujourd’hui ?"
+  },
+  {
+    "id": "restaurant",
+    "category": "daily",
+    "group": "",
+    "zh": "用餐",
+    "en": "Dining out",
+    "role": "commander au restaurant ; tu joues le serveur ou la serveuse",
+    "opening": "Bonsoir et bienvenue ! Avez-vous une réservation ?"
+  },
+  {
+    "id": "cafe",
+    "category": "daily",
+    "group": "",
+    "zh": "咖啡馆",
+    "en": "At a café",
+    "role": "commander dans un café ; tu joues le serveur",
+    "opening": "Bonjour ! Qu’est-ce que je vous sers ?"
+  },
+  {
+    "id": "shopping",
+    "category": "daily",
+    "group": "",
+    "zh": "购物",
+    "en": "Shopping",
+    "role": "acheter un vêtement ; tu joues le vendeur ou la vendeuse",
+    "opening": "Bonjour ! Vous cherchez quelque chose en particulier ?"
+  },
+  {
+    "id": "transport",
+    "category": "daily",
+    "group": "",
+    "zh": "交通",
+    "en": "Getting around",
+    "role": "acheter un billet de transport ; tu es au guichet",
+    "opening": "Bonjour ! Pour quelle destination souhaitez-vous un billet ?"
+  },
+  {
+    "id": "travel",
+    "category": "daily",
+    "group": "",
+    "zh": "问路",
+    "en": "Ask for directions",
+    "role": "demander son chemin en ville ; tu es un passant serviable",
+    "opening": "Bonjour ! Vous cherchez un endroit en particulier ?"
+  },
+  {
+    "id": "self_intro",
+    "category": "social",
+    "group": "",
+    "zh": "自我介绍",
+    "en": "Introduce yourself",
+    "role": "faire connaissance ; tu es une nouvelle connaissance",
+    "opening": "Salut ! Je m’appelle Camille. Et toi, comment tu t’appelles ?"
+  },
+  {
+    "id": "friends",
+    "category": "social",
+    "group": "",
+    "zh": "朋友闲聊",
+    "en": "Chat with friends",
+    "role": "une conversation entre amis ; tu poses des questions naturelles",
+    "opening": "Salut ! Quoi de neuf ? Tu as fait quelque chose de sympa cette semaine ?"
+  },
+  {
+    "id": "invite",
+    "category": "social",
+    "group": "",
+    "zh": "发出邀请",
+    "en": "Invite someone",
+    "role": "organiser une sortie ; tu es un ami ou une amie",
+    "opening": "Salut ! Tu avais une idée de sortie à me proposer ?"
+  },
+  {
+    "id": "decline",
+    "category": "social",
+    "group": "",
+    "zh": "礼貌拒绝",
+    "en": "Decline politely",
+    "role": "refuser une invitation avec tact ; tu es un ami qui propose une sortie",
+    "opening": "Salut ! Ça te dit de venir dîner chez moi samedi soir ?"
+  },
+  {
+    "id": "course",
+    "category": "study",
+    "group": "school",
+    "zh": "选课",
+    "en": "Choose courses",
+    "role": "choisir des cours à l’université ; tu es au secrétariat pédagogique",
+    "opening": "Bonjour ! Quels cours aimeriez-vous suivre ce semestre ?"
+  },
+  {
+    "id": "teacher",
+    "category": "study",
+    "group": "school",
+    "zh": "和老师沟通",
+    "en": "Talk to a teacher",
+    "role": "discuter d’un cours ou demander une explication ; tu es le professeur",
+    "opening": "Bonjour ! Vous aviez une question sur le cours ou le devoir ?"
+  },
+  {
+    "id": "report",
+    "category": "study",
+    "group": "",
+    "zh": "工作汇报",
+    "en": "Give a work update",
+    "role": "faire un point sur un projet ; tu es le responsable et poses des questions concrètes",
+    "opening": "Bonjour ! Où en est votre projet cette semaine ?"
+  },
+  {
+    "id": "interview",
+    "category": "interview",
+    "group": "",
+    "zh": "面试",
+    "en": "Job interview",
+    "role": "un entretien d’embauche ; tu es le recruteur et poses une question à la fois",
+    "opening": "Bonjour ! Pouvez-vous vous présenter en quelques phrases ?"
+  }
+]

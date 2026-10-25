@@ -170,3 +170,24 @@ def test_invalid_public_configuration_prevents_startup(private_api, monkeypatch)
     with pytest.raises(RuntimeError, match="SITE_PASSWORD"):
         with TestClient(main.app):
             pass
+
+
+def test_reviews_share_the_provider_budget(private_api, monkeypatch):
+    login(private_api)
+    session = private_api.post("/sessions", json={"topic": "daily"}).json()["id"]
+    monkeypatch.setenv("MAX_CALLS_PER_DAY", "1")
+    assert (
+        private_api.post("/chat", json={"session_id": session, "message": "Bonjour"}).status_code
+        == 200
+    )
+    response = private_api.post(f"/sessions/{session}/review", json={})
+    assert response.status_code == 429
+
+
+def test_login_interface_language(private_api):
+    response = private_api.get("/auth/login?lang=en")
+    assert "Welcome to your French space." in response.text
+    assert 'lang="en"' in response.text
+    response = private_api.post("/auth/login", data={"password": "wrong"})
+    assert "Incorrect password" in response.text
+    assert "Site password" in response.text

@@ -71,7 +71,7 @@ export function TopicSidebar({
         aria-label="Conversation themes"
       >
         {topics.map((item, index) => {
-          const Icon = icons[item.id];
+          const Icon = icons[item.id as keyof typeof icons] || MessageCircle;
           return (
             <button
               key={item.id}

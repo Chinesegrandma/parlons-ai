@@ -1,12 +1,12 @@
-export type Topic =
-  | "daily"
-  | "interview"
-  | "travel"
-  | "cafe"
-  | "restaurant"
-  | "shopping"
-  | "doctor"
-  | "friends";
+import { catalog } from "./catalog";
+export type Topic = (typeof catalog)[number]["id"];
+export type Language = "zh" | "en";
+export type PracticeMode = "guided" | "conversation";
+export type Review = {
+  summary: string;
+  strengths: { quote: string; reason: string }[];
+  corrections: { original: string; suggestion: string; explanation: string }[];
+};
 export type Message = {
   id: number;
   role: "user" | "assistant";
@@ -24,13 +24,8 @@ export type Health = {
   private_site?: boolean;
 };
 export type Transcript = { id: string; original_text: string };
-export const topics: { id: Topic; name: string; emoji: string }[] = [
-  { id: "daily", name: "Vie quotidienne", emoji: "☀️" },
-  { id: "interview", name: "Entretien", emoji: "💼" },
-  { id: "travel", name: "Voyage", emoji: "✈️" },
-  { id: "cafe", name: "Au café", emoji: "☕" },
-  { id: "restaurant", name: "Au restaurant", emoji: "🍽️" },
-  { id: "shopping", name: "Les boutiques", emoji: "🛍️" },
-  { id: "doctor", name: "Un rendez-vous", emoji: "📅" },
-  { id: "friends", name: "Entre amis", emoji: "🌿" },
-];
+export const topics = catalog.map((scene) => ({
+  id: scene.id,
+  name: scene.en,
+  emoji: "✦",
+}));

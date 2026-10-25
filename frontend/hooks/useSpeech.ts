@@ -6,6 +6,9 @@ export function useSpeech(client = api) {
   const [autoplay, setAutoplay] = useState(true);
   const [slow, setSlow] = useState(false);
   const [notice, setNotice] = useState("");
+  const [working, setWorking] = useState(false);
+  const reusable = useRef<HTMLAudioElement | null>(null);
+  const completion = useRef<((success: boolean) => void) | null>(null);
   const [blocked, setBlocked] = useState(false);
   const player = useRef<HTMLAudioElement | null>(null);
   const objectUrl = useRef<string | null>(null);
@@ -15,6 +18,9 @@ export function useSpeech(client = api) {
   const autoplayEnabled = useRef(true);
 
   const stop = useCallback(() => {
+    completion.current?.(false);
+    completion.current = null;
+    setWorking(false);
     generation.current++;
     controller.current?.abort();
     controller.current = null;
@@ -66,6 +72,8 @@ export function useSpeech(client = api) {
   }
 
   async function playCurrent(current: number) {
+    if (!player.current) return;
+    setWorking(true);
     try {
       await player.current?.play();
       if (generation.current === current) {
@@ -80,6 +88,9 @@ export function useSpeech(client = api) {
         "name" in error &&
         error.name === "NotAllowedError"
       ) {
+        completion.current?.(false);
+        completion.current = null;
+        setWorking(false);
         setBlocked(true);
         setNotice(
           "浏览器阻止了自动播放，请点击播放。 / Click Play response to listen.",
@@ -93,22 +104,32 @@ export function useSpeech(client = api) {
     }
   }
 
-  async function speak(text: string) {
+  async function speak(text: string, wait = false): Promise<boolean> {
     stop();
     setNotice("");
+    setWorking(true);
     const current = generation.current;
     const abort = new AbortController();
     controller.current = abort;
     try {
       const blob = await client.synthesize(text, abort.signal);
-      if (current !== generation.current) return;
+      if (current !== generation.current) return false;
       const url = URL.createObjectURL(blob);
       objectUrl.current = url;
-      const audio = new Audio(url);
+      const audio = reusable.current || new Audio(url);
+      audio.src = url;
+      audio.volume = 1;
       player.current = audio;
       audio.playbackRate = rate.current;
+      const ended = new Promise<boolean>((resolve) => {
+        completion.current = resolve;
+      });
       audio.onended = () => {
-        if (generation.current === current) stop();
+        if (generation.current === current) {
+          completion.current?.(true);
+          completion.current = null;
+          stop();
+        }
       };
       audio.onerror = () => {
         if (generation.current !== current) return;
@@ -118,13 +139,42 @@ export function useSpeech(client = api) {
         );
       };
       await playCurrent(current);
+      if (wait) return await ended;
+      return current === generation.current;
     } catch {
-      if (current !== generation.current) return;
+      if (current !== generation.current) return false;
       stop();
       setNotice(
         "语音服务暂不可用，可继续文字对话。 / Speech unavailable; text chat is available.",
       );
     }
+    return false;
+  }
+
+  function unlock() {
+    if (reusable.current) return;
+    const bytes = Uint8Array.from(
+      atob("UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQIAAACAgA=="),
+      (char) => char.charCodeAt(0),
+    );
+    const silentUrl = URL.createObjectURL(
+      new Blob([bytes], { type: "audio/wav" }),
+    );
+    const audio = new Audio(silentUrl);
+    reusable.current = audio;
+    audio.volume = 0;
+    void audio
+      .play()
+      .then(() => {
+        if (audio.volume === 0) {
+          audio.pause();
+          audio.volume = 1;
+        }
+      })
+      .catch(() => {
+        audio.volume = 1;
+      })
+      .finally(() => URL.revokeObjectURL(silentUrl));
   }
 
   async function playResponse(text: string, ready: boolean) {
@@ -132,6 +182,9 @@ export function useSpeech(client = api) {
   }
   return {
     autoplay,
+    working,
+    unlock,
+    speakAndWait: (text: string) => speak(text, true),
     slow,
     notice,
     blocked,

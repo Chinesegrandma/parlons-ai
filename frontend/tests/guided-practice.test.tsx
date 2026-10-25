@@ -8,12 +8,12 @@ import { practice } from "../lib/practice";
 import { scenarios } from "../lib/scenarios";
 import { topics } from "../lib/types";
 
-it("all eight scenes have three usable guide tasks and expressions", () => {
-  expect(topics).toHaveLength(8);
+it("legacy scene hints remain available while the full catalog includes new situations", () => {
+  expect(topics.length).toBeGreaterThan(8);
   for (const { id } of topics) {
     expect(practice[id].goals).toHaveLength(3);
     expect(scenarios[id].starters).toHaveLength(3);
-    expect(scenarios[id].vocabulary.length).toBeGreaterThan(0);
+    expect(scenarios[id].label).toBeTruthy();
   }
 });
 

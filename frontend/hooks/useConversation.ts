@@ -6,6 +6,8 @@ import {
   type Session,
   type Topic,
   type Transcript,
+  type Language,
+  type PracticeMode,
 } from "../lib/types";
 
 const STORAGE_KEY = "parlons-session";
@@ -30,11 +32,15 @@ function saveSession(id: string, topic: Topic, storageKey: string) {
     // Storage may be disabled. The current session still works in memory.
   }
 }
-export function useConversation(client = api, storageKey = STORAGE_KEY) {
+export function useConversation(
+  client = api,
+  storageKey = STORAGE_KEY,
+  autoStart = true,
+) {
   const [session, setSession] = useState<Session | null>(null);
   const [input, setInput] = useState("");
   const [transcript, setTranscript] = useState<Transcript | null>(null);
-  const [busy, setBusy] = useState(true);
+  const [busy, setBusy] = useState(autoStart);
   const [error, setError] = useState("");
   const generation = useRef(0);
   const sending = useRef(false);
@@ -56,7 +62,10 @@ export function useConversation(client = api, storageKey = STORAGE_KEY) {
       setTranscript(null);
       try {
         const result = await client.session(selection.id, selection.topic);
-        if (current === generation.current) setSession(result);
+        if (current === generation.current) {
+          setSession(result);
+          return result;
+        }
       } catch {
         if (current === generation.current)
           setError("无法载入会话，请重试。 / Unable to load conversation.");
@@ -68,22 +77,50 @@ export function useConversation(client = api, storageKey = STORAGE_KEY) {
   );
 
   useEffect(() => {
-    void start();
+    if (autoStart) void start();
     const activeGeneration = generation;
     return () => {
       activeGeneration.current++;
     };
-  }, [start]);
+  }, [start, autoStart]);
 
-  async function send(): Promise<string | null> {
-    if (!session || !input.trim() || busy || sending.current) return null;
+  async function send(override?: {
+    text: string;
+    transcriptId?: string;
+    language?: Language;
+    practice_mode?: PracticeMode;
+  }): Promise<string | null> {
+    if (
+      !session ||
+      !(override?.text ?? input).trim() ||
+      busy ||
+      sending.current
+    )
+      return null;
     sending.current = true;
     const current = generation.current;
-    const value = input; // Keep edited text separately from the immutable transcript.
+    const value = override?.text ?? input; // Keep edited text separately from the immutable transcript.
     setBusy(true);
     setError("");
     try {
-      const result = await client.chat(session.id, value, transcript?.id);
+      const preferences = override?.language
+        ? {
+            language: override.language,
+            practice_mode: override.practice_mode || ("guided" as PracticeMode),
+          }
+        : undefined;
+      const result = preferences
+        ? await client.chat(
+            session.id,
+            value,
+            override?.transcriptId ?? transcript?.id,
+            preferences,
+          )
+        : await client.chat(
+            session.id,
+            value,
+            override?.transcriptId ?? transcript?.id,
+          );
       const updated = await client.history(session.id);
       if (current !== generation.current) return null;
       setSession(updated);

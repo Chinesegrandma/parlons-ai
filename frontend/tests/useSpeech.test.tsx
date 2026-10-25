@@ -114,7 +114,7 @@ describe("speech playback", () => {
         }),
     );
     const { result } = renderHook(useSpeech);
-    let first!: Promise<void>;
+    let first!: Promise<boolean>;
     act(() => {
       first = result.current.speak("Old");
     });
@@ -164,4 +164,52 @@ it("honors autoplay being disabled while a chat response is pending", async () =
     await pendingResponseCallback("Late response", true);
   });
   expect(api.synthesize).not.toHaveBeenCalled();
+});
+
+it("waits for playback completion in hands-free mode and settles cancellation", async () => {
+  const { result } = renderHook(useSpeech);
+  let finished = false;
+  let playing!: Promise<boolean>;
+  await act(async () => {
+    playing = result.current.speakAndWait("Bonjour");
+    playing.then(() => {
+      finished = true;
+    });
+  });
+  expect(finished).toBe(false);
+  expect(result.current.working).toBe(true);
+  act(() => MockAudio.instances[0].onended?.());
+  await expect(playing).resolves.toBe(true);
+  expect(result.current.working).toBe(false);
+  await act(async () => {
+    playing = result.current.speakAndWait("Encore");
+  });
+  act(() => result.current.stop());
+  await expect(playing).resolves.toBe(false);
+});
+
+it("settles hands-free playback when autoplay is blocked and retries without a second request", async () => {
+  vi.stubGlobal(
+    "Audio",
+    class extends MockAudio {
+      constructor(src: string) {
+        super(src);
+        this.play.mockRejectedValueOnce(
+          new DOMException("blocked", "NotAllowedError"),
+        );
+      }
+    },
+  );
+  const { result } = renderHook(useSpeech);
+  await act(async () => {
+    expect(await result.current.speakAndWait("Bonjour")).toBe(false);
+  });
+  expect(result.current.blocked).toBe(true);
+  await act(async () => {
+    await result.current.retry();
+  });
+  expect(result.current.working).toBe(true);
+  expect(api.synthesize).toHaveBeenCalledOnce();
+  act(() => MockAudio.instances[0].onended?.());
+  expect(result.current.working).toBe(false);
 });

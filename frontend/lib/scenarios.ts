@@ -1,3 +1,4 @@
+import { catalog } from "./catalog";
 import type { Topic } from "./types";
 export const scenarios: Record<
   Topic,
@@ -10,7 +11,36 @@ export const scenarios: Record<
     starters: string[];
     vocabulary: [string, string][];
   }
-> = {
+> = Object.fromEntries(
+  catalog.map((scene) => [
+    scene.id,
+    {
+      label: scene.zh,
+      subtitle: scene.en.toUpperCase(),
+      title: scene.zh,
+      description: scene.en,
+      prompt: scene.zh,
+      starters: [
+        scene.opening,
+        "Pouvez-vous m’aider ?",
+        "Merci pour votre aide.",
+      ],
+      vocabulary: [],
+    },
+  ]),
+) as unknown as Record<
+  Topic,
+  {
+    label: string;
+    subtitle: string;
+    title: string;
+    description: string;
+    prompt: string;
+    starters: string[];
+    vocabulary: [string, string][];
+  }
+>;
+Object.assign(scenarios, {
   restaurant: {
     label: "餐厅晚餐",
     subtitle: "UNE TABLE POUR DEUX",
@@ -147,4 +177,4 @@ export const scenarios: Record<
       ["travailler en équipe", "团队合作"],
     ],
   },
-};
+});

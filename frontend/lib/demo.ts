@@ -1,16 +1,10 @@
+import { catalog } from "./catalog";
 import type { api } from "./api";
 import type { Session, Topic } from "./types";
 
-const openings: Record<Topic, string> = {
-  restaurant: "Bonsoir ! Avez-vous une réservation ?",
-  shopping: "Bonjour ! Vous cherchez quelque chose en particulier ?",
-  doctor: "Bonjour, cabinet médical. Vous souhaitez prendre rendez-vous ?",
-  friends: "Salut ! Tu es libre ce week-end ?",
-  daily: "Salut ! Comment s’est passée ta journée ?",
-  cafe: "Bonjour et bienvenue ! Qu’est-ce que je vous sers aujourd’hui ?",
-  travel: "Bonjour ! Quelle ville française aimerais-tu découvrir ?",
-  interview: "Bonjour ! Pour commencer, pouvez-vous vous présenter ?",
-};
+const openings = Object.fromEntries(
+  catalog.map((scene) => [scene.id, scene.opening]),
+) as Record<Topic, string>;
 const sessions = new Map<string, Session>();
 const KEY = "parlons-local-demo-data";
 function restore() {
@@ -92,7 +86,7 @@ export const demoApi: typeof api = {
     if (!session) throw new Error("Demo session not found");
     return structuredClone(session);
   },
-  chat: async (id, text, transcriptId) => {
+  chat: async (id, text, transcriptId, preferences) => {
     const session = sessions.get(id);
     if (!session) throw new Error("Demo session not found");
     await new Promise((resolve) => setTimeout(resolve, 650));
@@ -103,7 +97,13 @@ export const demoApi: typeof api = {
     else if (/je suis aller/i.test(text))
       correction =
         "示例反馈：aller 的过去分词是 allé。这里可说 Je suis allé au café.；女性说话者用 allée。";
-    const reply = {
+    if (preferences?.language === "en" && correction) {
+      correction = /une café/i.test(text)
+        ? "Demo feedback: café is masculine. Say un café."
+        : "Demo feedback: use the past participle allé (allée for a female speaker).";
+    }
+    if (preferences?.practice_mode === "conversation") correction = "";
+    const replies: Partial<Record<Topic, string>> = {
       restaurant:
         "Bien sûr ! Je vous recommande le plat du jour. Souhaitez-vous voir la carte ?",
       shopping:
@@ -118,7 +118,10 @@ export const demoApi: typeof api = {
         "Très bon choix ! Tu préfères découvrir les musées ou te promener dans la ville ?",
       interview:
         "Merci pour cette présentation. Pouvez-vous me parler d’un projet qui vous tient à cœur ?",
-    }[session.topic];
+    };
+    const reply =
+      replies[session.topic] ||
+      "D’accord ! Pouvez-vous m’en dire un peu plus sur ce dont vous avez besoin ?";
     const nextId = session.messages.length + 1;
     session.messages.push(
       {
@@ -137,6 +140,14 @@ export const demoApi: typeof api = {
     save();
     return { reply, correction, mode: "mock" };
   },
+  review: async (_id, language) => ({
+    summary:
+      language === "en"
+        ? "Scripted demo review. No real language assessment."
+        : "这是预设演示总结，不评估真实语言水平。",
+    strengths: [],
+    corrections: [],
+  }),
   transcribe: async () => ({
     id: "demo-transcript",
     original_text: "Je voudrais une café, s’il vous plaît.",
