@@ -12,10 +12,17 @@ export type Message = {
   role: "user" | "assistant";
   content: string;
   correction?: string | null;
+  corrected_text?: string | null;
+  review_prompt?: string | null;
   original_transcript?: string | null;
   edited_transcript?: string | null;
 };
-export type Session = { id: string; topic: Topic; messages: Message[] };
+export type Session = {
+  id: string;
+  topic: Topic;
+  messages: Message[];
+  options?: PracticeOptions;
+};
 export type Health = {
   mode: "mock" | "demo" | "ai";
   speech_ready: boolean;
@@ -29,3 +36,16 @@ export const topics = catalog.map((scene) => ({
   name: scene.en,
   emoji: "✦",
 }));
+
+export type PracticeOptions = {
+  scene: string;
+  situation: string;
+  goals: string[];
+  level: "A1-A2" | "B1-B2" | "C1";
+  focus: "fluency" | "grammar" | "natural";
+  persona: "patient" | "realistic" | "challenging";
+  feedback: "each_turn" | "after_session";
+  explanation_language: "Chinese" | "English" | "French";
+  review_targets: string[];
+};
+export type Voice = { id: string; name: string };

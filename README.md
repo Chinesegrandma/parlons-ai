@@ -20,6 +20,10 @@ tests, builds, or the included offline evaluations.**
 - A category-first practice home: life admin, everyday life, social life, study/work,
   and interviews. Bank, hospital and university groups expand into specific situations;
   selecting a leaf enters chat immediately. A separate button starts free chat.
+- Existing word-level correction cards, local notebook and spaced review records,
+  custom situations, voice selection, practice preferences and home-screen installation
+  remain available. Notebook data is local to a browser origin; export before changing
+  temporary tunnel addresses.
 - Guided practice keeps transcript review and feedback per turn. Conversation mode
   detects a pause locally, transcribes and sends automatically, speaks the reply, then
   listens again. Pause, mode switching, leaving the page and errors stop capture.

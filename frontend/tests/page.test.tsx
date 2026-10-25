@@ -170,14 +170,21 @@ it("opens category, group, then the leaf enters chat without an extra start butt
     screen.getByRole("button", { name: /办理银行卡.*进入对话/ }),
   );
   await screen.findByRole("heading", { name: "办理银行卡" });
-  expect(api.session).toHaveBeenCalledWith(expect.any(String), "bank_card");
+  expect(api.session).toHaveBeenCalledWith(
+    expect.any(String),
+    "bank_card",
+    expect.objectContaining({ scene: "办理银行卡" }),
+  );
   expect(screen.queryByText("找点灵感")).not.toBeInTheDocument();
   expect(screen.queryByText("练习工具")).not.toBeInTheDocument();
 });
 it("autoplays the opening once, and then autoplays generated replies", async () => {
   const user = await enter();
-  await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  await user.type(
+    screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
+    "Bonjour",
+  );
+  await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
   await screen.findByText("Avec plaisir ! Et ensuite ?");
   expect(api.synthesize).toHaveBeenCalledTimes(2);
 });
@@ -192,9 +199,14 @@ it("preserves text-only practice without speech configuration", async () => {
   render(<Home />);
   await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
   await screen.findByText(catalog[0].opening);
-  expect(screen.getByRole("button", { name: "Record French" })).toBeDisabled();
-  await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  expect(
+    screen.getByRole("button", { name: /^(Record French|录制法语)$/ }),
+  ).toBeDisabled();
+  await user.type(
+    screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
+    "Bonjour",
+  );
+  await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
   await screen.findByText("Avec plaisir ! Et ensuite ?");
   expect(api.synthesize).not.toHaveBeenCalled();
 });
@@ -209,8 +221,11 @@ it("uses the chosen language for the UI and new feedback", async () => {
   expect(
     screen.getByRole("heading", { name: "Free chat" }),
   ).toBeInTheDocument();
-  await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  await user.type(
+    screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
+    "Bonjour",
+  );
+  await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
   await waitFor(() =>
     expect(api.chat).toHaveBeenCalledWith(
       expect.any(String),
@@ -226,13 +241,19 @@ it("uses the chosen language for the UI and new feedback", async () => {
 });
 it("reviews an editable transcript in guided mode instead of auto-sending", async () => {
   const user = await enter();
-  await user.click(screen.getByRole("button", { name: "Record French" }));
-  await user.click(screen.getByRole("button", { name: "Stop recording" }));
-  const input = await screen.findByRole("textbox", { name: "Edit transcript" });
+  await user.click(
+    screen.getByRole("button", { name: /^(Record French|录制法语)$/ }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: /^(Stop recording|停止录音)$/ }),
+  );
+  const input = await screen.findByRole("textbox", {
+    name: /^(Edit transcript|编辑转写)$/,
+  });
   expect(api.chat).not.toHaveBeenCalled();
   await user.clear(input);
   await user.type(input, "Je voudrais un thé.");
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
   await waitFor(() =>
     expect(api.chat).toHaveBeenCalledWith(
       expect.any(String),
@@ -244,7 +265,7 @@ it("reviews an editable transcript in guided mode instead of auto-sending", asyn
 });
 it("does not send during IME composition", async () => {
   await enter();
-  const input = screen.getByRole("textbox", { name: "Message" });
+  const input = screen.getByRole("textbox", { name: /^(Message|输入内容)$/ });
   fireEvent.change(input, { target: { value: "Bonjour" } });
   fireEvent.keyDown(input, { key: "Enter", isComposing: true });
   expect(api.chat).not.toHaveBeenCalled();
@@ -317,8 +338,11 @@ it("mode switching stops capture and does not submit partial audio", async () =>
 });
 it("ends with strengths and corrections together", async () => {
   const user = await enter();
-  await user.type(screen.getByRole("textbox", { name: "Message" }), "Bonjour");
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  await user.type(
+    screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
+    "Bonjour",
+  );
+  await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
   await screen.findByText("Avec plaisir ! Et ensuite ?");
   await user.click(screen.getByRole("button", { name: "结束并总结" }));
   expect(await screen.findByText("Polite greeting")).toBeInTheDocument();
@@ -359,7 +383,9 @@ it("a failed automated reply stops the loop and retains the transcript draft", a
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
   act(() => detector.end?.());
-  const draft = await screen.findByRole("textbox", { name: "Edit transcript" });
+  const draft = await screen.findByRole("textbox", {
+    name: /^(Edit transcript|编辑转写)$/,
+  });
   expect(draft).toHaveValue("Bonjour, je voudrais un café.");
   expect(api.chat).toHaveBeenCalledOnce();
   expect(api.synthesize).toHaveBeenCalledOnce();

@@ -63,13 +63,16 @@ export function PracticeHome({
   disabled,
   onResume,
   canResume = true,
+  onCustom,
 }: {
   language: Language;
   onStart: (topic: Topic) => void;
   disabled: boolean;
   onResume: () => void;
   canResume?: boolean;
+  onCustom?: (text: string) => void;
 }) {
+  const [custom, setCustom] = useState("");
   const [category, setCategory] = useState("");
   const [group, setGroup] = useState("");
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
@@ -199,6 +202,39 @@ export function PracticeHome({
             </button>
           ))}
         </div>
+      )}
+      {onCustom && (
+        <details className="custom-practice">
+          <summary>
+            {t("自定义一个真实情境", "Create your own situation")}
+          </summary>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (custom.trim()) onCustom(custom.trim());
+            }}
+          >
+            <label>
+              {t("你想练习什么？", "What would you like to practice?")}
+              <textarea
+                maxLength={1000}
+                rows={3}
+                value={custom}
+                onChange={(event) => setCustom(event.target.value)}
+                placeholder={t(
+                  "例如：向老师解释我为什么需要延期交作业。",
+                  "For example: ask your teacher for a deadline extension.",
+                )}
+              />
+            </label>
+            <button
+              className="end-review"
+              disabled={disabled || !custom.trim()}
+            >
+              {t("进入对话", "Enter conversation")} →
+            </button>
+          </form>
+        </details>
       )}
       {canResume && (
         <button

@@ -60,7 +60,7 @@ export function Composer({
             <button
               disabled={disabled}
               onClick={onDiscard}
-              aria-label="Discard draft"
+              aria-label={t("丢弃草稿", "Discard draft")}
             >
               <X size={15} />
             </button>
@@ -112,7 +112,11 @@ export function Composer({
             className={`mic ${listening ? "recording" : ""}`}
             disabled={disabled || !sttReady || (!listening && Boolean(input))}
             onClick={onRecord}
-            aria-label={listening ? "Stop recording" : "Record French"}
+            aria-label={
+              listening
+                ? t("停止录音", "Stop recording")
+                : t("录制法语", "Record French")
+            }
             title={
               !sttReady
                 ? t("语音识别不可用", "Speech recognition unavailable")
@@ -133,7 +137,11 @@ export function Composer({
         )}
         <textarea
           rows={2}
-          aria-label={transcript ? "Edit transcript" : "Message"}
+          aria-label={
+            transcript
+              ? t("编辑转写", "Edit transcript")
+              : t("输入内容", "Message")
+          }
           value={input}
           maxLength={2000}
           onChange={(event) => onChange(event.target.value)}
@@ -165,7 +173,7 @@ export function Composer({
           className="send"
           onClick={onSend}
           disabled={!input.trim() || disabled || listening}
-          aria-label="Send"
+          aria-label={t("发送", "Send")}
         >
           <ArrowUp size={21} />
         </button>

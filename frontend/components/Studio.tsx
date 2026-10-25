@@ -6,6 +6,9 @@ import { Composer } from "./Composer";
 import { MessageList } from "./MessageList";
 import { PracticeHome } from "./PracticeHome";
 import { ReviewPanel } from "./ReviewPanel";
+import { useLearning } from "../hooks/useLearning";
+import { NotebookPanel } from "./NotebookPanel";
+import { InstallApp } from "./InstallApp";
 import { useConversation } from "../hooks/useConversation";
 import { useRecorder } from "../hooks/useRecorder";
 import { useSpeech } from "../hooks/useSpeech";
@@ -20,6 +23,8 @@ import type {
   Review,
   Topic,
   Transcript,
+  Voice,
+  PracticeOptions,
 } from "../lib/types";
 
 type Phase = "idle" | "listening" | "thinking" | "speaking" | "paused";
@@ -31,9 +36,16 @@ export function Studio({ demo = false }: { demo?: boolean }) {
     demo ? "parlons-demo-session" : "parlons-session",
     false,
   );
-  const speech = useSpeech(client);
+  const learning = useLearning(demo, conversation.session, language);
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const speech = useSpeech(
+    client,
+    voices.some((item) => item.id === learning.voice)
+      ? learning.voice
+      : "default",
+  );
   const [canResume, setCanResume] = useState(false);
-  const [page, setPage] = useState<"home" | "chat">("home");
+  const [page, setPage] = useState<"home" | "chat" | "notebook">("home");
   const [mode, setMode] = useState<PracticeMode>("guided");
   const [settings, setSettings] = useState(false);
   const [health, setHealth] = useState<Health | null>(null);
@@ -77,6 +89,18 @@ export function Studio({ demo = false }: { demo?: boolean }) {
       setCanResume(Boolean(session));
     }
   }, [session, demo]);
+  useEffect(() => {
+    let active = true;
+    client
+      .voices()
+      .then((result) => {
+        if (active) setVoices(result.voices);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [client]);
   useEffect(() => {
     let active = true;
     client
@@ -224,14 +248,25 @@ export function Studio({ demo = false }: { demo?: boolean }) {
     setReview(null);
     setReviewError("");
   }
-  async function begin(topic?: Topic) {
+  async function begin(topic?: Topic, extra?: Partial<PracticeOptions>) {
     pauseVoice();
     const current = epoch.current;
     speech.unlock();
     cancelReview();
     setDemoListening(false);
     setPage("chat");
-    const result = await conversation.start(topic);
+    const target = catalog.find((item) => item.id === topic);
+    const options: PracticeOptions = {
+      ...learning.options,
+      scene: target?.[language] || "",
+      situation: "",
+      goals: [],
+      review_targets: [],
+      explanation_language: language === "en" ? "English" : "Chinese",
+      feedback: mode === "conversation" ? "after_session" : "each_turn",
+      ...extra,
+    };
+    const result = await conversation.start(topic, topic ? options : undefined);
     if (current === epoch.current && result?.messages.length === 1)
       setOpeningId(result.id);
   }
@@ -353,7 +388,9 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               ? t("连接中", "Connecting")
               : demo || health.mock_ai
                 ? t("模拟体验", "Demo mode")
-                : t("真实练习", "Live practice")
+                : health.mode === "ai"
+                  ? t("真实练习", "Live practice")
+                  : t("文字体验", "Text demo")
         }
         offline={offline}
         privateSite={Boolean(health?.private_site)}
@@ -363,11 +400,24 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           cancelReview();
           setPage("home");
         }}
+        onNotebook={() => {
+          pauseVoice();
+          cancelReview();
+          setPage("notebook");
+        }}
         onSettings={() => setSettings(!settings)}
       />
       {settings && (
         <PracticeSettings
           language={language}
+          options={learning.options}
+          onOptions={learning.setOptions}
+          voices={voices}
+          voice={learning.voice}
+          onVoice={(value) => {
+            pauseVoice();
+            learning.setVoice(value);
+          }}
           autoplay={speech.autoplay}
           slow={speech.slow}
           onClose={() => setSettings(false)}
@@ -380,8 +430,33 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           onSlow={speech.toggleSlow}
         />
       )}
-      {page === "home" ? (
+      {page === "notebook" ? (
+        <NotebookPanel
+          language={language}
+          learning={learning}
+          onBack={() => setPage("home")}
+          speechReady={speechReady}
+          onSpeak={(text) => {
+            speech.unlock();
+            void speech.speak(text);
+          }}
+          onPractice={(card) =>
+            void begin(card.topic, {
+              scene: t("复习表达", "Review an expression"),
+              situation:
+                "Propose une nouvelle situation pour pratiquer une expression déjà apprise.",
+              review_targets: [card.corrected || card.sent],
+            })
+          }
+        />
+      ) : page === "home" ? (
         <PracticeHome
+          onCustom={(text) =>
+            void begin("daily", {
+              scene: t("自定义情境", "Your scenario"),
+              situation: text,
+            })
+          }
           canResume={canResume}
           language={language}
           disabled={busy}
@@ -403,7 +478,13 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             </button>
             <div>
               <span className="eyebrow">PARLONS FRANÇAIS</span>
-              <h1>{scene?.[language] || t("自由聊天", "Free chat")}</h1>
+              <h1>
+                {session?.options?.situation
+                  ? session.options.review_targets?.length
+                    ? t("复习表达", "Review an expression")
+                    : t("自定义情境", "Your scenario")
+                  : scene?.[language] || t("自由聊天", "Free chat")}
+              </h1>
             </div>
             <button
               className="end-review"
@@ -498,6 +579,18 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               speechReady={speechReady && !voiceActive}
               language={language}
               hideCorrections={mode === "conversation"}
+              onSaveCorrection={learning.saveCorrection}
+              savedCorrectionIds={
+                session?.messages
+                  .filter((message) =>
+                    learning.book.cards.some(
+                      (card) =>
+                        card.accepted &&
+                        card.id === `${session.id}:${message.id}`,
+                    ),
+                  )
+                  .map((message) => message.id) || []
+              }
               onSpeak={(text) => {
                 pauseVoice();
                 speech.unlock();
@@ -567,6 +660,11 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 )}
           </p>
         </main>
+      )}
+      {page === "home" && (
+        <div className="app-install">
+          <InstallApp language={language} />
+        </div>
       )}
       <footer className="app-bottom">
         UN PEU, CHAQUE JOUR.{" "}

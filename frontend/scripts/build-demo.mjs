@@ -16,7 +16,13 @@ const result = await build({
     "process.env.NEXT_PUBLIC_API_URL": '""',
   },
 });
-const css = await readFile(path.join(root, "app/globals.css"), "utf8");
+const css = (
+  await Promise.all(
+    ["globals.css", "studio.css"].map((file) =>
+      readFile(path.join(root, "app", file), "utf8"),
+    ),
+  )
+).join("\n");
 const js = result.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
 await mkdir(path.join(root, "public"), { recursive: true });
 await writeFile(

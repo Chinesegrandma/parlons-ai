@@ -29,7 +29,7 @@ export function PlaybackControls({
             type="checkbox"
             checked={autoplay}
             onChange={(event) => onAutoplay(event.target.checked)}
-            aria-label="Autoplay replies"
+            aria-label="自动朗读"
           />
           <span className="switch-track" />
           自动朗读
@@ -39,19 +39,17 @@ export function PlaybackControls({
             type="checkbox"
             checked={slow}
             onChange={(event) => onSlow(event.target.checked)}
-            aria-label="Slow playback (0.8×)"
+            aria-label="慢速播放（0.8 倍）"
           />
           0.8× 慢速
         </label>
-        <button className="audio-stop" onClick={onStop} aria-label="Stop audio">
+        <button className="audio-stop" onClick={onStop} aria-label="停止播放">
           <Square size={10} fill="currentColor" />
           停止
         </button>
         <span className={`speech-status ${ready ? "ready" : ""}`} role="status">
           <span className="live-dot" />
-          {ready
-            ? "Speech available"
-            : "Speech unavailable · text chat available"}
+          {ready ? "语音可用" : "语音暂不可用，可以打字继续"}
         </span>
       </div>
       {notice && (
@@ -61,7 +59,7 @@ export function PlaybackControls({
       )}
       {blocked && (
         <button className="retry-audio" onClick={onRetry}>
-          Play response
+          播放回复
         </button>
       )}
     </div>

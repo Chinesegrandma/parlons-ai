@@ -722,3 +722,424 @@
     padding: 25px 20px;
   }
 }
+.app-install {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+.app-install .text-button {
+  color: #6e8660;
+  font-size: 11px;
+}
+.custom-practice {
+  margin: 25px 0;
+  border: 1px solid #e0e6d8;
+  border-radius: 15px;
+  padding: 18px;
+  background: #ffffffaa;
+}
+.custom-practice summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: #6c835c;
+}
+.custom-practice form {
+  padding-top: 15px;
+}
+.custom-practice label {
+  font-size: 12px;
+  color: #7c8b70;
+}
+.custom-practice textarea {
+  display: block;
+  resize: vertical;
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  padding: 13px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #dce5d3;
+  background: #fff;
+}
+.notebook-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin: 24px 0;
+}
+.notebook-heading h1 {
+  font-size: 32px;
+  font-weight: 500;
+  margin-top: 13px;
+}
+.notebook-heading .eyebrow {
+  font-size: 9px;
+  color: #9aa78d;
+}
+.notebook-heading > button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.notebook-add {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #dfe6d7;
+  border-radius: 15px;
+  margin: 22px 0;
+}
+.notebook-add > input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px;
+  background: none;
+}
+.notebook-add > button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #fff;
+  background: #33573f;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 15px;
+}
+.notebook-panel .mode-description {
+  text-align: left;
+}
+.notebook-filter {
+  margin-left: 0;
+}
+.notebook-cards {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+.notebook-entry {
+  background: #fff;
+  border: 1px solid #dfe5d7;
+  border-radius: 18px;
+  padding: 22px;
+}
+.notebook-entry > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  color: #91a07f;
+  font-size: 11px;
+}
+.notebook-entry header > button {
+  background: none;
+  border: 0;
+  color: #a4ab99;
+  padding: 8px;
+}
+.notebook-entry h2 {
+  font:
+    22px/1.8 Georgia,
+    serif;
+  font-weight: 400;
+  margin: 16px 0;
+}
+.notebook-entry p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #7d8c70;
+}
+.notebook-entry > small {
+  display: block;
+  margin-top: 12px;
+  color: #a9ac9d;
+  font-size: 13px;
+}
+.notebook-entry textarea {
+  width: 100%;
+  font:
+    16px/1.8 Georgia,
+    serif;
+  border: 1px solid #dfe6d8;
+  border-radius: 9px;
+  padding: 11px;
+}
+.notebook-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+.notebook-actions > button {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  border: 0;
+  background: #f1f5e9;
+  color: #6d855e;
+  border-radius: 20px;
+  padding: 9px 13px;
+  font-size: 11px;
+}
+.focused-chat .correction-card {
+  border: 1px solid #e6e3d1;
+  background: #fafbf2;
+  border-radius: 13px;
+  padding: 15px;
+  margin-top: 14px;
+}
+.focused-chat .correction-card mark {
+  background: #e2eccc;
+  color: #567142;
+}
+.focused-chat .correction-card .text-button {
+  color: #6d855a;
+}
+@media (max-width: 700px) {
+  .app-header-actions {
+    gap: 2px;
+  }
+  .app-header-actions > button {
+    padding: 7px;
+  }
+  .connection-pill {
+    padding: 6px 8px;
+  }
+  .app-brand {
+    font-size: 27px;
+  }
+  .app-brand > span:first-child {
+    width: 34px;
+    height: 34px;
+  }
+  .app-install {
+    padding: 0 20px;
+  }
+  .notebook-entry {
+    padding: 18px;
+  }
+  .notebook-add > input {
+    font-size: 16px;
+  }
+  .notebook-filter button {
+    padding: 10px 14px;
+  }
+}
+.parlons-app {
+  --ink: #283d36;
+  --green: #254c3f;
+  color: var(--ink);
+  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.focused-chat .conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 23px;
+  max-height: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.focused-chat .message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  max-width: 92%;
+  margin: 0;
+}
+.focused-chat .message.user {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+.focused-chat .avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  flex: none;
+  color: #84956f;
+  background: #f0f4e8;
+  font-size: 10px;
+}
+.focused-chat .bubblewrap {
+  min-width: 0;
+}
+.focused-chat .message-author {
+  font-size: 10px;
+  color: #91a080;
+  margin: 3px 0 7px;
+  gap: 10px;
+}
+.focused-chat .message-author > span {
+  font-size: 8px;
+}
+.focused-chat .bubble {
+  padding: 13px 16px;
+  border: 1px solid #e9eddc;
+  border-radius: 0 14px 14px 14px;
+  background: #f6f8ef;
+  font:
+    18px/1.75 Georgia,
+    serif;
+  color: #4b6342;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.focused-chat .user .bubble {
+  color: #8b7154;
+  background: #f6eee5;
+  border-color: #eee5d8;
+  border-radius: 14px 0 14px 14px;
+}
+.focused-chat .speak {
+  color: #8a9a77;
+  background: none;
+  border: 0;
+  display: flex;
+  gap: 6px;
+  padding: 8px 0;
+  align-items: center;
+  font-size: 11px;
+}
+.focused-chat .composer {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  border: 1px solid #dbe4ce;
+  border-radius: 16px;
+  background: #fff;
+  padding: 7px;
+}
+.focused-chat .composer textarea {
+  min-width: 0;
+  flex: 1;
+  width: 0;
+  border: 0;
+  background: none;
+  color: #506747;
+  padding: 8px 2px;
+  font:
+    16px/1.6 Arial,
+    sans-serif;
+  min-height: 46px;
+  max-height: 160px;
+  resize: vertical;
+  outline-offset: 0;
+}
+.focused-chat .composer textarea::placeholder {
+  font-size: 13px;
+  color: #8f9b80;
+}
+.focused-chat .mic,
+.focused-chat .send {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: #efe7dc;
+  color: #b68b62;
+}
+.focused-chat .send {
+  background: #769581;
+  color: white;
+}
+.focused-chat .mic.recording {
+  background: #f4e2d5;
+  color: #a76d50;
+}
+.focused-chat .composer-hint {
+  color: #a0a98f;
+  font-size: 10px;
+  gap: 9px;
+}
+.focused-chat .error {
+  color: #a6765c;
+  padding: 12px;
+  background: #fff4eb;
+  border: 1px solid #f0e0d0;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.focused-chat .recording-status,
+.focused-chat .transcription-status {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #8a936c;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f2f5e9;
+  margin-bottom: 10px;
+}
+.focused-chat .recording-timer {
+  display: inline-block;
+  margin: 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+.focused-chat .transcript-review {
+  padding: 12px;
+  background: #f7f8ee;
+  border: 1px solid #e4e9d6;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #8a9877;
+}
+.focused-chat .transcript-review > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.focused-chat .transcript-review strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.focused-chat .transcript-review button {
+  border: 0;
+  background: none;
+  color: #92a180;
+  padding: 6px;
+}
+.focused-chat .transcript-review p {
+  color: #637c53;
+  font:
+    16px/1.7 Georgia,
+    serif;
+}
+.focused-chat .transcript-history {
+  font-size: 10px;
+  color: #a2aa94;
+  padding-top: 8px;
+  line-height: 1.8;
+}
+.focused-chat .typing {
+  font-size: 12px;
+  color: #a4ad95;
+}
+@media (max-width: 700px) {
+  .focused-chat .message {
+    max-width: 100%;
+    gap: 6px;
+  }
+  .focused-chat .bubble {
+    font-size: 17px;
+    padding: 12px;
+  }
+  .focused-chat .composer-hint {
+    flex-wrap: wrap;
+  }
+}

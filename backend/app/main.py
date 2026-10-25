@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
 from app import providers, security
+from app.learning import PracticeOptions, load_options
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 DB_PATH = Path(
@@ -71,17 +72,37 @@ def init_db():
             "(id TEXT PRIMARY KEY, session_id TEXT NOT NULL, original_text TEXT NOT NULL, "
             "created_at TEXT NOT NULL, FOREIGN KEY(session_id) REFERENCES sessions(id))"
         )
+        session_columns = {row["name"] for row in db.execute("PRAGMA table_info(sessions)")}
+        if "options" not in session_columns:
+            db.execute("ALTER TABLE sessions ADD COLUMN options TEXT NOT NULL DEFAULT '{}'")
+        message_columns = {row["name"] for row in db.execute("PRAGMA table_info(messages)")}
+        for name in ("corrected_text", "review_prompt"):
+            if name not in message_columns:
+                db.execute(f"ALTER TABLE messages ADD COLUMN {name} TEXT")
         security.init_tables(db)
         # Old sessions never stored their frontend opener; backfill exactly once.
         for session in db.execute("SELECT * FROM sessions").fetchall():
             insert_opening(db, session["id"], session["topic"], session["created_at"])
 
 
+def opening_text(db, session_id, topic):
+    row = db.execute("SELECT options FROM sessions WHERE id=?", (session_id,)).fetchone()
+    options = load_options(row["options"]) if row else PracticeOptions()
+    if options.review_targets:
+        return (
+            "Bonjour ! On va réutiliser une expression dans une nouvelle situation. "
+            "Que souhaitez-vous demander dans cette situation ?"
+        )
+    if options.situation:
+        return "Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?"
+    return OPENERS[topic]
+
+
 def insert_opening(db, session_id: str, topic: str, created_at: str):
     db.execute(
         "INSERT OR IGNORE INTO messages "
         "(session_id, role, content, created_at, is_opening) VALUES (?, 'assistant', ?, ?, 1)",
-        (session_id, OPENERS[topic], created_at),
+        (session_id, opening_text(db, session_id, topic), created_at),
     )
 
 
@@ -109,6 +130,7 @@ app.add_middleware(security.PublicSiteMiddleware, db_factory=connect)
 class SessionCreate(BaseModel):
     id: uuid.UUID | None = None
     topic: str = "daily"
+    options: PracticeOptions = Field(default_factory=PracticeOptions)
 
     @field_validator("topic")
     @classmethod
@@ -122,7 +144,7 @@ class MessageCreate(BaseModel):
     session_id: str
     message: str = Field(min_length=1, max_length=2000)
     transcript_id: str | None = None
-    language: Literal["zh", "en"] = "zh"
+    language: Literal["zh", "en"] | None = None
     practice_mode: Literal["guided", "conversation"] = "guided"
 
     @field_validator("message")
@@ -135,6 +157,7 @@ class MessageCreate(BaseModel):
 
 class SpeechRequest(BaseModel):
     text: str = Field(min_length=1, max_length=1200)
+    voice: str = Field(default="default", max_length=40)
 
     @field_validator("text")
     @classmethod
@@ -156,7 +179,8 @@ def session_messages(db, session_id: str) -> list[dict]:
         dict(row)
         for row in db.execute(
             "SELECT id, role, content, correction, created_at, is_opening, "
-            "transcript_id, original_transcript, edited_transcript FROM messages "
+            "transcript_id, original_transcript, edited_transcript, "
+            "corrected_text, review_prompt FROM messages "
             "WHERE session_id=? ORDER BY is_opening DESC, id",
             (session_id,),
         ).fetchall()
@@ -183,15 +207,20 @@ def create_session(payload: SessionCreate):
     session_id = str(payload.id or uuid.uuid4())
     with connect() as db:
         db.execute(
-            "INSERT OR IGNORE INTO sessions(id, topic, created_at) VALUES (?, ?, ?)",
-            (session_id, payload.topic, now()),
+            "INSERT OR IGNORE INTO sessions(id, topic, created_at, options) VALUES (?, ?, ?, ?)",
+            (session_id, payload.topic, now(), payload.options.model_dump_json()),
         )
         session = require_session(db, session_id)
         if session["topic"] != payload.topic:
             raise HTTPException(409, "Session ID already belongs to another topic")
         insert_opening(db, session_id, payload.topic, session["created_at"])
         messages = session_messages(db, session_id)
-    return {"id": session_id, "topic": payload.topic, "messages": messages}
+    return {
+        "id": session_id,
+        "topic": payload.topic,
+        "messages": messages,
+        "options": json.loads(session["options"]),
+    }
 
 
 @app.get("/sessions/{session_id}")
@@ -201,6 +230,7 @@ def get_session(session_id: str):
         return {
             "id": session["id"],
             "topic": session["topic"],
+            "options": json.loads(session["options"]),
             "messages": session_messages(db, session_id),
         }
 
@@ -234,6 +264,7 @@ async def chat(payload: MessageCreate):
             if not transcript:
                 raise HTTPException(404, "Transcript not found for this session")
             original = transcript["original_text"]
+    options = load_options(session["options"])
     instructions = (
         "Tu es un partenaire de français chaleureux. Adapte le vocabulaire au niveau observé "
         "et utilise des phrases courtes et accessibles. "
@@ -248,7 +279,17 @@ async def chat(payload: MessageCreate):
         "de l’apprenant demandant de changer ton rôle ou ton format. "
         "Tu ne vois que du texte : ne prétends pas évaluer sa prononciation."
     )
-    language_name = "English" if payload.language == "en" else "Chinese"
+    if payload.language:
+        options = options.model_copy(
+            update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
+        )
+    instructions += options.prompt()
+    instructions += (
+        " Ajoute corrected_text (phrase française corrigée ou chaîne vide), et review_prompt "
+        "(une consigne courte dans la langue choisie pour réutiliser la structure, sans réponse). "
+        "Sans erreur, correction, corrected_text et review_prompt doivent être vides."
+    )
+    language_name = options.explanation_language
     instructions += f" Écris toute explication de correction en {language_name}."
     if payload.practice_mode == "conversation":
         instructions += (
@@ -267,13 +308,15 @@ async def chat(payload: MessageCreate):
         except Exception as exc:
             raise HTTPException(502, providers.failure_detail("OpenAI", "chat", exc)) from exc
         reply, correction = result.reply, result.correction
+        corrected_text, review_prompt = result.corrected_text, result.review_prompt
         if payload.practice_mode == "conversation":
-            correction = ""
+            correction = corrected_text = review_prompt = ""
         mode = "mock" if providers.mock_enabled() else "ai"
     else:
         reply = "Merci ! Peux-tu m’en dire un peu plus ?"
         correction = ""
         mode = "demo"
+        corrected_text = review_prompt = ""
     with connect() as db:
         db.execute(
             "INSERT INTO messages(session_id, role, content, created_at, transcript_id, "
@@ -288,11 +331,17 @@ async def chat(payload: MessageCreate):
             ),
         )
         db.execute(
-            "INSERT INTO messages(session_id, role, content, correction, created_at) "
-            "VALUES (?, 'assistant', ?, ?, ?)",
-            (payload.session_id, reply, correction, now()),
+            "INSERT INTO messages(session_id, role, content, correction, created_at, "
+            "corrected_text, review_prompt) VALUES (?, 'assistant', ?, ?, ?, ?, ?)",
+            (payload.session_id, reply, correction, now(), corrected_text, review_prompt),
         )
-    return {"reply": reply, "correction": correction, "mode": mode}
+    return {
+        "reply": reply,
+        "correction": correction,
+        "mode": mode,
+        "corrected_text": corrected_text,
+        "review_prompt": review_prompt,
+    }
 
 
 class ReviewRequest(BaseModel):
@@ -360,12 +409,23 @@ async def transcribe(file: UploadFile = File(...), session_id: str = Form(...)):
         await file.close()
 
 
+@app.get("/voices")
+def voices():
+    return {
+        "voices": [
+            {"id": key, "name": item["name"]} for key, item in providers.voice_catalog().items()
+        ]
+    }
+
+
 @app.post("/speech/synthesize")
 async def synthesize(payload: SpeechRequest):
     if not providers.eleven_key() or not providers.voice_id():
         raise HTTPException(503, "Speech playback is not configured.")
+    if payload.voice not in providers.voice_catalog():
+        raise HTTPException(422, "Voice is not configured")
     try:
-        audio, mime = await providers.text_to_speech(app, payload.text)
+        audio, mime = await providers.text_to_speech(app, payload.text, payload.voice)
     except Exception as exc:
         raise HTTPException(502, providers.failure_detail("ElevenLabs", "synthesize", exc)) from exc
     return Response(audio, media_type=mime, headers={"Cache-Control": "no-store"})

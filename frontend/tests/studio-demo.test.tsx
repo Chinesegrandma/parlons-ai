@@ -22,10 +22,10 @@ it("runs a categorized offline practice and review without network access", asyn
   await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
   await screen.findByText("Bonjour ! Qu’est-ce que je vous sers ?");
   await user.type(
-    screen.getByRole("textbox", { name: "Message" }),
+    screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
     "Je voudrais une café.",
   );
-  await user.click(screen.getByRole("button", { name: "Send" }));
+  await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
   await screen.findByText(/示例反馈：café 是阳性名词/);
   await user.click(screen.getByRole("button", { name: "结束并总结" }));
   await screen.findByText("这是预设演示总结，不评估真实语言水平。");

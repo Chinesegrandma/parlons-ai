@@ -1,8 +1,11 @@
+import { CorrectionCard } from "./CorrectionCard";
 import { useEffect, useRef } from "react";
 import { AudioLines, Sparkles, Volume2 } from "lucide-react";
 import type { Message, Language } from "../lib/types";
 export function MessageList({
   language = "zh",
+  onSaveCorrection,
+  savedCorrectionIds = [],
   hideCorrections = false,
   messages,
   busy,
@@ -11,6 +14,8 @@ export function MessageList({
   onSpeak,
 }: {
   language?: Language;
+  onSaveCorrection?: (id: number) => void;
+  savedCorrectionIds?: number[];
   hideCorrections?: boolean;
   messages: Message[];
   busy: boolean;
@@ -34,7 +39,7 @@ export function MessageList({
         UNE NOUVELLE CONVERSATION
         <span />
       </div>
-      {messages.map((message) => (
+      {messages.map((message, index) => (
         <article className={`message ${message.role}`} key={message.id}>
           <div className="avatar">
             {message.role === "assistant" ? (
@@ -64,14 +69,31 @@ export function MessageList({
                 {t("听一遍", "Listen")}
               </button>
             )}
-            {!hideCorrections && message.correction && (
-              <div className="correction">
-                <strong>
-                  <Sparkles size={13} /> {t("一个小建议", "A small suggestion")}
-                </strong>
-                <p>{message.correction}</p>
-              </div>
-            )}
+            {!hideCorrections &&
+              message.correction &&
+              (onSaveCorrection ? (
+                <CorrectionCard
+                  language={language}
+                  original={
+                    messages
+                      .slice(0, index)
+                      .reverse()
+                      .find((item) => item.role === "user")?.content || ""
+                  }
+                  corrected={message.corrected_text || ""}
+                  explanation={message.correction}
+                  saved={savedCorrectionIds.includes(message.id)}
+                  onSave={() => onSaveCorrection(message.id)}
+                />
+              ) : (
+                <div className="correction">
+                  <strong>
+                    <Sparkles size={13} />{" "}
+                    {t("一个小建议", "A small suggestion")}
+                  </strong>
+                  <p>{message.correction}</p>
+                </div>
+              ))}
             {message.original_transcript != null && (
               <details className="transcript-history">
                 <summary>

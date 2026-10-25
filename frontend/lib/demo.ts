@@ -69,13 +69,25 @@ export const demoApi: typeof api = {
     stt_ready: true,
     mock_ai: true,
   }),
-  session: async (id, topic) => {
+  voices: async () => ({
+    voices: [{ id: "default", name: "Demo tone (not a voice)" }],
+  }),
+  session: async (id, topic, options) => {
     restore();
     if (!sessions.has(id)) {
       sessions.set(id, {
         id,
         topic,
-        messages: [{ id: 1, role: "assistant", content: openings[topic] }],
+        options,
+        messages: [
+          {
+            id: 1,
+            role: "assistant",
+            content: options?.situation
+              ? "Bonjour ! On joue cette situation ensemble. À toi de commencer !"
+              : openings[topic],
+          },
+        ],
       });
       save();
     }
@@ -135,7 +147,20 @@ export const demoApi: typeof api = {
             }
           : {}),
       },
-      { id: nextId + 1, role: "assistant", content: reply, correction },
+      {
+        id: nextId + 1,
+        role: "assistant",
+        content: reply,
+        correction,
+        corrected_text: /une café/i.test(text)
+          ? text.replace(/une café/gi, "un café")
+          : /je suis aller/i.test(text)
+            ? text.replace(/je suis aller/gi, "Je suis allé")
+            : "",
+        review_prompt: correction
+          ? "换一种饮品，试着用正确的冠词礼貌点单。"
+          : "",
+      },
     );
     save();
     return { reply, correction, mode: "mock" };

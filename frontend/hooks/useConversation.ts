@@ -4,6 +4,7 @@ import { api, ApiError } from "../lib/api";
 import {
   topics,
   type Session,
+  type PracticeOptions,
   type Topic,
   type Transcript,
   type Language,
@@ -46,7 +47,7 @@ export function useConversation(
   const sending = useRef(false);
 
   const start = useCallback(
-    async (topic?: Topic) => {
+    async (topic?: Topic, options?: PracticeOptions) => {
       const current = ++generation.current;
       const saved = topic ? null : storedSession(storageKey);
       const selection = saved || {
@@ -61,7 +62,9 @@ export function useConversation(
       setInput("");
       setTranscript(null);
       try {
-        const result = await client.session(selection.id, selection.topic);
+        const result = options
+          ? await client.session(selection.id, selection.topic, options)
+          : await client.session(selection.id, selection.topic);
         if (current === generation.current) {
           setSession(result);
           return result;

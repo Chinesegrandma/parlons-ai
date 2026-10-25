@@ -74,3 +74,28 @@ API 类型、演示数据和样式。回归测试、README 与本说明同步更
 
 正式公开前仍需独立账号与用户隔离、备份、审计、提供商硬预算控制及完整隐私政策。
 本版本沿用单人密码入口，未将其宣称为多用户生产认证系统。
+
+## 最终兼容与检查记录（2026-10-25）
+
+整合远程 main 的 `f1b6f06`，保留已有逐词纠错卡片、笔记收藏与间隔复习、
+自定义情境、级别/重点/角色偏好、服务端声音白名单和安装到主屏幕。
+笔记在独立页面，不重新把练习工具塞回聊天；所有新增界面支持中英切换。
+原数据库按新增字段迁移，既有 localStorage 学习记录沿用原键。
+
+最终自动检查：136 项后端、66 项前端测试通过；Ruff、Prettier、ESLint、
+TypeScript、离线评估和生产构建通过。Starlette/httpx 有一条既有弃用警告。
+额外浏览器检查：逐词标记仅高亮变化词，保存纠错后笔记重载仍保留，
+模拟演示没有触发提供商请求，手机视口无横向溢出。
+全部 API 自动检查均使用内存模拟传输，外部套接字访问在测试中被阻止。
+
+新截图：
+- [手机首页](design/flow-home-mobile.png)
+- [桌面首页](design/flow-home-desktop.png)
+- [英文连续对话与总结](design/flow-conversation-mobile.png)
+- [逐词纠错](design/flow-correction-mobile.png)
+- [笔记本](design/flow-notebook-mobile.png)
+
+Mac 更新时先备份旧项目。下载 work 分支到新目录，复制旧 `backend/parlons.sqlite3`
+前先关闭两个应用。浏览器笔记属于原网址：临时地址变化不会自动迁移笔记，
+请在关闭旧隧道前导出备份。新源码用 `python3 scripts/run_local.py --tunnel`
+先试模拟版；真实模式另加 `--real`。不要把 API 密钥写进源码或发到聊天。
