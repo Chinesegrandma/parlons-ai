@@ -2,7 +2,7 @@ import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { CorrectionCard } from "./CorrectionCard";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Sparkles, Volume2, Languages, Copy, Check } from "lucide-react";
-import type { Message, Language } from "../lib/types";
+import type { Message, Language, RewriteStyle, RewriteSuggestion } from "../lib/types";
 export function MessageList({
   language = "zh",
   onSaveCorrection,
@@ -14,6 +14,7 @@ export function MessageList({
   speechReady,
   onSpeak,
   onTranslate,
+  onRewrite,
 }: {
   language?: Language;
   onSaveCorrection?: (id: number) => void;
@@ -25,6 +26,7 @@ export function MessageList({
   speechReady: boolean;
   onSpeak: (text: string) => void;
   onTranslate: (text: string, language: Language) => Promise<string>;
+  onRewrite?: (text: string, style: RewriteStyle, language: Language) => Promise<RewriteSuggestion>;
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const bottom = useRef<HTMLDivElement>(null);
@@ -145,7 +147,7 @@ export function MessageList({
             )}
             {!hideCorrections && message.role === "user" && (() => {
               const next = messages[index + 1];
-              if (next?.role !== "assistant" || !next.correction) return null;
+              if (next?.role !== "assistant") return null;
               return onSaveCorrection ? (
                 <CorrectionCard
                   language={language}
@@ -154,6 +156,7 @@ export function MessageList({
                   explanation={next.correction}
                   saved={savedCorrectionIds.includes(next.id)}
                   onSave={() => onSaveCorrection(next.id)}
+                  onRewrite={onRewrite}
                 />
               ) : (
                 <div className="correction">
