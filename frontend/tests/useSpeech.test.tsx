@@ -24,6 +24,19 @@ beforeEach(() => {
 });
 
 describe("speech playback", () => {
+  it("retains safe TTS diagnostic labels without exposing upstream response content", async () => {
+    vi.mocked(api.synthesize).mockRejectedValue(
+      new Error("ElevenLabs [permission HTTP 403]：private upstream content"),
+    );
+    const { result } = renderHook(useSpeech);
+    await act(async () => {
+      await result.current.speak("Bonjour");
+    });
+    expect(result.current.notice).toContain("ElevenLabs [permission HTTP 403]");
+    expect(result.current.notice).not.toContain("private upstream content");
+    expect(result.current.working).toBe(false);
+    expect(MockAudio.instances).toHaveLength(0);
+  });
   it("autoplays generated replies when ready", async () => {
     const { result } = renderHook(useSpeech);
     await act(async () => {

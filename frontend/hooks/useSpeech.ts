@@ -144,11 +144,20 @@ export function useSpeech(client = api, voice = "default") {
       await playCurrent(current);
       if (wait) return await ended;
       return current === generation.current;
-    } catch {
+    } catch (error) {
       if (current !== generation.current) return false;
       stop();
+      // Keep only the backend's fixed diagnostic label, never raw upstream content.
+      const diagnostic =
+        error instanceof Error
+          ? error.message.match(
+              /^ElevenLabs \[(?:authentication|permission|billing|quota_or_rate_limit|connection|timeout|request_rejected|upstream|invalid_response|internal)(?: HTTP \d{3})?\]/,
+            )?.[0]
+          : undefined;
       setNotice(
-        "语音服务暂不可用，可继续文字对话。 / Speech unavailable; text chat is available.",
+        diagnostic
+          ? `${diagnostic}：朗读失败，可继续文字对话。 / ${diagnostic}: Speech playback failed; text chat is available.`
+          : "语音服务暂不可用，可继续文字对话。 / Speech unavailable; text chat is available.",
       );
     }
     return false;

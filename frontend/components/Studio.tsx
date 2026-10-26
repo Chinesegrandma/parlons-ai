@@ -188,12 +188,17 @@ export function Studio({ demo = false }: { demo?: boolean }) {
       connection: "Connection failed. Check your computer’s network and proxy.",
       timeout: "The request timed out.",
       invalid_response: "The service returned an unexpected response.",
+      request_rejected:
+        "Request rejected. Check the voice, model and audio format.",
+      upstream:
+        "The speech provider returned an error. Please try again later.",
+      internal: "Speech playback failed. Check the local configuration.",
     };
     const category = Object.keys(categories).find((key) =>
       message.includes(`[${key}`),
     );
     return category
-      ? categories[category]
+      ? `${message.match(/^ElevenLabs \[[^\]]+\]/)?.[0] || ""} ${categories[category]}`.trim()
       : message.includes(" / ")
         ? message.split(" / ").at(-1)!
         : /[\u4e00-\u9fff]/.test(message)
