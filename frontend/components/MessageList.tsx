@@ -1,7 +1,7 @@
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
-import { CorrectionCard } from "./CorrectionCard";
+import { CorrectionCard, changedWords } from "./CorrectionCard";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Sparkles, Volume2, Languages, Copy, Check } from "lucide-react";
+import { Sparkles, Volume2, Languages, Copy, Check, ChevronDown } from "lucide-react";
 import type { Message, Language, RewriteStyle, RewriteSuggestion } from "../lib/types";
 export function MessageList({
   language = "zh",
@@ -36,6 +36,7 @@ export function MessageList({
   const [loadingTranslation, setLoadingTranslation] = useState<string | null>(null);
   const [translationError, setTranslationError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [openCorrectionId, setOpenCorrectionId] = useState<number | null>(null);
   async function toggleTranslation(message: Message) {
     if (expanded.includes(message.id)) {
       setExpanded((ids) => ids.filter((id) => id !== message.id));
@@ -148,21 +149,54 @@ export function MessageList({
             {!hideCorrections && message.role === "user" && (() => {
               const next = messages[index + 1];
               if (next?.role !== "assistant") return null;
-              return onSaveCorrection ? (
-                <CorrectionCard
-                  language={language}
-                  original={message.content}
-                  corrected={next.corrected_text || ""}
-                  explanation={next.correction || ""}
-                  saved={savedCorrectionIds.includes(next.id)}
-                  onSave={() => onSaveCorrection(next.id)}
-                  onRewrite={onRewrite}
-                />
-              ) : (
-                <div className="correction">
-                  <strong><Sparkles size={13} /> {t("表达改进", "Improve your expression")}</strong>
-                  {next.corrected_text && <p lang="fr">{next.corrected_text}</p>}
-                  <p>{next.correction}</p>
+              const corrected = next.corrected_text || "";
+              const hasError = Boolean(next.correction?.trim());
+              const isOpen = openCorrectionId === message.id;
+              const summary = corrected && hasError
+                ? changedWords(message.content, corrected).corrected
+                : null;
+              return (
+                <div className="inline-feedback">
+                  <button
+                    type="button"
+                    className="correction-capsule"
+                    aria-expanded={isOpen}
+                    aria-controls={`correction-detail-${message.id}`}
+                    onClick={() => setOpenCorrectionId(isOpen ? null : message.id)}
+                  >
+                    <Sparkles size={14} aria-hidden="true" />
+                    <span className="correction-capsule-label">
+                      {hasError ? t("更自然", "Try this") : t("表达很好", "Well said")}
+                    </span>
+                    {summary && (
+                      <span className="correction-capsule-example" lang="fr">
+                        {summary.map((word, i) =>
+                          word.changed ? <mark key={i}>{word.text}</mark> : word.text,
+                        )}
+                      </span>
+                    )}
+                    <ChevronDown size={15} className={isOpen ? "is-open" : ""} aria-hidden="true" />
+                  </button>
+                  {isOpen && (
+                    <div id={`correction-detail-${message.id}`} className="inline-feedback-detail">
+                      {onSaveCorrection ? (
+                        <CorrectionCard
+                          language={language}
+                          original={message.content}
+                          corrected={corrected}
+                          explanation={next.correction || ""}
+                          saved={savedCorrectionIds.includes(next.id)}
+                          onSave={() => onSaveCorrection(next.id)}
+                          onRewrite={onRewrite}
+                        />
+                      ) : (
+                        <div className="correction">
+                          {corrected && <p lang="fr">{corrected}</p>}
+                          <p>{next.correction || t("没有发现明显错误。", "No obvious errors found.")}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })()}
