@@ -1,0 +1,592 @@
+/* A · Sauge Verre. Presentation only; loaded after the existing application styles. */
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter-latin-ext-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0100-02FF, U+1E00-1EFF, U+2020, U+20A0-20AB;
+}
+@font-face {
+  font-family: Fraunces;
+  src: url("/fonts/fraunces-latin-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: Fraunces;
+  src: url("/fonts/fraunces-latin-ext-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0100-02FF, U+1E00-1EFF, U+2020, U+20A0-20AB;
+}
+.parlons-app {
+  --sage-base: #edf1e7;
+  --sage-ink: #203f34;
+  --sage-muted: #345346;
+  --sage-deep: #2c5142;
+  --sage-peach: #edc9af;
+  --sage-glass: rgba(255, 255, 255, 0.4);
+  --sage-border: rgba(255, 255, 255, 0.8);
+  --sage-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  --sage-card-radius: 28px;
+  --sage-pill-radius: 999px;
+  --sage-blur: 24px;
+  --sage-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --sage-duration: 280ms;
+  --sage-ui: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --sage-french: Fraunces, Georgia, serif;
+  --ink: var(--sage-ink);
+  --green: var(--sage-deep);
+  position: relative;
+  isolation: isolate;
+  background: var(--sage-base);
+  color: var(--sage-ink);
+  font-family: var(--sage-ui);
+}
+.sage-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #edf1e7;
+}
+.sage-atmosphere > span {
+  position: absolute;
+  width: min(80vw, 850px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(80px);
+  background: #b4caa6;
+  top: -20%;
+  left: -20%;
+  animation: sage-drift 20s var(--sage-ease) infinite;
+}
+.sage-atmosphere > span:nth-child(2) {
+  background: #d9bba2;
+  opacity: 0.68;
+  width: min(70vw, 700px);
+  top: 38%;
+  left: 65%;
+  animation-delay: -7s;
+}
+.sage-atmosphere > span:nth-child(3) {
+  background: #9ec5b9;
+  opacity: 0.64;
+  top: 82%;
+  left: 15%;
+  animation-delay: -14s;
+}
+.sage-atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23n)' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
+}
+@keyframes sage-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(55px, 45px, 0) scale(1.08);
+  }
+}
+@keyframes sage-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sage-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.32);
+    opacity: 0.12;
+  }
+}
+.parlons-app button {
+  min-height: 44px;
+  min-width: 44px;
+  font-family: var(--sage-ui);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--sage-duration) var(--sage-ease),
+    opacity 200ms var(--sage-ease);
+}
+.parlons-app button:active:not(:disabled) {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+.parlons-app button:disabled {
+  opacity: 0.5;
+}
+.parlons-app :focus-visible {
+  outline: 2px solid var(--sage-deep);
+  outline-offset: 4px;
+}
+.parlons-app .eyebrow {
+  color: var(--sage-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+.parlons-app .app-header {
+  height: 76px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.18);
+}
+.parlons-app .app-brand {
+  color: var(--sage-deep);
+}
+.parlons-app .app-header-actions {
+  gap: 8px;
+}
+.parlons-app .app-header-actions button {
+  min-width: 44px;
+  justify-content: center;
+}
+.parlons-app .connection-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--sage-glass);
+  border: 1px solid var(--sage-border);
+  color: var(--sage-muted);
+  border-radius: var(--sage-pill-radius);
+}
+.connection-pill > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.parlons-app .connection-pill button {
+  padding: 0;
+}
+.parlons-app .connection-pill.unavailable {
+  padding: 0 0 0 12px;
+}
+.parlons-app .app-settings,
+.parlons-app .category-card,
+.parlons-app .subscene-card,
+.parlons-app .home-quick,
+.parlons-app .custom-practice,
+.parlons-app .notebook-entry,
+.parlons-app .session-review,
+.parlons-app .voice-session,
+.glass-notice {
+  background: var(--sage-glass);
+  border: 1px solid var(--sage-border);
+  border-radius: var(--sage-card-radius);
+  box-shadow: var(--sage-shadow);
+  -webkit-backdrop-filter: blur(var(--sage-blur));
+  backdrop-filter: blur(var(--sage-blur));
+}
+.parlons-app .practice-home p,
+.parlons-app .practice-home small,
+.parlons-app .practice-home summary,
+.parlons-app .category-footer,
+.parlons-app .category-heading > button,
+.parlons-app .resume-session,
+.parlons-app .app-settings p,
+.parlons-app .notebook-entry p,
+.parlons-app .notebook-entry small,
+.parlons-app .session-review p,
+.parlons-app .session-review small,
+.parlons-app .session-review span,
+.parlons-app .app-bottom,
+.parlons-app .app-install .text-button {
+  color: var(--sage-muted);
+}
+.parlons-app .home-intro h1,
+.parlons-app .chat-heading h1 {
+  font-weight: 300;
+}
+.parlons-app .conversation-page {
+  max-width: 780px;
+  padding: 30px 28px 0;
+}
+.parlons-app .chat-heading {
+  margin-bottom: 16px;
+}
+.parlons-app .chat-heading h1 {
+  font-family: var(--sage-french);
+  font-size: 30px;
+  margin: 4px 0 0;
+}
+.parlons-app .back-scenes,
+.parlons-app .end-review {
+  padding: 8px 14px;
+  border: 1px solid var(--sage-border);
+  border-radius: var(--sage-pill-radius);
+  background: var(--sage-glass);
+  color: var(--sage-ink);
+  -webkit-backdrop-filter: blur(var(--sage-blur));
+  backdrop-filter: blur(var(--sage-blur));
+}
+.parlons-app .assistant-identity {
+  margin: 12px 0 18px;
+  gap: 8px;
+}
+.parlons-app .assistant-identity .assistant-portrait {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+.parlons-app .assistant-identity strong {
+  font-family: var(--sage-french);
+  font-size: 16px;
+  color: var(--sage-ink);
+}
+.parlons-app .assistant-identity small {
+  color: var(--sage-muted);
+  font-size: 10px;
+  margin-top: 2px;
+}
+.parlons-app .mode-switch {
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid var(--sage-border);
+  -webkit-backdrop-filter: blur(var(--sage-blur));
+  backdrop-filter: blur(var(--sage-blur));
+}
+.parlons-app .mode-switch button {
+  color: var(--sage-muted);
+  padding: 8px 22px;
+  font-size: 12px;
+}
+.parlons-app .mode-switch button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--sage-ink);
+  font-weight: 600;
+  box-shadow: 0 3px 12px #294b3d12;
+}
+.parlons-app .mode-description {
+  color: var(--sage-muted);
+  font-size: 11px;
+  margin: 12px 0 16px;
+}
+.parlons-app .focused-chat {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.parlons-app .focused-chat .conversation {
+  height: max(320px, calc(100dvh - 455px));
+  min-height: 0;
+  gap: 18px;
+  padding: 8px 4px 24px;
+  scroll-padding-bottom: 24px;
+}
+.parlons-app .focused-chat .message {
+  max-width: 94%;
+  gap: 0;
+  animation: sage-arrive 300ms var(--sage-ease) both;
+  animation-delay: var(--message-stagger, 0ms);
+}
+/* Identity stays above the conversation; compact labels stay inside each glass card. */
+.parlons-app .focused-chat .message > .avatar {
+  display: none;
+}
+.parlons-app .focused-chat .bubblewrap {
+  padding: 19px 20px 15px;
+  border: 1px solid var(--sage-border);
+  border-radius: var(--sage-card-radius);
+  background: var(--sage-glass);
+  box-shadow: var(--sage-shadow);
+  -webkit-backdrop-filter: blur(var(--sage-blur));
+  backdrop-filter: blur(var(--sage-blur));
+}
+.parlons-app .focused-chat .message-author {
+  color: var(--sage-muted);
+  margin: 0 0 8px;
+  font-size: 10px;
+}
+.parlons-app .focused-chat .message-author > span {
+  color: var(--sage-muted);
+}
+.parlons-app .focused-chat .bubble {
+  border: 0;
+  background: none;
+  color: var(--sage-ink);
+  padding: 0;
+  font: 400 22px/1.4 var(--sage-french);
+}
+.parlons-app .focused-chat .user .bubblewrap {
+  background: rgba(237, 201, 175, 0.7);
+  padding: 14px 20px;
+}
+.parlons-app .focused-chat .user .bubble {
+  color: #513923;
+  font-size: 20px;
+}
+.parlons-app .focused-chat .user .message-author {
+  display: none;
+}
+.parlons-app .focused-chat .speak {
+  margin-top: 12px;
+  padding: 8px 13px;
+  border-radius: var(--sage-pill-radius);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--sage-ink);
+  width: fit-content;
+  min-height: 44px;
+}
+.parlons-app .focused-chat .composerarea {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  border: 0;
+  background: transparent;
+  padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+}
+.parlons-app .focused-chat .composer {
+  padding: 8px;
+  gap: 10px;
+  border: 1px solid var(--sage-border);
+  border-radius: var(--sage-pill-radius);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: var(--sage-shadow);
+  -webkit-backdrop-filter: blur(var(--sage-blur));
+  backdrop-filter: blur(var(--sage-blur));
+}
+.parlons-app .focused-chat .composer textarea {
+  font: 400 16px/1.45 var(--sage-ui);
+  color: var(--sage-ink);
+  min-height: 44px;
+  max-height: 130px;
+  padding: 2px 0;
+  resize: none;
+}
+.parlons-app .focused-chat .composer textarea::placeholder {
+  color: var(--sage-muted);
+  font-size: 13px;
+  opacity: 1;
+}
+.parlons-app .focused-chat .mic,
+.parlons-app .focused-chat .send {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sage-pill-radius);
+}
+.parlons-app .focused-chat .mic {
+  position: relative;
+  background: var(--sage-peach);
+  color: #513923;
+}
+.parlons-app .focused-chat .mic.recording::before,
+.parlons-app .voice-session.active .voice-orb::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 2px solid var(--sage-deep);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sage-breathe 1800ms var(--sage-ease) infinite;
+}
+.parlons-app .focused-chat .send {
+  background: var(--sage-deep);
+  color: #fff;
+}
+.parlons-app .focused-chat .send:disabled {
+  opacity: 0.35;
+}
+.parlons-app .focused-chat .composer-hint {
+  color: var(--sage-muted);
+  font-size: 10px;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.parlons-app .focused-chat .correction-card,
+.parlons-app .focused-chat .transcript-review,
+.parlons-app .focused-chat .recording-status,
+.parlons-app .focused-chat .transcription-status,
+.parlons-app .focused-chat .error {
+  color: var(--sage-ink);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--sage-border);
+  border-radius: 20px;
+}
+.parlons-app .focused-chat .correction-card p,
+.parlons-app .focused-chat .correction-card .text-button,
+.parlons-app .focused-chat .transcript-review p,
+.parlons-app .focused-chat .transcript-review button,
+.parlons-app .focused-chat .transcript-history,
+.parlons-app .focused-chat .typing,
+.parlons-app .practice-footnote {
+  color: var(--sage-muted);
+}
+.parlons-app .voice-session {
+  padding: 16px;
+}
+.parlons-app .voice-orb {
+  position: relative;
+  color: var(--sage-deep);
+  background: rgba(255, 255, 255, 0.5);
+}
+.parlons-app .voice-session small {
+  color: var(--sage-muted);
+}
+.glass-notice {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 7px 5px 16px;
+  margin: 0 0 16px;
+  color: var(--sage-ink);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.glass-notice > svg {
+  flex: none;
+}
+.glass-notice > span {
+  flex: 1;
+}
+.glass-notice > button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sage-ink);
+}
+@media (max-width: 700px) {
+  .parlons-app .app-header {
+    height: 64px;
+    padding: 0 18px;
+  }
+  .parlons-app .app-brand {
+    font-size: 24px;
+  }
+  .parlons-app .app-header-actions {
+    gap: 0;
+  }
+  .parlons-app .connection-pill {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  .parlons-app .connection-pill.unavailable {
+    padding: 0 0 0 8px;
+  }
+  .parlons-app .conversation-page {
+    padding: 24px 20px 0;
+  }
+  .parlons-app .chat-heading {
+    gap: 8px;
+  }
+  .parlons-app .chat-heading h1 {
+    font-size: 24px;
+  }
+  .parlons-app .chat-heading .eyebrow {
+    font-size: 8px;
+  }
+  .parlons-app .back-scenes {
+    padding: 8px;
+    font-size: 10px;
+  }
+  .parlons-app .end-review {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+  .parlons-app .mode-switch {
+    width: 100%;
+    justify-content: center;
+  }
+  .parlons-app .mode-switch button {
+    flex: 1;
+    padding: 8px 10px;
+  }
+  .parlons-app .focused-chat .conversation {
+    height: max(280px, calc(100dvh - 440px));
+    padding: 8px 0 20px;
+  }
+  .parlons-app .focused-chat .message {
+    max-width: 100%;
+  }
+  .parlons-app .focused-chat .bubblewrap {
+    padding: 17px 18px 14px;
+  }
+  .parlons-app .focused-chat .bubble {
+    font-size: 21px;
+  }
+  .parlons-app .voice-session > button {
+    width: auto;
+    margin-left: auto;
+  }
+  .parlons-app .app-bottom {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+  .sage-atmosphere > span {
+    width: 110vw;
+  }
+  .sage-atmosphere > span:nth-child(2) {
+    width: 100vw;
+    left: 60%;
+  }
+}
+@media (max-width: 380px) {
+  .parlons-app .app-header {
+    padding: 0 12px;
+  }
+  .parlons-app .app-brand {
+    font-size: 20px;
+  }
+  .parlons-app .app-brand > span:first-child {
+    width: 28px;
+    height: 28px;
+  }
+  .parlons-app .app-header-actions button {
+    min-width: 44px;
+  }
+  .parlons-app .conversation-page {
+    padding-inline: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .parlons-app *,
+  .parlons-app *::before,
+  .parlons-app *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .parlons-app button:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* French examples keep their content face; helper text keeps the UI face. */
+.parlons-app [lang="fr"],
+.parlons-app .review-strength blockquote,
+.parlons-app .review-correction > div > p {
+  font-family: var(--sage-french);
+}
+.parlons-app .focused-chat .correction-card span,
+.parlons-app .focused-chat .correction-card mark {
+  color: var(--sage-ink);
+}

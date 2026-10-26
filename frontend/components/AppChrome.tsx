@@ -1,4 +1,5 @@
-import { AudioLines, Settings2, X, BookOpen } from "lucide-react";
+import { useState } from "react";
+import { AudioLines, Settings2, X, BookOpen, WifiOff } from "lucide-react";
 import type { Language, PracticeOptions, Voice } from "../lib/types";
 const translate = (language: Language) => (zh: string, en: string) =>
   language === "en" ? en : zh;
@@ -22,6 +23,7 @@ export function StudioHeader({
   onNotebook?: () => void;
 }) {
   const t = translate(language);
+  const [dismissedStatus, setDismissedStatus] = useState<string | null>(null);
   return (
     <header className="app-header">
       <button
@@ -35,12 +37,26 @@ export function StudioHeader({
         parlons<span className="brand-period">.</span>
       </button>
       <div className="app-header-actions">
-        <span
-          className={`connection-pill ${offline ? "unavailable" : ""}`}
-          role="status"
-        >
-          ● {status}
-        </span>
+        {(!offline || dismissedStatus !== status) && (
+          <div className={`connection-pill ${offline ? "unavailable" : ""}`}>
+            <span role="status">
+              {offline ? (
+                <WifiOff size={15} aria-hidden="true" />
+              ) : (
+                <span aria-hidden="true">●</span>
+              )}
+              {status}
+            </span>
+            {offline && (
+              <button
+                aria-label={t("关闭状态提示", "Dismiss status notice")}
+                onClick={() => setDismissedStatus(status)}
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
+        )}
         {privateSite && (
           <form method="post" action="/auth/logout">
             <button>{t("退出", "Log out")}</button>

@@ -64,6 +64,22 @@ function tone() {
 }
 /** Local, scripted UI demonstration. No fetch, providers, microphone or real evaluation. */
 export const demoApi: typeof api = {
+  rewrite: async (text, style, language) => ({
+    expression: style === "polite"
+      ? "Est-ce que vous pourriez me donner un coup de main, s'il vous plaît ?"
+      : "Tu peux me filer un coup de main ?",
+    explanation: language === "zh"
+      ? style === "polite"
+        ? "示例：礼貌、自然，适合不熟悉的人或正式场合。"
+        : "示例：适合熟悉的朋友之间，口语化但不粗俗。"
+      : style === "polite"
+        ? "Demo: polite and natural for formal settings."
+        : "Demo: casual contemporary French among friends.",
+  }),
+
+  translate: async (_text, language) => ({
+    translation: language === "zh" ? "演示翻译：这是法语回答的中文意思。" : "Demo translation of this French reply.",
+  }),
   health: async () => ({
     mode: "mock",
     speech_ready: true,

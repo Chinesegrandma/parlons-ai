@@ -13,6 +13,7 @@ import { InstallApp } from "./InstallApp";
 import { useConversation } from "../hooks/useConversation";
 import { useRecorder } from "../hooks/useRecorder";
 import { useSpeech } from "../hooks/useSpeech";
+import { GlassNotice } from "./GlassNotice";
 import { prepareSilence } from "../lib/silence";
 import { useLanguage } from "../lib/language";
 import { api } from "../lib/api";
@@ -187,12 +188,17 @@ export function Studio({ demo = false }: { demo?: boolean }) {
       connection: "Connection failed. Check your computer’s network and proxy.",
       timeout: "The request timed out.",
       invalid_response: "The service returned an unexpected response.",
+      request_rejected:
+        "Request rejected. Check the voice, model and audio format.",
+      upstream:
+        "The speech provider returned an error. Please try again later.",
+      internal: "Speech playback failed. Check the local configuration.",
     };
     const category = Object.keys(categories).find((key) =>
       message.includes(`[${key}`),
     );
     return category
-      ? categories[category]
+      ? `${message.match(/^ElevenLabs \[[^\]]+\]/)?.[0] || ""} ${categories[category]}`.trim()
       : message.includes(" / ")
         ? message.split(" / ").at(-1)!
         : /[\u4e00-\u9fff]/.test(message)
@@ -408,7 +414,14 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             )
           : t("准备好时，开启连续对话。", "Start when you are ready.");
   return (
-    <div className="parlons-app">
+    <div
+      className={`parlons-app ${page === "chat" ? "sage-conversation" : ""}`}
+    >
+      <div className="sage-atmosphere" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
       <StudioHeader
         language={language}
         status={
@@ -495,6 +508,14 @@ export function Studio({ demo = false }: { demo?: boolean }) {
         />
       ) : (
         <main className="conversation-page">
+          {health && !speechReady && (
+            <GlassNotice language={language}>
+              {t(
+                "语音暂不可用，仍可使用文字对话。",
+                "Speech unavailable. You can still chat by text.",
+              )}
+            </GlassNotice>
+          )}
           <div className="chat-heading">
             <button
               className="back-scenes"
@@ -557,7 +578,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                   "Review your transcript before sending. Get feedback as you go.",
                 )
               : t(
-                  "开启一次，说完停顿即可自动发送。AI 说完后继续听你说，结束时统一总结。",
+                  "开启一次，停顿自动发送，也可以点击「我说完了」。AI 回复结束后继续聆听。",
                   "Start once. Pause to send; listening resumes after each reply. Review feedback at the end.",
                 )}
           </p>
@@ -583,6 +604,16 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                       )}
                 </small>
               </div>
+              {voiceActive && phase === "listening" && recorder.listening && (
+                <button
+                  type="button"
+                  className="finish-utterance"
+                  onClick={() => recorder.finish()}
+                  aria-label={t("我说完了", "I'm done speaking")}
+                >
+                  {t("我说完了", "I'm done speaking")}
+                </button>
+              )}
               <button
                 disabled={
                   demo ||
@@ -637,6 +668,13 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 speech.unlock();
                 void speech.speak(text);
               }}
+              onRewrite={async (text, style, targetLanguage) => {
+                return client.rewrite(text, style, targetLanguage);
+              }}
+              onTranslate={async (text, targetLanguage) => {
+                const result = await client.translate(text, targetLanguage);
+                return result.translation;
+              }}
             />
             {speech.blocked && (
               <button
@@ -650,9 +688,9 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               </button>
             )}
             {speech.notice && (
-              <p className="audio-notice" role="status">
+              <GlassNotice key={speech.notice} language={language}>
                 {localizedError(speech.notice)}
-              </p>
+              </GlassNotice>
             )}
             {!voiceActive && (
               <Composer
