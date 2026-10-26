@@ -16,8 +16,10 @@ describe("conversation learning interactions", () => {
     );
     const user = container.querySelector(".message.user");
     const assistant = container.querySelector(".message.assistant");
-    expect(user?.querySelector(".correction")).toBeTruthy();
+    expect(user?.querySelector(".correction-capsule")).toBeTruthy();
+    expect(user?.querySelector(".correction")).toBeNull();
     expect(assistant?.querySelector(".correction")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /更自然/ }));
     expect(user?.textContent).toContain("用 être。");
   });
 
@@ -47,6 +49,8 @@ describe("three correction modes", () => {
         onSaveCorrection={save} onRewrite={rewrite} />
     );
     const learner = container.querySelector(".message.user");
+    expect(learner?.querySelector(".correction-card")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /更自然/ }));
     expect(learner?.querySelector(".correction-card")).toBeTruthy();
     expect(learner?.querySelector("del")).toBeTruthy();
     expect(rewrite).not.toHaveBeenCalled();
@@ -58,5 +62,26 @@ describe("three correction modes", () => {
     expect(rewrite).toHaveBeenCalledTimes(2);
     fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
     expect(rewrite).toHaveBeenCalledTimes(2);
+  });
+});
+
+
+describe("collapsible feedback", () => {
+  it("shows only one inline correction at a time and allows collapsing", () => {
+    const twoTurns: Message[] = [
+      ...messages,
+      { id: 3, role: "user", content: "Une café, merci." },
+      { id: 4, role: "assistant", content: "D'accord.", correction: "用 un。", corrected_text: "Un café, merci." },
+    ];
+    const view = render(<MessageList messages={twoTurns} busy={false} speechReady={true}
+      language="zh" onSpeak={() => {}} onTranslate={async () => "翻译"} onSaveCorrection={() => {}} />);
+    const pills = screen.getAllByRole("button", { name: /更自然/ });
+    expect(view.container.querySelectorAll(".correction-card")).toHaveLength(0);
+    fireEvent.click(pills[0]);
+    expect(view.container.querySelectorAll(".correction-card")).toHaveLength(1);
+    fireEvent.click(pills[1]);
+    expect(view.container.querySelectorAll(".correction-card")).toHaveLength(1);
+    fireEvent.click(pills[1]);
+    expect(view.container.querySelectorAll(".correction-card")).toHaveLength(0);
   });
 });
