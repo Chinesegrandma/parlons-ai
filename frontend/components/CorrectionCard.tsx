@@ -1,4 +1,5 @@
 import type { Language, RewriteStyle, RewriteSuggestion } from "../lib/types";
+import { SlangGuide } from "./SlangGuide";
 import { useEffect, useState, useId } from "react";
 import { BookOpen, Check, ChevronUp } from "lucide-react";
 
@@ -113,14 +114,15 @@ export function CorrectionCard({
   const [pending, setPending] = useState("");
   const [failed, setFailed] = useState("");
   const [retry, setRetry] = useState(0);
-  const key = language + ":" + style + ":" + original;
+  const rewriteText = style === "slang" ? corrected || original : original;
+  const key = language + ":" + style + ":" + rewriteText;
   const alternative = alternatives[key];
   useEffect(() => {
     if (style === "correction" || !onRewrite || alternative) return;
     let active = true;
     setPending(key);
     setFailed("");
-    onRewrite(original, style, language)
+    onRewrite(rewriteText, style, language)
       .then((value) => {
         if (active)
           setAlternatives((previous) => ({ ...previous, [key]: value }));
@@ -134,11 +136,11 @@ export function CorrectionCard({
     return () => {
       active = false;
     };
-  }, [style, onRewrite, alternative, key, original, language, retry]);
+  }, [style, onRewrite, alternative, key, rewriteText, language, retry]);
   const modes = [
     { value: "correction", label: t("纠正错误", "Correct errors") },
     { value: "polite", label: t("更礼貌", "More polite") },
-    { value: "local", label: t("更自然", "More natural") },
+    { value: "slang", label: t("俚语", "Slang") },
   ] as const;
   return (
     <aside
@@ -283,6 +285,14 @@ export function CorrectionCard({
             aria-live="polite"
             aria-busy={pending === key && !alternative && failed !== key}
           >
+            {style === "slang" && (
+              <p className="slang-context">
+                {t(
+                  "俚语 / verlan · 按语境使用，不强行替换",
+                  "Argot / verlan · context matters; no forced rewrites",
+                )}
+              </p>
+            )}
             {alternative ? (
               <>
                 <p lang="fr" className="alternative-expression">
@@ -309,6 +319,7 @@ export function CorrectionCard({
             ) : (
               <p>{t("正在生成表达…", "Generating an expression…")}</p>
             )}
+            {style === "slang" && <SlangGuide language={language} />}
           </div>
         )}
       </div>

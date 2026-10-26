@@ -364,7 +364,7 @@ async def chat(payload: MessageCreate):
 
 class RewriteRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
-    style: Literal["polite", "local"]
+    style: Literal["polite", "slang", "local"]
     language: Literal["zh", "en"] = "zh"
 
     @field_validator("text")

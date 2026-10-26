@@ -64,23 +64,37 @@ function tone() {
 }
 /** Local, scripted UI demonstration. No fetch, providers, microphone or real evaluation. */
 export const demoApi: typeof api = {
-  rewrite: async (text, style, language) => ({
-    expression: /café/i.test(text)
-      ? style === "polite"
-        ? "Je souhaiterais un café, s’il vous plaît."
-        : "Un café, s’il te plaît."
-      : style === "polite"
-        ? "Est-ce que vous pourriez me donner un coup de main, s'il vous plaît ?"
-        : "Tu peux me filer un coup de main ?",
-    explanation:
-      language === "zh"
-        ? style === "polite"
-          ? "示例：礼貌、自然，适合不熟悉的人或正式场合。"
-          : "示例：适合熟悉的朋友之间，口语化但不粗俗。"
-        : style === "polite"
-          ? "Demo: polite and natural for formal settings."
-          : "Demo: casual contemporary French among friends.",
-  }),
+  rewrite: async (text, style, language) =>
+    style === "slang"
+      ? {
+          expression: /^J[’']aime cette musique\.$/.test(text.trim())
+            ? "Je kiffe cette musique."
+            : text,
+          explanation: /^J[’']aime cette musique\.$/.test(text.trim())
+            ? language === "zh"
+              ? "示例：kiffer 表示 aimer，属于俚语，不是 verlan。适合熟人之间，正式场景仍用 aimer。"
+              : "Demo: kiffer means aimer. Familiar slang, not verlan; use among peers, not in formal settings."
+            : language === "zh"
+              ? "模拟示例：此句未配置合适的俚语替换，不强行造词；普通口语不等于俚语。"
+              : "Mock fixture: no suitable slang rewrite is configured here. Casual wording alone is not slang.",
+        }
+      : {
+          expression: /café/i.test(text)
+            ? style === "polite"
+              ? "Je souhaiterais un café, s’il vous plaît."
+              : "Un café, s’il te plaît."
+            : style === "polite"
+              ? "Est-ce que vous pourriez me donner un coup de main, s'il vous plaît ?"
+              : "Tu peux me filer un coup de main ?",
+          explanation:
+            language === "zh"
+              ? style === "polite"
+                ? "示例：礼貌、自然，适合不熟悉的人或正式场合。"
+                : "示例：适合熟悉的朋友之间，口语化但不粗俗。"
+              : style === "polite"
+                ? "Demo: polite and natural for formal settings."
+                : "Demo: casual contemporary French among friends.",
+        },
 
   translate: async (text, language) => ({
     translation:

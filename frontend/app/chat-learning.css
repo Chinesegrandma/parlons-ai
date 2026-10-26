@@ -365,3 +365,39 @@
   padding: 1px 2px;
   font-weight: 600;
 }
+
+.sage-conversation .slang-context {
+  font: 400 11px/1.7 var(--sage-ui);
+  color: var(--sage-muted);
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #e8eee1;
+}
+
+.slang-guide {
+  margin-top: 16px;
+  border-top: 1px solid #c7d4bf;
+  padding-top: 12px;
+  font: 400 12px/1.8 var(--sage-ui);
+  color: var(--sage-ink);
+}
+.slang-guide summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.slang-guide dl {
+  margin: 10px 0;
+}
+.slang-guide dl > div {
+  margin: 12px 0;
+}
+.slang-guide dt {
+  font-weight: 600;
+}
+.slang-guide dd {
+  margin: 3px 0 0;
+}

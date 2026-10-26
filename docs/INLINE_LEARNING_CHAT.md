@@ -14,7 +14,7 @@ Branch: `design/inline-learning-chat`. Based on the latest main (`a7bebd8`), inc
 - User messages have collapsed learning capsules attached below their bubble. Assistant replies retain listen, translate and copy.
 - At mobile/tablet widths, a selected capsule expands inline. At 1024px and above, the selected card appears in a right-hand learning rail. Exactly one card is mounted. Resizing moves it without making an extra rewrite request.
 - A correction capsule shows the actual corrected French directly, highlighting changed words; tapping it reveals explanations and register alternatives. No “A small suggestion” heading is shown. If no corrected text is provided, a correction gets a neutral “View explanation” fallback; an empty correction produces neutral “Expression options”. No positive language judgment is invented from missing feedback. There is no automatic “Excellent!” badge.
-- The three tabs are Correct errors / More polite / More natural. They use the existing `/rewrite` API for actual separate rewrites, only after the corresponding tab is chosen. The original/corrected French word diff and notebook saving remain.
+- The three tabs are Correct errors / More polite / Slang. They use the existing `/rewrite` API for actual separate rewrites, only after the corresponding tab is chosen. The original/corrected French word diff and notebook saving remain.
 - Cached successful rewrite promises are scoped to message, text, interface language and register. Closing/reopening or resizing reuses them. Failed requests can be retried; late results from another tab do not replace the selected tab.
 - Tabs support arrow keys, Home/End, focus, selected state and associated tab panels. Capsules expose expanded/control attributes and cards have a labeled collapse button.
 - Continuous conversation hides all per-turn learning controls and continues to use the final review.
@@ -49,7 +49,7 @@ No real provider calls were made during development. Mock rewrites/translations 
 PARLONS_PYTHON=/path/to/python bash scripts/check.sh
 ```
 
-Passed Ruff/formatting, backend mock tests, fixture evaluation, Prettier, ESLint, TypeScript, frontend tests and production build. Final counts: **163 backend tests, 78 frontend tests**. Existing TestClient deprecation warning remains.
+Passed Ruff/formatting, backend mock tests, fixture evaluation, Prettier, ESLint, TypeScript, frontend tests and production build. Final counts: **172 backend tests, 79 frontend tests**. Existing TestClient deprecation warning remains.
 
 Chromium checked standalone HTML and the production `/demo` route: initial collapse; inline expansion; wide-screen rail; alternative tabs; settings/language access; no horizontal overflow at 320, 390, 768 and 1280px; composer visible at a 500px window height; continuous-mode suppression; reduced motion; no page errors or external calls. Screenshots are actual browser captures. Physical iPhone/Safari keyboard, microphone and blur performance still require testing; a resized desktop window is not a substitute for device testing.
 
@@ -68,3 +68,5 @@ Use the newly printed URL and password. No `--real` is needed for UI testing. Yo
 `docs/demo/parlons-inline-learning-demo.zip` also contains a standalone HTML preview; extract and open it in a browser. It uses scripted text/tone fixtures and makes no API calls.
 
 Actual screenshots: `docs/design/inline-learning-{collapsed,expanded,chinese,desktop}.png`.
+
+The third tab now teaches argot/verlan rather than repeating natural correction. See [definitions, provenance and checks](FRENCH_SLANG.md).

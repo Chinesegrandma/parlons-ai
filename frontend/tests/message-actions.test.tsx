@@ -66,7 +66,7 @@ describe("inline learning", () => {
     ).toBeNull();
   });
   it("generates separate alternatives only on demand and caches them across closing", async () => {
-    const rewrite = vi.fn(async (_text: string, style: "polite" | "local") => ({
+    const rewrite = vi.fn(async (_text: string, style: "polite" | "slang") => ({
       expression:
         style === "polite"
           ? "Je souhaiterais un café, s’il vous plaît."
@@ -83,7 +83,7 @@ describe("inline learning", () => {
     );
     fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
     await screen.findByText("Je souhaiterais un café, s’il vous plaît.");
-    fireEvent.click(screen.getByRole("tab", { name: "更自然" }));
+    fireEvent.click(screen.getByRole("tab", { name: "俚语" }));
     await screen.findByText("Un café, s’il te plaît.");
     fireEvent.click(screen.getByRole("button", { name: "收起学习卡" }));
     fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
@@ -97,7 +97,7 @@ describe("inline learning", () => {
       explanation: string;
     }) => void;
     const rewrite = vi.fn(
-      (_text: string, style: "polite" | "local", language: "en" | "zh") =>
+      (_text: string, style: "polite" | "slang", language: "en" | "zh") =>
         style === "polite" && language === "zh"
           ? new Promise<{ expression: string; explanation: string }>(
               (resolve) => {
@@ -115,16 +115,16 @@ describe("inline learning", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
-    fireEvent.click(screen.getByRole("tab", { name: "更自然" }));
+    fireEvent.click(screen.getByRole("tab", { name: "俚语" }));
     await screen.findByText("日常请求。");
     resolvePolite({ expression: "Bonjour", explanation: "旧结果" });
     await waitFor(() => expect(screen.queryByText("旧结果")).toBeNull());
     rerender(<MessageList {...defaults} language="en" onRewrite={rewrite} />);
-    fireEvent.click(screen.getByRole("tab", { name: "More natural" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Slang" }));
     await screen.findByText("A casual request.");
     expect(rewrite).toHaveBeenLastCalledWith(
-      "Je voudrais une café.",
-      "local",
+      "Je voudrais un café.",
+      "slang",
       "en",
     );
   });
@@ -170,5 +170,32 @@ it("translates an existing explanation on opening after the interface language c
   expect(screen.getByRole("tab", { name: "More polite" })).toHaveAttribute(
     "aria-selected",
     "true",
+  );
+});
+
+it("offers slang distinctly from correction and politeness, using the corrected sentence", async () => {
+  const rewrite = vi.fn(async () => ({
+    expression: "Je voudrais un café.",
+    explanation: "No suitable slang substitution here.",
+  }));
+  render(
+    <MessageList
+      {...defaults}
+      language="en"
+      onRewrite={rewrite}
+      onTranslate={async () => "Café is masculine."}
+    />,
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: /View explanation and alternatives/ }),
+  );
+  expect(screen.queryByRole("tab", { name: "More natural" })).toBeNull();
+  expect(rewrite).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("tab", { name: "Slang" }));
+  await screen.findByText("No suitable slang substitution here.");
+  expect(rewrite).toHaveBeenCalledExactlyOnceWith(
+    "Je voudrais un café.",
+    "slang",
+    "en",
   );
 });
