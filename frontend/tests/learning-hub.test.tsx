@@ -125,7 +125,9 @@ it("keeps word-level correction cards and saving them to the notebook", async ()
     "Je voudrais une café.",
   );
   await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
-  await user.click(await screen.findByRole("button", { name: /一个小建议/ }));
+  await user.click(
+    await screen.findByRole("button", { name: /查看解释和其他表达/ }),
+  );
   await screen.findByRole("complementary", { name: "本轮纠错" });
   await user.click(screen.getByRole("button", { name: "收进笔记本" }));
   await user.click(screen.getByLabelText("Camille 与聊天设置"));

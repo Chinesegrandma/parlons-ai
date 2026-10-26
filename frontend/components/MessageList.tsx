@@ -1,5 +1,5 @@
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
-import { CorrectionCard } from "./CorrectionCard";
+import { CorrectionCard, changedWords } from "./CorrectionCard";
 import { useEffect, useRef, useState, useId, type CSSProperties } from "react";
 import {
   Sparkles,
@@ -295,6 +295,11 @@ export function MessageList({
                 <div className="learner-feedback">
                   <button
                     className="learning-capsule"
+                    aria-label={
+                      messages[index + 1].corrected_text
+                        ? `${t("查看解释和其他表达", "View explanation and alternatives")}: ${messages[index + 1].corrected_text}`
+                        : undefined
+                    }
                     aria-expanded={showLearning && learningId === message.id}
                     aria-controls={
                       showLearning && learningId === message.id
@@ -308,11 +313,26 @@ export function MessageList({
                     }
                   >
                     <Sparkles size={14} aria-hidden="true" />
-                    <span>
-                      {messages[index + 1].correction
-                        ? t("一个小建议 · 查看", "A small suggestion · View")
-                        : t("表达选项 · 查看", "Expression options · View")}
-                    </span>
+                    {messages[index + 1].corrected_text ? (
+                      <span className="correction-preview" lang="fr">
+                        {changedWords(
+                          message.content,
+                          messages[index + 1].corrected_text!,
+                        ).corrected.map((word, wordIndex) =>
+                          word.changed ? (
+                            <mark key={wordIndex}>{word.text}</mark>
+                          ) : (
+                            word.text
+                          ),
+                        )}
+                      </span>
+                    ) : (
+                      <span>
+                        {messages[index + 1].correction
+                          ? t("查看错误解释", "View explanation")
+                          : t("表达选项 · 查看", "Expression options · View")}
+                      </span>
+                    )}
                     <ChevronDown size={15} aria-hidden="true" />
                   </button>
                   {!wide && showLearning && learningId === message.id && (

@@ -29,7 +29,9 @@ it("runs a categorized offline practice and review without network access", asyn
     "Je voudrais une café.",
   );
   await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
-  await user.click(await screen.findByRole("button", { name: /一个小建议/ }));
+  await user.click(
+    await screen.findByRole("button", { name: /查看解释和其他表达/ }),
+  );
   await screen.findByText(/示例反馈：café 是阳性名词/);
   await user.click(screen.getByRole("button", { name: "结束并总结" }));
   await screen.findByText("这是预设演示总结，不评估真实语言水平。");

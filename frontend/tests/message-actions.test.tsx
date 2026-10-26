@@ -26,7 +26,11 @@ describe("inline learning", () => {
   it("starts collapsed and attaches the learning card below the learner, not the assistant", () => {
     const { container } = render(<MessageList {...defaults} />);
     expect(screen.queryByRole("complementary")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: /一个小建议/ }));
+    const preview = screen.getByRole("button", { name: /查看解释和其他表达/ });
+    expect(preview).toHaveTextContent("Je voudrais un café.");
+    expect(preview.querySelector("mark")).toHaveTextContent("un");
+    expect(screen.queryByText(/一个小建议/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     expect(
       container.querySelector(".message.user .correction-card"),
     ).toBeTruthy();
@@ -49,7 +53,7 @@ describe("inline learning", () => {
       />,
     );
     expect(screen.queryByText(/表达很好/)).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: /一个小建议/ }));
+    fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     fireEvent.click(screen.getByRole("button", { name: /表达选项/ }));
     expect(screen.getAllByRole("complementary")).toHaveLength(1);
     expect(screen.queryByText("café 是阳性名词。")).toBeNull();
@@ -57,7 +61,9 @@ describe("inline learning", () => {
   });
   it("suppresses all per-turn learning in continuous conversation", () => {
     render(<MessageList {...defaults} hideCorrections />);
-    expect(screen.queryByRole("button", { name: /一个小建议/ })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /查看解释和其他表达/ }),
+    ).toBeNull();
   });
   it("generates separate alternatives only on demand and caches them across closing", async () => {
     const rewrite = vi.fn(async (_text: string, style: "polite" | "local") => ({
@@ -70,7 +76,7 @@ describe("inline learning", () => {
     }));
     render(<MessageList {...defaults} onRewrite={rewrite} />);
     expect(rewrite).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: /一个小建议/ }));
+    fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     expect(screen.getByRole("tab", { name: "纠正错误" })).toHaveAttribute(
       "aria-selected",
       "true",
@@ -80,7 +86,7 @@ describe("inline learning", () => {
     fireEvent.click(screen.getByRole("tab", { name: "更自然" }));
     await screen.findByText("Un café, s’il te plaît.");
     fireEvent.click(screen.getByRole("button", { name: "收起学习卡" }));
-    fireEvent.click(screen.getByRole("button", { name: /一个小建议/ }));
+    fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
     await screen.findByText("Je souhaiterais un café, s’il vous plaît.");
     expect(rewrite).toHaveBeenCalledTimes(2);
@@ -107,7 +113,7 @@ describe("inline learning", () => {
     const { rerender } = render(
       <MessageList {...defaults} onRewrite={rewrite} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /一个小建议/ }));
+    fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
     fireEvent.click(screen.getByRole("tab", { name: "更自然" }));
     await screen.findByText("日常请求。");
@@ -131,7 +137,7 @@ describe("inline learning", () => {
         explanation: "A polite request.",
       });
     render(<MessageList {...defaults} onRewrite={rewrite} />);
-    fireEvent.click(screen.getByRole("button", { name: /一个小建议/ }));
+    fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
     fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
     fireEvent.click(await screen.findByRole("button", { name: /生成失败/ }));
     await screen.findByText("Un café, s’il vous plaît.");
@@ -152,7 +158,9 @@ it("translates an existing explanation on opening after the interface language c
   const translate = vi.fn(async () => "Café is a masculine noun.");
   render(<MessageList {...defaults} language="en" onTranslate={translate} />);
   expect(translate).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: /A small suggestion/ }));
+  fireEvent.click(
+    screen.getByRole("button", { name: /View explanation and alternatives/ }),
+  );
   await screen.findByText("Café is a masculine noun.");
   expect(translate).toHaveBeenCalledExactlyOnceWith("café 是阳性名词。", "en");
   fireEvent.keyDown(screen.getByRole("tab", { name: "Correct errors" }), {
