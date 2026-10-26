@@ -668,6 +668,9 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 speech.unlock();
                 void speech.speak(text);
               }}
+              onRewrite={async (text, style, targetLanguage) => {
+                return client.rewrite(text, style, targetLanguage);
+              }}
               onTranslate={async (text, targetLanguage) => {
                 const result = await client.translate(text, targetLanguage);
                 return result.translation;
