@@ -18,7 +18,7 @@ tests, builds, or the included offline evaluations.**
 ## 聊天布局预览分支
 
 `design/inline-learning-chat`：单行 Camille 顶栏、底部输入栏、默认折叠的学习胶囊，
-手机原地展开 / 宽屏右侧学习栏。学习卡提供纠正错误、更礼貌、俚语（含 verlan 小词典）；
+手机原地展开 / 宽屏右侧学习栏。学习卡采用 [A 方案](docs/DIRECTION_A_LEARNING.md)：纠错为主体，下方可选更礼貌、俚语（含 verlan 小词典）；
 俚语按语境生成，不强行替换，见 [定义与验证限制](docs/FRENCH_SLANG.md)。
 设置与笔记本在 Camille 的下拉菜单中。
 详情、截图和测试步骤见 [聊天布局说明](docs/INLINE_LEARNING_CHAT.md)。本次改动暂不合并 main。

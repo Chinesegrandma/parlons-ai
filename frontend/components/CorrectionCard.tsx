@@ -1,7 +1,14 @@
 import type { Language, RewriteStyle, RewriteSuggestion } from "../lib/types";
 import { SlangGuide } from "./SlangGuide";
 import { useEffect, useState, useId } from "react";
-import { BookOpen, Check, ChevronUp } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  ChevronUp,
+  ChevronRight,
+  MessageCircle,
+  Users,
+} from "lucide-react";
 
 /** Word-level LCS: keep shared words quiet, highlight only substitutions/insertions. */
 export function changedWords(original: string, corrected: string) {
@@ -107,7 +114,7 @@ export function CorrectionCard({
     explanationRetry,
   ]);
 
-  const [style, setStyle] = useState<"correction" | RewriteStyle>("correction");
+  const [style, setStyle] = useState<RewriteStyle | null>(null);
   const [alternatives, setAlternatives] = useState<
     Record<string, RewriteSuggestion>
   >({});
@@ -118,7 +125,7 @@ export function CorrectionCard({
   const key = language + ":" + style + ":" + rewriteText;
   const alternative = alternatives[key];
   useEffect(() => {
-    if (style === "correction" || !onRewrite || alternative) return;
+    if (!style || !onRewrite || alternative) return;
     let active = true;
     setPending(key);
     setFailed("");
@@ -138,19 +145,18 @@ export function CorrectionCard({
     };
   }, [style, onRewrite, alternative, key, rewriteText, language, retry]);
   const modes = [
-    { value: "correction", label: t("纠正错误", "Correct errors") },
-    { value: "polite", label: t("更礼貌", "More polite") },
-    { value: "slang", label: t("俚语", "Slang") },
+    { value: "polite", label: t("更礼貌", "More polite"), icon: MessageCircle },
+    { value: "slang", label: t("俚语", "Slang"), icon: Users },
   ] as const;
   return (
     <aside
-      className="correction-card"
+      className="correction-card hierarchy-a"
       aria-label={t("本轮纠错", "Turn correction")}
     >
       <header className="learning-card-heading">
         <strong>
           {hasCorrection
-            ? t("表达建议", "Expression feedback")
+            ? t("更正后的表达", "Corrected expression")
             : t("表达练习", "Expression practice")}
         </strong>
         {onClose && (
@@ -163,125 +169,114 @@ export function CorrectionCard({
           </button>
         )}
       </header>
-      <div
-        className="correction-modes"
-        role="tablist"
-        aria-label={t("表达风格", "Expression style")}
+      <section
+        className="primary-feedback"
+        aria-label={t("纠错解释", "Correction explanation")}
       >
-        {modes.map((mode, index) => (
-          <button
-            key={mode.value}
-            type="button"
-            role="tab"
-            id={`${id}-${mode.value}`}
-            aria-controls={`${id}-panel`}
-            aria-selected={style === mode.value}
-            tabIndex={style === mode.value ? 0 : -1}
-            onClick={() => setStyle(mode.value)}
-            onKeyDown={(event) => {
-              let next = index;
-              if (event.key === "ArrowRight") next = (index + 1) % modes.length;
-              else if (event.key === "ArrowLeft")
-                next = (index + modes.length - 1) % modes.length;
-              else if (event.key === "Home") next = 0;
-              else if (event.key === "End") next = modes.length - 1;
-              else return;
-              event.preventDefault();
-              setStyle(modes[next].value);
-              document.getElementById(`${id}-${modes[next].value}`)?.focus();
-            }}
-          >
-            {mode.label}
-          </button>
-        ))}
-      </div>
-      <div
-        role="tabpanel"
-        id={`${id}-panel`}
-        aria-labelledby={`${id}-${style}`}
-        tabIndex={0}
-      >
-        {style === "correction" ? (
+        {hasCorrection ? (
           <>
-            {hasCorrection ? (
-              <>
-                <div>
-                  <span>{t("你说的", "You said")}</span>
-                  <p lang="fr" className="correction-source">
-                    {words.original.map((word, index) =>
-                      word.changed ? (
-                        <del key={index}>{word.text}</del>
-                      ) : (
-                        word.text
-                      ),
-                    )}
-                  </p>
-                </div>
-                {corrected && (
-                  <div>
-                    <span>
-                      {t("更自然的说法", "A more natural expression")}
-                    </span>
-                    <p lang="fr">
-                      {words.corrected.map((word, index) =>
-                        word.changed ? (
-                          <mark key={index}>{word.text}</mark>
-                        ) : (
-                          word.text
-                        ),
-                      )}
-                    </p>
-                  </div>
-                )}
-                {needsLocalization &&
-                onExplain &&
-                localized?.key !== explanationKey ? (
-                  explanationFailed ? (
-                    <button
-                      onClick={() => setExplanationRetry((value) => value + 1)}
-                    >
-                      {t(
-                        "解释翻译失败，点击重试",
-                        "Explanation translation failed. Retry",
-                      )}
-                    </button>
-                  ) : (
-                    <p className="correction-explanation" role="status">
-                      {t("正在翻译解释…", "Translating explanation…")}
-                    </p>
-                  )
-                ) : (
-                  <p className="correction-explanation">
-                    {localized?.key === explanationKey
-                      ? localized.text
-                      : explanation}
-                  </p>
-                )}
-                {canSave && (
-                  <button
-                    className="text-button"
-                    disabled={saved}
-                    onClick={onSave}
-                  >
-                    {saved ? <Check size={15} /> : <BookOpen size={15} />}
-                    {saved
-                      ? t("已收进笔记本", "Saved to notebook")
-                      : t("收进笔记本", "Save to notebook")}
-                  </button>
-                )}
-              </>
+            {corrected && (
+              <div>
+                <span className="sr-only">
+                  {t("更自然的说法", "A more natural expression")}
+                </span>
+                <p lang="fr">
+                  {words.corrected.map((word, index) =>
+                    word.changed ? (
+                      <mark key={index}>{word.text}</mark>
+                    ) : (
+                      word.text
+                    ),
+                  )}
+                </p>
+              </div>
+            )}
+            {needsLocalization &&
+            onExplain &&
+            localized?.key !== explanationKey ? (
+              explanationFailed ? (
+                <button
+                  onClick={() => setExplanationRetry((value) => value + 1)}
+                >
+                  {t(
+                    "解释翻译失败，点击重试",
+                    "Explanation translation failed. Retry",
+                  )}
+                </button>
+              ) : (
+                <p className="correction-explanation" role="status">
+                  {t("正在翻译解释…", "Translating explanation…")}
+                </p>
+              )
             ) : (
               <p className="correction-explanation">
-                {t(
-                  "本轮没有提供纠错反馈。你可以按需探索其他表达方式。",
-                  "No correction was provided for this turn. You can explore other ways to say it.",
+                {localized?.key === explanationKey
+                  ? localized.text
+                  : explanation}
+              </p>
+            )}
+            <details className="learning-original">
+              <summary>{t("你说的", "You said")}</summary>
+              <p lang="fr" className="correction-source">
+                {words.original.map((word, index) =>
+                  word.changed ? <del key={index}>{word.text}</del> : word.text,
                 )}
               </p>
+            </details>
+            {canSave && (
+              <button className="text-button" disabled={saved} onClick={onSave}>
+                {saved ? <Check size={15} /> : <BookOpen size={15} />}
+                {saved
+                  ? t("已收进笔记本", "Saved to notebook")
+                  : t("收进笔记本", "Save to notebook")}
+              </button>
             )}
           </>
         ) : (
+          <p className="correction-explanation">
+            {t(
+              "本轮没有提供纠错反馈。你可以按需探索其他表达方式。",
+              "No correction was provided for this turn. You can explore other ways to say it.",
+            )}
+          </p>
+        )}
+      </section>
+      <section
+        className="expression-exploration"
+        aria-label={t("换一种表达", "Explore another expression")}
+      >
+        <h3>{t("换一种表达", "Explore another expression")}</h3>
+        <div className="exploration-actions">
+          {modes.map((mode) => (
+            <button
+              key={mode.value}
+              type="button"
+              aria-expanded={style === mode.value}
+              aria-controls={
+                style === mode.value ? `${id}-alternative` : undefined
+              }
+              onClick={() =>
+                setStyle((current) =>
+                  current === mode.value ? null : mode.value,
+                )
+              }
+            >
+              <mode.icon size={16} aria-hidden="true" />
+              <span>{mode.label}</span>
+              <ChevronRight size={15} aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+        {style && (
           <div
             className="expression-alternative"
+            role="region"
+            id={`${id}-alternative`}
+            aria-label={
+              style === "polite"
+                ? t("更礼貌的表达", "Polite alternative")
+                : t("俚语表达", "Slang alternative")
+            }
             aria-live="polite"
             aria-busy={pending === key && !alternative && failed !== key}
           >
@@ -322,7 +317,7 @@ export function CorrectionCard({
             {style === "slang" && <SlangGuide language={language} />}
           </div>
         )}
-      </div>
+      </section>
     </aside>
   );
 }

@@ -39,6 +39,6 @@ it("shows the saved state and readable correction labels", () => {
     />,
   );
   expect(screen.getByText("你说的")).toBeVisible();
-  expect(screen.getByText("更自然的说法")).toBeVisible();
+  expect(screen.getByText("更自然的说法")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "已收进笔记本" })).toBeDisabled();
 });

@@ -401,3 +401,74 @@
 .slang-guide dd {
   margin: 3px 0 0;
 }
+/* Direction A: correction stays primary; register exploration is secondary. */
+.sage-conversation .hierarchy-a .primary-feedback {
+  padding: 10px 0 4px;
+}
+.sage-conversation .hierarchy-a .primary-feedback p[lang="fr"] {
+  font-size: 21px;
+}
+.hierarchy-a .learning-original {
+  margin: 8px 0 12px;
+  color: var(--sage-muted);
+  font-size: 11px;
+}
+.hierarchy-a .learning-original summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.hierarchy-a .expression-exploration {
+  border-top: 1px solid #c7d4bf;
+  margin-top: 14px;
+  padding-top: 16px;
+}
+.hierarchy-a .expression-exploration h3 {
+  margin: 0 0 10px;
+  font: 500 12px/1.6 var(--sage-ui);
+  color: var(--sage-muted);
+}
+.hierarchy-a .exploration-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.hierarchy-a .exploration-actions > button {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 9px 10px;
+  min-height: 44px;
+  border: 1px solid #aebeab;
+  border-radius: 16px;
+  background: #ffffff45;
+  font-size: 12px;
+  color: var(--sage-ink);
+  text-align: left;
+}
+.hierarchy-a .exploration-actions > button span {
+  flex: 1;
+}
+.hierarchy-a .exploration-actions > button[aria-expanded="true"] {
+  background: #e5eddf;
+  border-color: var(--sage-deep);
+}
+.hierarchy-a
+  .exploration-actions
+  > button[aria-expanded="true"]
+  > svg:last-child {
+  transform: rotate(90deg);
+}
+.hierarchy-a .expression-alternative {
+  margin-top: 14px;
+  border-radius: 18px;
+  background: #ffffff66;
+  padding: 12px;
+  animation: sage-arrive 250ms var(--sage-ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hierarchy-a .expression-alternative {
+    animation: none;
+  }
+}

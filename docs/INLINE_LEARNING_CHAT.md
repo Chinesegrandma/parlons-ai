@@ -14,9 +14,9 @@ Branch: `design/inline-learning-chat`. Based on the latest main (`a7bebd8`), inc
 - User messages have collapsed learning capsules attached below their bubble. Assistant replies retain listen, translate and copy.
 - At mobile/tablet widths, a selected capsule expands inline. At 1024px and above, the selected card appears in a right-hand learning rail. Exactly one card is mounted. Resizing moves it without making an extra rewrite request.
 - A correction capsule shows the actual corrected French directly, highlighting changed words; tapping it reveals explanations and register alternatives. No “A small suggestion” heading is shown. If no corrected text is provided, a correction gets a neutral “View explanation” fallback; an empty correction produces neutral “Expression options”. No positive language judgment is invented from missing feedback. There is no automatic “Excellent!” badge.
-- The three tabs are Correct errors / More polite / Slang. They use the existing `/rewrite` API for actual separate rewrites, only after the corresponding tab is chosen. The original/corrected French word diff and notebook saving remain.
+- Direction A keeps correction/meaning explanations primary and always visible. Below a divider, More polite / Slang are secondary disclosure buttons; only explicitly chosen rewrites call `/rewrite`. See [Direction A details](DIRECTION_A_LEARNING.md). The original/corrected word diff and notebook saving remain.
 - Cached successful rewrite promises are scoped to message, text, interface language and register. Closing/reopening or resizing reuses them. Failed requests can be retried; late results from another tab do not replace the selected tab.
-- Tabs support arrow keys, Home/End, focus, selected state and associated tab panels. Capsules expose expanded/control attributes and cards have a labeled collapse button.
+- Secondary choices use native keyboard-accessible disclosure buttons with expanded/control attributes. Capsules also expose expanded/control attributes and cards have a labeled collapse button.
 - Continuous conversation hides all per-turn learning controls and continues to use the final review.
 - Expanding a card does not trigger message auto-scroll. New messages retain existing scrolling behavior; reduced motion disables smooth scrolling and entrances.
 
@@ -69,4 +69,4 @@ Use the newly printed URL and password. No `--real` is needed for UI testing. Yo
 
 Actual screenshots: `docs/design/inline-learning-{collapsed,expanded,chinese,desktop}.png`.
 
-The third tab now teaches argot/verlan rather than repeating natural correction. See [definitions, provenance and checks](FRENCH_SLANG.md).
+The Slang exploration choice teaches argot/verlan rather than repeating natural correction. See [definitions, provenance and checks](FRENCH_SLANG.md).

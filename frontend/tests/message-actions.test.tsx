@@ -77,21 +77,19 @@ describe("inline learning", () => {
     render(<MessageList {...defaults} onRewrite={rewrite} />);
     expect(rewrite).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
-    expect(screen.getByRole("tab", { name: "纠正错误" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.getByText("café 是阳性名词。")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
     await screen.findByText("Je souhaiterais un café, s’il vous plaît.");
-    fireEvent.click(screen.getByRole("tab", { name: "俚语" }));
+    fireEvent.click(screen.getByRole("button", { name: "俚语" }));
     await screen.findByText("Un café, s’il te plaît.");
     fireEvent.click(screen.getByRole("button", { name: "收起学习卡" }));
     fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
-    fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
+    fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
     await screen.findByText("Je souhaiterais un café, s’il vous plaît.");
     expect(rewrite).toHaveBeenCalledTimes(2);
   });
-  it("uses the new interface language and ignores late results from another tab", async () => {
+  it("uses the new interface language and ignores late results from another exploration choice", async () => {
     let resolvePolite!: (value: {
       expression: string;
       explanation: string;
@@ -114,13 +112,13 @@ describe("inline learning", () => {
       <MessageList {...defaults} onRewrite={rewrite} />,
     );
     fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
-    fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
-    fireEvent.click(screen.getByRole("tab", { name: "俚语" }));
+    fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
+    fireEvent.click(screen.getByRole("button", { name: "俚语" }));
     await screen.findByText("日常请求。");
     resolvePolite({ expression: "Bonjour", explanation: "旧结果" });
     await waitFor(() => expect(screen.queryByText("旧结果")).toBeNull());
     rerender(<MessageList {...defaults} language="en" onRewrite={rewrite} />);
-    fireEvent.click(screen.getByRole("tab", { name: "Slang" }));
+    fireEvent.click(screen.getByRole("button", { name: "Slang" }));
     await screen.findByText("A casual request.");
     expect(rewrite).toHaveBeenLastCalledWith(
       "Je voudrais un café.",
@@ -138,7 +136,7 @@ describe("inline learning", () => {
       });
     render(<MessageList {...defaults} onRewrite={rewrite} />);
     fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
-    fireEvent.click(screen.getByRole("tab", { name: "更礼貌" }));
+    fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
     fireEvent.click(await screen.findByRole("button", { name: /生成失败/ }));
     await screen.findByText("Un café, s’il vous plaît.");
     expect(rewrite).toHaveBeenCalledTimes(2);
@@ -163,14 +161,15 @@ it("translates an existing explanation on opening after the interface language c
   );
   await screen.findByText("Café is a masculine noun.");
   expect(translate).toHaveBeenCalledExactlyOnceWith("café 是阳性名词。", "en");
-  fireEvent.keyDown(screen.getByRole("tab", { name: "Correct errors" }), {
-    key: "ArrowRight",
-  });
-  expect(screen.getByRole("tab", { name: "More polite" })).toHaveFocus();
-  expect(screen.getByRole("tab", { name: "More polite" })).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
+  const polite = screen.getByRole("button", { name: "More polite" });
+  fireEvent.click(polite);
+  expect(polite).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByText("Café is a masculine noun.")).toBeVisible();
+  fireEvent.click(polite);
+  expect(polite).toHaveAttribute("aria-expanded", "false");
+  expect(
+    screen.queryByRole("region", { name: "Polite alternative" }),
+  ).toBeNull();
 });
 
 it("offers slang distinctly from correction and politeness, using the corrected sentence", async () => {
@@ -191,7 +190,7 @@ it("offers slang distinctly from correction and politeness, using the corrected 
   );
   expect(screen.queryByRole("tab", { name: "More natural" })).toBeNull();
   expect(rewrite).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("tab", { name: "Slang" }));
+  fireEvent.click(screen.getByRole("button", { name: "Slang" }));
   await screen.findByText("No suitable slang substitution here.");
   expect(rewrite).toHaveBeenCalledExactlyOnceWith(
     "Je voudrais un café.",
