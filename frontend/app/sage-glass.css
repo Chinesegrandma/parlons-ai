@@ -590,3 +590,184 @@
 .parlons-app .focused-chat .correction-card mark {
   color: var(--sage-ink);
 }
+
+
+/* The mobile-first chat is a focused full-height conversation, not a marketing page. */
+.parlons-app.sage-conversation {
+  min-height: 100dvh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.parlons-app.sage-conversation > .app-header { display: none; }
+.parlons-app.sage-conversation > .conversation-page {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  padding: max(14px, env(safe-area-inset-top)) 24px 0;
+  box-sizing: border-box;
+}
+.parlons-app.sage-conversation .chat-heading {
+  flex: none;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  margin: 0 0 18px;
+}
+.parlons-app.sage-conversation .chat-tutor {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+.parlons-app.sage-conversation .chat-tutor-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  text-align: left;
+}
+.parlons-app.sage-conversation .chat-tutor-text strong {
+  font: 500 21px/1.2 var(--sage-french);
+  color: var(--sage-deep);
+}
+.parlons-app.sage-conversation .chat-tutor-text span {
+  font: 12px/1.5 var(--sage-ui);
+  color: var(--sage-muted);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.parlons-app.sage-conversation .back-scenes {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.parlons-app.sage-conversation .end-review {
+  background: rgba(255,255,255,.44);
+  border: 1.5px solid var(--sage-deep);
+  color: var(--sage-deep);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 1;
+}
+.parlons-app.sage-conversation .end-review:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+  border-color: var(--sage-muted);
+}
+.parlons-app.sage-conversation .mode-switch { flex: none; margin: 0 auto 7px; }
+.parlons-app.sage-conversation .mode-description {
+  flex: none;
+  margin: 0 auto 9px;
+  font-size: 11px;
+  max-width: 550px;
+}
+.parlons-app.sage-conversation .voice-session { flex: none; }
+.parlons-app.sage-conversation .focused-chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.parlons-app.sage-conversation .focused-chat .conversation {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 5px 18px;
+}
+.parlons-app.sage-conversation .focused-chat .composerarea {
+  flex: none;
+  position: relative;
+  z-index: 3;
+  padding: 10px 0 max(12px, env(safe-area-inset-bottom));
+}
+.parlons-app.sage-conversation .focused-chat .composer-hint { display: none; }
+.parlons-app.sage-conversation .focused-chat .composer { box-shadow: var(--sage-shadow); }
+.parlons-app.sage-conversation .practice-footnote { display: none; }
+
+/* Correction pill is attached to the learner's message without shifting the AI column. */
+.parlons-app .focused-chat .inline-feedback {
+  width: 100%;
+  margin-top: 8px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.parlons-app .focused-chat .correction-capsule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  max-width: 100%;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.72);
+  background: rgba(255,255,255,.60);
+  color: var(--sage-deep);
+  cursor: pointer;
+  font: 12px/1.45 var(--sage-ui);
+  box-shadow: 0 3px 15px rgba(41,75,61,.05);
+}
+.parlons-app .focused-chat .correction-capsule-label { flex: none; font-weight: 600; }
+.parlons-app .focused-chat .correction-capsule-example {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  font: 13px/1.45 var(--sage-french);
+}
+.parlons-app .focused-chat .correction-capsule-example mark {
+  background: rgba(135,180,137,.22);
+  color: inherit;
+  padding: 1px 3px;
+  border-radius: 4px;
+}
+.parlons-app .focused-chat .correction-capsule svg:last-child {
+  flex: none;
+  transition: transform .18s ease;
+}
+.parlons-app .focused-chat .correction-capsule svg.is-open { transform: rotate(180deg); }
+.parlons-app .focused-chat .correction-capsule:focus-visible {
+  outline: 2px solid var(--sage-deep);
+  outline-offset: 3px;
+}
+.parlons-app .focused-chat .inline-feedback-detail {
+  width: min(100%, 420px);
+  margin-top: 8px;
+  animation: sage-arrive 220ms var(--sage-ease) both;
+}
+.parlons-app .focused-chat .inline-feedback-detail .correction-card {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid var(--sage-border);
+  border-radius: 19px;
+  background: rgba(255,255,255,.77);
+  box-shadow: var(--sage-shadow);
+  text-align: left;
+}
+@media (max-width: 700px) {
+  .parlons-app.sage-conversation > .conversation-page {
+    padding: max(10px, env(safe-area-inset-top)) 14px 0;
+  }
+  .parlons-app.sage-conversation .chat-heading { gap: 9px; margin-bottom: 14px; }
+  .parlons-app.sage-conversation .chat-tutor-text strong { font-size: 18px; }
+  .parlons-app.sage-conversation .end-review { padding: 9px 10px; font-size: 11px; }
+  .parlons-app.sage-conversation .mode-description { font-size: 10px; }
+  .parlons-app .focused-chat .inline-feedback-detail { width: min(100%, 360px); }
+  .parlons-app .focused-chat .inline-feedback-detail .correction-card { padding: 12px; }
+}
