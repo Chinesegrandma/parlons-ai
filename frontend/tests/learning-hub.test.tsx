@@ -119,12 +119,13 @@ it("keeps word-level correction cards and saving them to the notebook", async ()
   render(<Studio demo />);
   await user.click(screen.getByRole("button", { name: "日常" }));
   await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
-  await screen.findByRole("heading", { name: "咖啡馆" });
+  await screen.findByText("咖啡馆");
   await user.type(
     screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
     "Je voudrais une café.",
   );
   await user.click(screen.getByRole("button", { name: /^(Send|发送)$/ }));
+  await user.click(await screen.findByRole("button", { name: /更自然/ }));
   await screen.findByRole("complementary", { name: "本轮纠错" });
   await user.click(screen.getByRole("button", { name: "收进笔记本" }));
   await user.click(screen.getByRole("button", { name: "笔记本" }));
