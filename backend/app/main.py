@@ -362,6 +362,21 @@ async def chat(payload: MessageCreate):
     }
 
 
+class TranslationRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+    language: Literal["zh", "en"] = "zh"
+
+
+@app.post("/translate")
+async def translate(payload: TranslationRequest):
+    """Translate assistant text only; never append translations to chat history."""
+    try:
+        translated = await providers.translate_reply(app, payload.text, payload.language)
+    except Exception as exc:
+        raise HTTPException(502, providers.failure_detail("OpenAI", "translate", exc)) from exc
+    return {"translation": translated}
+
+
 class ReviewRequest(BaseModel):
     language: Literal["zh", "en"] = "zh"
 
