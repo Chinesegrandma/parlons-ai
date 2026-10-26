@@ -362,6 +362,30 @@ async def chat(payload: MessageCreate):
     }
 
 
+class RewriteRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+    style: Literal["polite", "local"]
+    language: Literal["zh", "en"] = "zh"
+
+    @field_validator("text")
+    @classmethod
+    def not_blank(cls, value):
+        if not value.strip():
+            raise ValueError("Message must not be blank")
+        return value
+
+
+@app.post("/rewrite")
+async def rewrite(payload: RewriteRequest):
+    try:
+        result = await providers.rewrite_expression(
+            app, payload.text, payload.style, payload.language
+        )
+    except Exception as exc:
+        raise HTTPException(502, providers.failure_detail("OpenAI", "rewrite", exc)) from exc
+    return result.model_dump()
+
+
 class TranslationRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
     language: Literal["zh", "en"] = "zh"
