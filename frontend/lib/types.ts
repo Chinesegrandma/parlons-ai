@@ -49,3 +49,6 @@ export type PracticeOptions = {
   review_targets: string[];
 };
 export type Voice = { id: string; name: string };
+
+export type RewriteStyle = "polite" | "local";
+export type RewriteSuggestion = { expression: string; explanation: string };
