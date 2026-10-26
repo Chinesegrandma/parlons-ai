@@ -351,3 +351,18 @@ def test_health_has_no_credentials(api, monkeypatch):
     assert "private-openai-fixture" not in response.text
     assert "private-eleven-fixture" not in response.text
     assert response.json()["mock_ai"] is True
+
+
+def test_translate_is_independent_from_session_history(api, session):
+    before = api.get(f"/sessions/{session}/messages").json()["messages"]
+    response = api.post("/translate", json={"text": "Bonjour !", "language": "zh"})
+    assert response.status_code == 200
+    assert response.json()["translation"]
+    after = api.get(f"/sessions/{session}/messages").json()["messages"]
+    assert after == before
+
+
+def test_translate_validates_length_and_language(api):
+    assert api.post("/translate", json={"text": ""}).status_code == 422
+    assert api.post("/translate", json={"text": "a" * 2001}).status_code == 422
+    assert api.post("/translate", json={"text": "Salut", "language": "xx"}).status_code == 422
