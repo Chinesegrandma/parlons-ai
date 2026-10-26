@@ -366,3 +366,22 @@ def test_translate_validates_length_and_language(api):
     assert api.post("/translate", json={"text": ""}).status_code == 422
     assert api.post("/translate", json={"text": "a" * 2001}).status_code == 422
     assert api.post("/translate", json={"text": "Salut", "language": "xx"}).status_code == 422
+
+
+@pytest.mark.parametrize("style", ["polite", "local"])
+def test_rewrite_styles_do_not_change_conversation(api, session, style):
+    before = api.get(f"/sessions/{session}/messages").json()["messages"]
+    response = api.post("/rewrite", json={
+        "text": "Tu peux m'aider ?", "style": style, "language": "zh"
+    })
+    assert response.status_code == 200
+    assert response.json()["expression"]
+    assert response.json()["explanation"]
+    after = api.get(f"/sessions/{session}/messages").json()["messages"]
+    assert after == before
+
+
+def test_rewrite_invalid_values(api):
+    assert api.post("/rewrite", json={"text": "", "style": "polite"}).status_code == 422
+    assert api.post("/rewrite", json={"text": "Salut", "style": "slang"}).status_code == 422
+    assert api.post("/rewrite", json={"text": "Salut", "style": "local", "language": "fr"}).status_code == 422
