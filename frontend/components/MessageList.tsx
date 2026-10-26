@@ -153,7 +153,7 @@ export function MessageList({
                   language={language}
                   original={message.content}
                   corrected={next.corrected_text || ""}
-                  explanation={next.correction}
+                  explanation={next.correction || ""}
                   saved={savedCorrectionIds.includes(next.id)}
                   onSave={() => onSaveCorrection(next.id)}
                   onRewrite={onRewrite}
