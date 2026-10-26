@@ -64,6 +64,9 @@ function tone() {
 }
 /** Local, scripted UI demonstration. No fetch, providers, microphone or real evaluation. */
 export const demoApi: typeof api = {
+  translate: async (_text, language) => ({
+    translation: language === "zh" ? "演示翻译：这是法语回答的中文意思。" : "Demo translation of this French reply.",
+  }),
   health: async () => ({
     mode: "mock",
     speech_ready: true,
