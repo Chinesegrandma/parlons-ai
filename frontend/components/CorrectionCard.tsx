@@ -57,7 +57,7 @@ export function CorrectionCard({
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const words = changedWords(original, corrected || original);
-  const hasCorrection = Boolean(correction?.trim());
+  const hasCorrection = Boolean(explanation?.trim());
   const [style, setStyle] = useState<"correction" | RewriteStyle>("correction");
   const [alternatives, setAlternatives] = useState<Record<string, RewriteSuggestion>>({});
   const [loading, setLoading] = useState(false);
