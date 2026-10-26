@@ -82,7 +82,7 @@ export function CorrectionCard({
   }
 
   return (
-    <aside className="correction-card" aria-label={t("表达改进", "Improve your expression")}>
+    <aside className="correction-card" aria-label={t("本轮纠错", "Turn correction")}>
       <div className="correction-modes" role="group" aria-label={t("表达风格", "Expression style")}>
         <button type="button" aria-pressed={style === "correction"}
           onClick={() => void selectStyle("correction")}>
@@ -110,7 +110,7 @@ export function CorrectionCard({
               </div>
               {corrected && (
                 <div>
-                  <span>{t("正确表达", "Correct expression")}</span>
+                  <span>{t("更自然的说法", "A more natural expression")}</span>
                   <p lang="fr">{words.corrected.map((w, index) =>
                     w.changed ? <mark key={index}>{w.text}</mark> : w.text)}</p>
                 </div>
