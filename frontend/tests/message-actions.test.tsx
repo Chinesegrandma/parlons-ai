@@ -32,3 +32,31 @@ describe("conversation learning interactions", () => {
     expect(screen.queryByText("看什么电影？")).toBeNull();
   });
 });
+
+
+describe("three correction modes", () => {
+  it("renders default error correction under the user's bubble and generates alternatives only on click", async () => {
+    const rewrite = vi.fn(async (_text: string, style: "polite" | "local") => ({
+      expression: style === "polite" ? "Pourriez-vous m'aider ?" : "Tu peux me filer un coup de main ?",
+      explanation: style === "polite" ? "较礼貌" : "更口语",
+    }));
+    const save = vi.fn();
+    const { container } = render(
+      <MessageList messages={messages} busy={false} speechReady={true}
+        language="zh" onSpeak={() => {}} onTranslate={async () => "翻译"}
+        onSaveCorrection={save} onRewrite={rewrite} />
+    );
+    const learner = container.querySelector(".message.user");
+    expect(learner?.querySelector(".correction-card")).toBeTruthy();
+    expect(learner?.querySelector("del")).toBeTruthy();
+    expect(rewrite).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
+    await waitFor(() => expect(screen.getByText("Pourriez-vous m'aider ?")).toBeTruthy());
+    expect(rewrite).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "更本土地道" }));
+    await waitFor(() => expect(screen.getByText("Tu peux me filer un coup de main ?")).toBeTruthy());
+    expect(rewrite).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
+    expect(rewrite).toHaveBeenCalledTimes(2);
+  });
+});
