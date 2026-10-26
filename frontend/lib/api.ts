@@ -56,6 +56,11 @@ export const api = {
       "/chat",
       json({ session_id, message, transcript_id, ...preferences }),
     ),
+  translate: (text: string, language: Language, signal?: AbortSignal) =>
+    request<{ translation: string }>("/translate", {
+      ...json({ text, language }),
+      signal,
+    }),
   review: (id: string, language: Language, signal?: AbortSignal) =>
     request<Review>(`/sessions/${id}/review`, {
       ...json({ language }),
