@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, AudioLines, Mic, Pause } from "lucide-react";
+import { ArrowLeft, AudioLines, Mic, Pause, ChevronDown } from "lucide-react";
 import { StudioHeader, PracticeSettings } from "./AppChrome";
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { Composer } from "./Composer";
@@ -413,6 +413,51 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               "Speaking. Listening resumes after the reply.",
             )
           : t("准备好时，开启连续对话。", "Start when you are ready.");
+  useEffect(() => {
+    if (page !== "chat" || !window.visualViewport) return;
+    const viewport = window.visualViewport;
+    const resize = () =>
+      document.documentElement.style.setProperty(
+        "--chat-viewport-height",
+        `${viewport.height}px`,
+      );
+    resize();
+    viewport.addEventListener("resize", resize);
+    return () => {
+      viewport.removeEventListener("resize", resize);
+      document.documentElement.style.removeProperty("--chat-viewport-height");
+    };
+  }, [page]);
+  const navigation = (
+    <StudioHeader
+      language={language}
+      status={
+        offline
+          ? t("连接暂不可用", "Connection unavailable")
+          : !health
+            ? t("连接中", "Connecting")
+            : demo || health.mock_ai
+              ? t("模拟体验", "Demo mode")
+              : health.mode === "ai"
+                ? t("真实练习", "Live practice")
+                : t("文字体验", "Text demo")
+      }
+      offline={offline}
+      privateSite={Boolean(health?.private_site)}
+      settings={settings}
+      onHome={() => {
+        pauseVoice();
+        cancelReview();
+        setPage("home");
+      }}
+      onNotebook={() => {
+        pauseVoice();
+        cancelReview();
+        setPage("notebook");
+      }}
+      onSettings={() => setSettings(!settings)}
+    />
+  );
   return (
     <div
       className={`parlons-app ${page === "chat" ? "sage-conversation" : ""}`}
@@ -422,34 +467,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
         <span />
         <span />
       </div>
-      <StudioHeader
-        language={language}
-        status={
-          offline
-            ? t("连接暂不可用", "Connection unavailable")
-            : !health
-              ? t("连接中", "Connecting")
-              : demo || health.mock_ai
-                ? t("模拟体验", "Demo mode")
-                : health.mode === "ai"
-                  ? t("真实练习", "Live practice")
-                  : t("文字体验", "Text demo")
-        }
-        offline={offline}
-        privateSite={Boolean(health?.private_site)}
-        settings={settings}
-        onHome={() => {
-          pauseVoice();
-          cancelReview();
-          setPage("home");
-        }}
-        onNotebook={() => {
-          pauseVoice();
-          cancelReview();
-          setPage("notebook");
-        }}
-        onSettings={() => setSettings(!settings)}
-      />
+      {page !== "chat" && navigation}
       {settings && (
         <PracticeSettings
           language={language}
@@ -524,19 +542,34 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 setPage("home");
               }}
             >
-              <ArrowLeft size={17} />
-              {t("场景", "Scenes")}
+              <ArrowLeft size={20} />
+              <span className="sr-only">{t("场景", "Scenes")}</span>
             </button>
-            <div>
-              <span className="eyebrow">PARLONS FRANÇAIS</span>
-              <h1>
-                {session?.options?.situation
-                  ? session.options.review_targets?.length
-                    ? t("复习表达", "Review an expression")
-                    : t("自定义情境", "Your scenario")
-                  : scene?.[language] || t("自由聊天", "Free chat")}
-              </h1>
-            </div>
+            <details className="identity-menu">
+              <summary
+                aria-label={t(
+                  "Camille 与聊天设置",
+                  "Camille and chat settings",
+                )}
+              >
+                <AssistantAvatar size={36} language={language} />
+                <div>
+                  <strong>{ASSISTANT_NAME}</strong>
+                  {(demo || health?.mock_ai) && (
+                    <span className="demo-indicator">{t("演示", "Demo")}</span>
+                  )}
+                  <h1>
+                    {session?.options?.situation
+                      ? session.options.review_targets?.length
+                        ? t("复习表达", "Review an expression")
+                        : t("自定义情境", "Your scenario")
+                      : scene?.[language] || t("自由聊天", "Free chat")}
+                  </h1>
+                </div>
+                <ChevronDown size={13} aria-hidden="true" />
+              </summary>
+              <div className="chat-navigation">{navigation}</div>
+            </details>
             <button
               className="end-review"
               disabled={reviewLoading || (!turns && !conversation.busy)}
@@ -544,15 +577,6 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             >
               {t("结束并总结", "Finish & review")}
             </button>
-          </div>
-          <div className="assistant-identity">
-            <AssistantAvatar size={48} language={language} />
-            <div>
-              <strong>{ASSISTANT_NAME}</strong>
-              <small>
-                {t("你的 AI 法语女助理", "Your AI French assistant")}
-              </small>
-            </div>
           </div>
           <div
             className="mode-switch"
@@ -571,17 +595,6 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               {t("连续对话", "Conversation")}
             </button>
           </div>
-          <p className="mode-description">
-            {mode === "guided"
-              ? t(
-                  "录音后检查转写再发送，边聊边看反馈。",
-                  "Review your transcript before sending. Get feedback as you go.",
-                )
-              : t(
-                  "开启一次，停顿自动发送，也可以点击「我说完了」。AI 回复结束后继续聆听。",
-                  "Start once. Pause to send; listening resumes after each reply. Review feedback at the end.",
-                )}
-          </p>
           {mode === "conversation" && (
             <section
               className={`voice-session ${voiceActive ? "active" : ""}`}
@@ -727,17 +740,6 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               }}
             />
           )}
-          <p className="practice-footnote">
-            {demo || health?.mock_ai
-              ? t(
-                  "模拟回复与提示音，不评估真实语言质量。",
-                  "Scripted replies and tones, not a real language evaluation.",
-                )
-              : t(
-                  "语音与回复会使用你的 API 额度。连续模式每轮会自动调用服务。",
-                  "Speech and replies use API credits. Conversation mode calls services automatically each turn.",
-                )}
-          </p>
         </main>
       )}
       {page === "home" && (
@@ -745,15 +747,17 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           <InstallApp language={language} />
         </div>
       )}
-      <footer className="app-bottom">
-        UN PEU, CHAQUE JOUR.{" "}
-        <span>
-          {t(
-            "少一点犹豫，多一点表达。",
-            "A little less hesitation. A little more conversation.",
-          )}
-        </span>
-      </footer>
+      {page !== "chat" && (
+        <footer className="app-bottom">
+          UN PEU, CHAQUE JOUR.{" "}
+          <span>
+            {t(
+              "少一点犹豫，多一点表达。",
+              "A little less hesitation. A little more conversation.",
+            )}
+          </span>
+        </footer>
+      )}
     </div>
   );
 }

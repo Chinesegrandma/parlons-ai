@@ -191,3 +191,16 @@ def test_login_interface_language(private_api):
     response = private_api.post("/auth/login", data={"password": "wrong"})
     assert "Incorrect password" in response.text
     assert "Site password" in response.text
+
+
+@pytest.mark.parametrize(
+    "path", ["/translate", "/rewrite", "/api/backend/translate", "/api/backend/rewrite"]
+)
+def test_learning_actions_share_provider_budget(private_api, monkeypatch, path):
+    login(private_api)
+    monkeypatch.setenv("MAX_CALLS_PER_DAY", "1")
+    assert private_api.post("/speech/synthesize", json={"text": "Bonjour"}).status_code == 200
+    payload = {"text": "Bonjour", "language": "en", "style": "polite"}
+    response = private_api.post(path, json=payload)
+    assert response.status_code == 429
+    assert int(response.headers["retry-after"]) > 0

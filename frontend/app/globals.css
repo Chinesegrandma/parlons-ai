@@ -1856,7 +1856,6 @@ p {
   display: none;
 }
 
-
 /* Learning feedback belongs to the learner's side of the conversation. */
 .message.user .bubblewrap .correction-card,
 .message.user .bubblewrap .correction {
@@ -1872,12 +1871,16 @@ p {
   gap: 8px;
   margin-top: 8px;
 }
-.reply-actions .speak { display: inline-flex; align-items: center; gap: 5px; }
+.reply-actions .speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 .reply-translation {
   flex-basis: 100%;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(113, 143, 128, .10);
+  background: rgba(113, 143, 128, 0.1);
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -1896,10 +1899,39 @@ p {
 }
 
 /* Correction is anchored under the learner, with optional register upgrades. */
-.correction-modes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.correction-modes button { border: 1px solid rgba(67,94,80,.28); border-radius: 999px; background: transparent; padding: 7px 12px; cursor: pointer; font: inherit; font-size: 13px; }
-.correction-modes button[aria-pressed="true"] { background: #285e4f; color: white; }
-.correction-modes button:focus-visible { outline: 2px solid #285e4f; outline-offset: 2px; }
-.correction-source del { text-decoration-color: #d15c4e; text-decoration-thickness: 2px; background: rgba(209,92,78,.12); }
-.alternative-expression { font-size: 1.05em; line-height: 1.6; overflow-wrap: anywhere; }
-.expression-alternative { min-height: 64px; }
+.correction-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.correction-modes button {
+  border: 1px solid rgba(67, 94, 80, 0.28);
+  border-radius: 999px;
+  background: transparent;
+  padding: 7px 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+.correction-modes button[aria-pressed="true"] {
+  background: #285e4f;
+  color: white;
+}
+.correction-modes button:focus-visible {
+  outline: 2px solid #285e4f;
+  outline-offset: 2px;
+}
+.correction-source del {
+  text-decoration-color: #d15c4e;
+  text-decoration-thickness: 2px;
+  background: rgba(209, 92, 78, 0.12);
+}
+.alternative-expression {
+  font-size: 1.05em;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.expression-alternative {
+  min-height: 64px;
+}

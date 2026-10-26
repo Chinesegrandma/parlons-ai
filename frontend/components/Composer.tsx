@@ -178,30 +178,6 @@ export function Composer({
           <ArrowUp size={21} />
         </button>
       </div>
-      <div className="composer-hint">
-        <span>
-          {hideMicrophone
-            ? t(
-                "也可以输入文字继续对话。",
-                "You can also type to continue the conversation.",
-              )
-            : demo
-              ? t(
-                  "本地演示 · 预设回复 · 播放为提示音",
-                  "Local demo · scripted replies · playback uses a tone",
-                )
-              : t(
-                  "点击麦克风录音，再次点击结束 · 最长 60 秒",
-                  "Tap to record, tap again to stop · up to 60 seconds",
-                )}
-        </span>
-        <span>
-          {t(
-            "Enter 发送 · Shift+Enter 换行",
-            "Enter to send · Shift+Enter for a new line",
-          )}
-        </span>
-      </div>
     </div>
   );
 }

@@ -1,0 +1,352 @@
+/* Conversation viewport: header and composer stay visible, only history scrolls. */
+.sage-conversation {
+  height: var(--chat-viewport-height, 100dvh);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.sage-conversation .conversation-page {
+  width: 100%;
+  max-width: 1200px;
+  padding: max(18px, env(safe-area-inset-top)) 20px 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.sage-conversation .chat-heading {
+  flex: none;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sage-conversation .back-scenes {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  justify-content: center;
+  padding: 0;
+}
+.sage-conversation .identity-menu {
+  flex: 1;
+  min-width: 0;
+}
+.sage-conversation .identity-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  min-height: 44px;
+  list-style: none;
+  border-radius: 20px;
+}
+.identity-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.identity-menu > summary > div {
+  min-width: 0;
+}
+.sage-conversation .identity-menu strong {
+  font: 400 22px/1.2 var(--sage-french);
+}
+.sage-conversation .identity-menu h1 {
+  font: 400 12px/1.5 var(--sage-ui);
+  margin: 3px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-navigation {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 78px;
+  z-index: 8;
+  border-radius: 24px;
+  border: 1px solid var(--sage-border);
+  background: #f0f4e9;
+  box-shadow: var(--sage-shadow);
+  overflow: hidden;
+}
+.sage-conversation .chat-navigation .app-header {
+  padding: 8px 12px;
+  height: auto;
+  min-height: 64px;
+}
+.sage-conversation .chat-navigation .app-brand {
+  font-size: 22px;
+}
+.sage-conversation .end-review {
+  border: 1.5px solid var(--sage-deep);
+  color: var(--sage-ink);
+  font-weight: 600;
+  opacity: 1;
+  flex: none;
+  font-size: 12px;
+  padding: 8px 13px;
+}
+.sage-conversation .end-review:disabled {
+  opacity: 1;
+  border-style: dashed;
+}
+.sage-conversation .mode-switch {
+  flex: none;
+  width: min(100%, 310px);
+}
+.sage-conversation .mode-switch button {
+  flex: 1;
+}
+.sage-conversation .mode-description {
+  margin: 8px 0 12px;
+  font-size: 10px;
+}
+.sage-conversation .focused-chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.conversation-layout {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+}
+.sage-conversation .focused-chat .conversation {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  padding: 8px 0 20px;
+  gap: 22px;
+}
+.sage-conversation .focused-chat .message.user {
+  flex-direction: column;
+  align-items: flex-end;
+  max-width: 95%;
+}
+.sage-conversation .focused-chat .user .bubblewrap {
+  max-width: 100%;
+}
+.sage-conversation .focused-chat .message.assistant {
+  max-width: 92%;
+}
+.sage-conversation .focused-chat .message.assistant > .avatar {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  margin: 10px 8px 0 0;
+}
+.sage-conversation .focused-chat .message-author {
+  display: none;
+}
+.sage-conversation .focused-chat .reply-actions {
+  gap: 6px;
+}
+.sage-conversation .focused-chat .reply-actions .speak {
+  margin: 6px 0 0;
+  padding: 6px 9px;
+  background: transparent;
+  font-size: 10px;
+}
+.sage-conversation .focused-chat .bubble {
+  font-size: 21px;
+}
+.learner-feedback {
+  max-width: 100%;
+  margin-top: 7px;
+}
+.learning-capsule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  border: 1px solid var(--sage-border);
+  border-radius: var(--sage-pill-radius);
+  padding: 8px 13px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--sage-ink);
+  font-size: 12px;
+  text-align: left;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+.learning-capsule svg {
+  flex: none;
+}
+.learning-capsule[aria-expanded="true"] > svg:last-child {
+  transform: rotate(180deg);
+}
+.inline-learning {
+  margin-top: 8px;
+  animation: sage-arrive 250ms var(--sage-ease) both;
+}
+.sage-conversation .focused-chat .correction-card {
+  width: 100%;
+  max-width: 430px;
+  margin: 0;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid var(--sage-border);
+  border-radius: 24px;
+  box-shadow: var(--sage-shadow);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  text-align: left;
+  color: var(--sage-ink);
+}
+.learning-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.learning-card-heading strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.learning-card-heading > button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 50%;
+}
+.sage-conversation .correction-modes {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  margin: 8px 0 16px;
+  border-radius: 24px;
+  background: #e5eddf;
+}
+.sage-conversation .correction-modes > button {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  border: 0;
+  border-radius: 22px;
+  padding: 7px;
+  color: var(--sage-muted);
+  background: transparent;
+}
+.sage-conversation .correction-modes > button[aria-selected="true"] {
+  background: white;
+  color: var(--sage-ink);
+  font-weight: 600;
+}
+.sage-conversation .correction-card [role="tabpanel"] > div > span {
+  font-size: 11px;
+}
+.sage-conversation .correction-card p[lang="fr"] {
+  font: 400 19px/1.5 var(--sage-french);
+  margin: 8px 0 16px;
+}
+.sage-conversation .correction-explanation {
+  font: 400 12px/1.8 var(--sage-ui);
+  color: var(--sage-muted);
+}
+.sage-conversation .correction-source del {
+  text-decoration-color: #9b392e;
+  text-decoration-thickness: 2px;
+}
+.sage-conversation .focused-chat .composerarea {
+  position: static;
+  flex: none;
+  padding: 10px 0 12px;
+}
+.sage-conversation .focused-chat .composer textarea {
+  resize: none;
+}
+.sage-conversation .voice-session {
+  margin-bottom: 12px;
+  flex: none;
+}
+.sage-conversation .session-review {
+  position: absolute;
+  z-index: 7;
+  inset: 90px 16px 12px;
+  overflow-y: auto;
+  margin: 0;
+  background: #f4f5ec;
+}
+.sage-conversation > .app-settings {
+  position: absolute;
+  inset: 20px 12px;
+  z-index: 10;
+  overflow-y: auto;
+  width: min(620px, calc(100% - 24px));
+  max-height: calc(100dvh - 40px);
+}
+@media (min-width: 1024px) {
+  .sage-conversation .conversation-page {
+    padding-inline: 32px;
+  }
+  .conversation-layout.has-learning {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 28px;
+  }
+  .learning-rail {
+    overflow-y: auto;
+    padding: 8px 4px 20px;
+    min-height: 0;
+  }
+  .sage-conversation .focused-chat .message {
+    max-width: 85%;
+  }
+  .sage-conversation .focused-chat .bubble {
+    font-size: 23px;
+  }
+}
+@media (max-width: 360px) {
+  .sage-conversation .conversation-page {
+    padding-inline: 12px;
+  }
+  .sage-conversation .chat-heading {
+    gap: 7px;
+  }
+  .sage-conversation .identity-menu strong {
+    font-size: 19px;
+  }
+  .sage-conversation .identity-menu summary {
+    gap: 6px;
+  }
+  .sage-conversation .end-review {
+    font-size: 10px;
+    padding: 7px 9px;
+  }
+  .sage-conversation .chat-navigation .app-brand {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inline-learning {
+    animation: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.demo-indicator {
+  font: 500 9px/1.5 var(--sage-ui);
+  color: var(--sage-muted);
+  border: 1px solid var(--sage-deep);
+  border-radius: 12px;
+  padding: 2px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}

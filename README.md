@@ -15,6 +15,12 @@ tests, builds, or the included offline evaluations.**
 真实调用使用 `--tunnel --real`。终端会显示 HTTPS 地址和本次访问口令。
 安装、密钥输入和关闭方法见 [临时隧道指南](docs/TEMPORARY_TUNNEL.md)。
 
+## 聊天布局预览分支
+
+`design/inline-learning-chat`：单行 Camille 顶栏、底部输入栏、默认折叠的学习胶囊，
+手机原地展开 / 宽屏右侧学习栏。设置与笔记本在 Camille 的下拉菜单中。
+详情、截图和测试步骤见 [聊天布局说明](docs/INLINE_LEARNING_CHAT.md)。本次改动暂不合并 main。
+
 ## Features
 
 - A category-first practice home: life admin, everyday life, social life, study/work,
@@ -35,7 +41,8 @@ tests, builds, or the included offline evaluations.**
   they do not assess pronunciation and are not retained across refreshes.
 - Chinese and English settings apply to the interface and newly generated explanations
   and reviews. French remains the practice language. Previous generated feedback is not
-  retroactively translated. Settings call this “Language” and “Practice preferences.”
+  overwritten; opening a learning card can translate its explanation on demand.
+  Settings call this “Language” and “Practice preferences.”
 - Camille is the default female AI assistant persona, with an inline illustrated avatar
   and a short introduction persisted once in each new conversation opening.
 - New English feedback has an explicit language contract and a bounded repair for

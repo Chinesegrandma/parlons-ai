@@ -14,7 +14,7 @@ from starlette.datastructures import Headers
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 
 COOKIE = "parlons_session"
-BILLABLE_PATHS = {"/chat", "/speech/transcribe", "/speech/synthesize"}
+BILLABLE_PATHS = {"/chat", "/speech/transcribe", "/speech/synthesize", "/translate", "/rewrite"}
 MAX_BODY = 9 * 1024 * 1024
 
 
