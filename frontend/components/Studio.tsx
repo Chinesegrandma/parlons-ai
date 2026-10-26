@@ -519,23 +519,26 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           <div className="chat-heading">
             <button
               className="back-scenes"
+              aria-label={t("返回场景", "Back to scenes")}
               onClick={() => {
                 pauseVoice();
                 setPage("home");
               }}
             >
-              <ArrowLeft size={17} />
-              {t("场景", "Scenes")}
+              <ArrowLeft size={19} />
             </button>
-            <div>
-              <span className="eyebrow">PARLONS FRANÇAIS</span>
-              <h1>
-                {session?.options?.situation
-                  ? session.options.review_targets?.length
-                    ? t("复习表达", "Review an expression")
-                    : t("自定义情境", "Your scenario")
-                  : scene?.[language] || t("自由聊天", "Free chat")}
-              </h1>
+            <div className="chat-tutor">
+              <AssistantAvatar size={34} language={language} />
+              <div className="chat-tutor-text">
+                <strong>{ASSISTANT_NAME}</strong>
+                <span>
+                  {session?.options?.situation
+                    ? session.options.review_targets?.length
+                      ? t("复习表达", "Review an expression")
+                      : t("自定义情境", "Your scenario")
+                    : scene?.[language] || t("自由聊天", "Free chat")}
+                </span>
+              </div>
             </div>
             <button
               className="end-review"
@@ -544,15 +547,6 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             >
               {t("结束并总结", "Finish & review")}
             </button>
-          </div>
-          <div className="assistant-identity">
-            <AssistantAvatar size={48} language={language} />
-            <div>
-              <strong>{ASSISTANT_NAME}</strong>
-              <small>
-                {t("你的 AI 法语女助理", "Your AI French assistant")}
-              </small>
-            </div>
           </div>
           <div
             className="mode-switch"
@@ -727,7 +721,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               }}
             />
           )}
-          <p className="practice-footnote">
+          {!demo && !health?.mock_ai && <p className="practice-footnote" aria-label={t("技术提示", "Technical notice")}>
             {demo || health?.mock_ai
               ? t(
                   "模拟回复与提示音，不评估真实语言质量。",
@@ -737,7 +731,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                   "语音与回复会使用你的 API 额度。连续模式每轮会自动调用服务。",
                   "Speech and replies use API credits. Conversation mode calls services automatically each turn.",
                 )}
-          </p>
+          </p>}
         </main>
       )}
       {page === "home" && (
@@ -745,7 +739,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           <InstallApp language={language} />
         </div>
       )}
-      <footer className="app-bottom">
+      {page !== "chat" && <footer className="app-bottom">
         UN PEU, CHAQUE JOUR.{" "}
         <span>
           {t(
@@ -753,7 +747,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             "A little less hesitation. A little more conversation.",
           )}
         </span>
-      </footer>
+      </footer>}
     </div>
   );
 }
