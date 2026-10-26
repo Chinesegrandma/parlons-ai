@@ -578,7 +578,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                   "Review your transcript before sending. Get feedback as you go.",
                 )
               : t(
-                  "开启一次，说完停顿即可自动发送。AI 说完后继续听你说，结束时统一总结。",
+                  "开启一次，停顿自动发送，也可以点击「我说完了」。AI 回复结束后继续聆听。",
                   "Start once. Pause to send; listening resumes after each reply. Review feedback at the end.",
                 )}
           </p>
@@ -604,6 +604,16 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                       )}
                 </small>
               </div>
+              {voiceActive && phase === "listening" && recorder.listening && (
+                <button
+                  type="button"
+                  className="finish-utterance"
+                  onClick={() => recorder.finish()}
+                  aria-label={t("我说完了", "I'm done speaking")}
+                >
+                  {t("我说完了", "I'm done speaking")}
+                </button>
+              )}
               <button
                 disabled={
                   demo ||
@@ -657,6 +667,10 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 pauseVoice();
                 speech.unlock();
                 void speech.speak(text);
+              }}
+              onTranslate={async (text, targetLanguage) => {
+                const result = await client.translate(text, targetLanguage);
+                return result.translation;
               }}
             />
             {speech.blocked && (
