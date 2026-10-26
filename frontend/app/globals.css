@@ -1855,3 +1855,42 @@ p {
 .view-content[hidden] {
   display: none;
 }
+
+
+/* Learning feedback belongs to the learner's side of the conversation. */
+.message.user .bubblewrap .correction-card,
+.message.user .bubblewrap .correction {
+  width: 100%;
+  max-width: 100%;
+  margin: 8px 0 0;
+  text-align: left;
+}
+.reply-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.reply-actions .speak { display: inline-flex; align-items: center; gap: 5px; }
+.reply-translation {
+  flex-basis: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(113, 143, 128, .10);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.voice-session .finish-utterance {
+  background: #285e4f;
+  color: white;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.voice-session .finish-utterance:focus-visible {
+  outline: 3px solid #86b7a3;
+  outline-offset: 3px;
+}
