@@ -102,7 +102,7 @@ export function CorrectionCard({
           {hasCorrection ? (
             <>
               <div>
-                <span>{t("原句（标出需要修改的部分）", "Your sentence (errors marked)")}</span>
+                <span>{t("你说的", "You said")}</span>
                 <p lang="fr" className="correction-source">
                   {words.original.map((w, index) => w.changed
                     ? <del key={index}>{w.text}</del> : w.text)}
