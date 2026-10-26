@@ -86,31 +86,26 @@ export function MessageList({
                 {t("听一遍", "Listen")}
               </button>
             )}
-            {!hideCorrections &&
-              message.correction &&
-              (onSaveCorrection ? (
+            {!hideCorrections && message.role === "user" && (() => {
+              const next = messages[index + 1];
+              if (next?.role !== "assistant" || !next.correction) return null;
+              return onSaveCorrection ? (
                 <CorrectionCard
                   language={language}
-                  original={
-                    messages
-                      .slice(0, index)
-                      .reverse()
-                      .find((item) => item.role === "user")?.content || ""
-                  }
-                  corrected={message.corrected_text || ""}
-                  explanation={message.correction}
-                  saved={savedCorrectionIds.includes(message.id)}
-                  onSave={() => onSaveCorrection(message.id)}
+                  original={message.content}
+                  corrected={next.corrected_text || ""}
+                  explanation={next.correction}
+                  saved={savedCorrectionIds.includes(next.id)}
+                  onSave={() => onSaveCorrection(next.id)}
                 />
               ) : (
                 <div className="correction">
-                  <strong>
-                    <Sparkles size={13} />{" "}
-                    {t("一个小建议", "A small suggestion")}
-                  </strong>
-                  <p>{message.correction}</p>
+                  <strong><Sparkles size={13} /> {t("表达改进", "Improve your expression")}</strong>
+                  {next.corrected_text && <p lang="fr">{next.corrected_text}</p>}
+                  <p>{next.correction}</p>
                 </div>
-              ))}
+              );
+            })()}
             {message.original_transcript != null && (
               <details className="transcript-history">
                 <summary>
