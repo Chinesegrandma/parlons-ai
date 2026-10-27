@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field, field_validator
 from app import providers, security
 from app.learning import PracticeOptions, load_options
 from app.persona import introduce
+from app.social import SOCIAL_CONVERSATION
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 DB_PATH = Path(
@@ -287,6 +288,12 @@ async def chat(payload: MessageCreate):
             update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
         )
     instructions += options.prompt()
+    if (
+        any(scene["id"] == session["topic"] and scene["category"] == "social" for scene in CATALOG)
+        and not options.situation
+        and not options.review_targets
+    ):
+        instructions += SOCIAL_CONVERSATION
     instructions += (
         " Ajoute corrected_text (phrase française corrigée ou chaîne vide), et review_prompt "
         "(une consigne courte dans la langue choisie pour réutiliser la structure, sans réponse). "

@@ -226,3 +226,56 @@ it("settles hands-free playback when autoplay is blocked and retries without a s
   act(() => MockAudio.instances[0].onended?.());
   expect(result.current.working).toBe(false);
 });
+
+it("plays a one-off slow reply without changing preferences and stops overlapping audio", async () => {
+  const { result } = renderHook(useSpeech);
+  await act(async () => {
+    await result.current.speakAtRate("Bonjour", 0.8);
+  });
+  expect(MockAudio.instances[0].playbackRate).toBe(0.8);
+  expect(result.current.slow).toBe(false);
+  expect(localStorage.getItem("parlons-slow")).toBeNull();
+  await act(async () => {
+    await result.current.speakAtRate("Salut", 1);
+  });
+  expect(MockAudio.instances[0].pause).toHaveBeenCalled();
+  expect(MockAudio.instances[1].playbackRate).toBe(1);
+});
+
+it("keeps an explicit normal rate while global settings change, then uses the preference for autoplay", async () => {
+  const { result } = renderHook(useSpeech);
+  await act(async () => {
+    await result.current.speakAtRate("Bonjour", 1);
+  });
+  act(() => result.current.toggleSlow(true));
+  expect(MockAudio.instances[0].playbackRate).toBe(1);
+  await act(async () => {
+    await result.current.playResponse("Salut", true);
+  });
+  expect(MockAudio.instances[1].playbackRate).toBe(0.8);
+});
+
+it("retries browser-blocked slow playback at the same rate without another synthesis request", async () => {
+  vi.stubGlobal(
+    "Audio",
+    class extends MockAudio {
+      constructor(src: string) {
+        super(src);
+        this.play.mockRejectedValueOnce(
+          new DOMException("gesture", "NotAllowedError"),
+        );
+      }
+    },
+  );
+  const { result } = renderHook(useSpeech);
+  await act(async () => {
+    await result.current.speakAtRate("Bonjour", 0.8);
+  });
+  expect(result.current.blocked).toBe(true);
+  await act(async () => {
+    await result.current.retry();
+  });
+  expect(result.current.blocked).toBe(false);
+  expect(MockAudio.instances[0].playbackRate).toBe(0.8);
+  expect(api.synthesize).toHaveBeenCalledOnce();
+});

@@ -161,7 +161,7 @@ export const demoApi: typeof api = {
       doctor:
         "Nous avons un créneau demain à dix heures. Est-ce que cela vous convient ?",
       friends:
-        "Avec plaisir ! Samedi après-midi, ça te va ? On peut se retrouver devant le cinéma.",
+        "Ça me fait plaisir de discuter avec toi ! Qu’est-ce qui t’occupe en ce moment ?",
       cafe: "Avec plaisir ! Vous préférez un espresso ou un café allongé ? Et avec ça, un croissant ?",
       daily: "Merci de partager ça ! Qu’est-ce que tu aimerais faire ensuite ?",
       travel:
@@ -169,9 +169,29 @@ export const demoApi: typeof api = {
       interview:
         "Merci pour cette présentation. Pouvez-vous me parler d’un projet qui vous tient à cœur ?",
     };
-    const reply =
+    let reply =
       replies[session.topic] ||
       "D’accord ! Pouvez-vous m’en dire un peu plus sur ce dont vous avez besoin ?";
+    // A labeled demo fixture, not a simulation of general model understanding.
+    const social =
+      catalog.find((item) => item.id === session.topic)?.category ===
+        "social" &&
+      !session.options?.situation &&
+      !session.options?.review_targets?.length;
+    const interviewQuestion =
+      "Ah, tu prépares un entretien ! C’est pour quel type de poste ?";
+    if (
+      social &&
+      text.trim() === "En semaine, je prépare un entretien, donc plutôt samedi."
+    ) {
+      reply = interviewQuestion;
+    } else if (
+      social &&
+      session.messages.at(-1)?.content === interviewQuestion
+    ) {
+      reply =
+        "J’espère que ça se passera bien ! On garde samedi après-midi pour se voir ?";
+    }
     const nextId = session.messages.length + 1;
     session.messages.push(
       {

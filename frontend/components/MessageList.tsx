@@ -5,6 +5,7 @@ import {
   Sparkles,
   ChevronDown,
   Volume2,
+  Gauge,
   Languages,
   Copy,
   Check,
@@ -36,7 +37,7 @@ export function MessageList({
   busy: boolean;
   busyLabel?: string;
   speechReady: boolean;
-  onSpeak: (text: string) => void;
+  onSpeak: (text: string, playbackRate?: 0.8 | 1) => void;
   onTranslate: (text: string, language: Language) => Promise<string>;
   onRewrite?: (
     text: string,
@@ -208,9 +209,21 @@ export function MessageList({
                     className="speak"
                     aria-label={t("朗读", "Listen")}
                     disabled={!speechReady}
-                    onClick={() => onSpeak(message.content)}
+                    onClick={() => onSpeak(message.content, 1)}
                   >
                     <Volume2 size={13} /> {t("听一遍", "Listen")}
+                  </button>
+                  <button
+                    className="speak"
+                    disabled={!speechReady}
+                    aria-label={t("慢速朗读 0.8×", "Slow listen (0.8×)")}
+                    title={t(
+                      "以 0.8 倍速朗读这条回复",
+                      "Play this reply at 0.8× speed",
+                    )}
+                    onClick={() => onSpeak(message.content, 0.8)}
+                  >
+                    <Gauge size={13} aria-hidden="true" /> 0.8×
                   </button>
                   <button
                     className="speak"

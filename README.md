@@ -28,6 +28,8 @@ tests, builds, or the included offline evaluations.**
 输入栏已改为 [同位置录音、停止、发送](docs/SINGLE_ACTION_COMPOSER.md)，两种表达改写均针对完整发言。
 详情、截图和测试步骤见 [聊天布局说明](docs/INLINE_LEARNING_CHAT.md)。本次改动暂不合并 main。
 
+社交场景新增 [关注个人细节的对话节奏与逐条 0.8× 播放](docs/SOCIAL_CONVERSATION_AND_SLOW_AUDIO.md)。
+
 ## Features
 
 - A category-first practice home: life admin, everyday life, social life, study/work,

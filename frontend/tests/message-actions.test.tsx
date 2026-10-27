@@ -233,3 +233,31 @@ it("rewrites the entire user utterance for both styles even when correction cont
   );
   expect(screen.queryByText(/俚语 \/ verlan/)).toBeNull();
 });
+
+it("places slow playback after Listen and sends per-message rates, respecting speech availability", () => {
+  const speak = vi.fn();
+  const { container, rerender } = render(
+    <MessageList {...defaults} language="en" onSpeak={speak} />,
+  );
+  const actions = container.querySelector(".reply-actions");
+  expect(
+    [...actions!.querySelectorAll("button")].map((button) =>
+      button.textContent?.trim(),
+    ),
+  ).toEqual(["Listen", "0.8×", "Translate", "Copy"]);
+  fireEvent.click(screen.getByRole("button", { name: "Slow listen (0.8×)" }));
+  expect(speak).toHaveBeenLastCalledWith("Et avec ça ?", 0.8);
+  fireEvent.click(screen.getByRole("button", { name: "Listen" }));
+  expect(speak).toHaveBeenLastCalledWith("Et avec ça ?", 1);
+  rerender(
+    <MessageList
+      {...defaults}
+      language="en"
+      speechReady={false}
+      onSpeak={speak}
+    />,
+  );
+  expect(
+    screen.getByRole("button", { name: "Slow listen (0.8×)" }),
+  ).toBeDisabled();
+});

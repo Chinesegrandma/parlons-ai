@@ -60,3 +60,21 @@ it("switches the entire demo interface to English and keeps French practice cont
   ).toBeInTheDocument();
   expect(fetch).not.toHaveBeenCalled();
 });
+
+it("demonstrates interest in the interview before returning to scheduling in the social fixture", async () => {
+  const { demoApi } = await import("../lib/demo");
+  const id = crypto.randomUUID();
+  await demoApi.session(id, "invite");
+  const first = await demoApi.chat(
+    id,
+    "En semaine, je prépare un entretien, donc plutôt samedi.",
+  );
+  expect(first.reply).toBe(
+    "Ah, tu prépares un entretien ! C’est pour quel type de poste ?",
+  );
+  const second = await demoApi.chat(id, "Un poste d’ingénieur.");
+  expect(second.reply).toBe(
+    "J’espère que ça se passera bien ! On garde samedi après-midi pour se voir ?",
+  );
+  expect(fetch).not.toHaveBeenCalled();
+});

@@ -15,12 +15,14 @@ export function useSpeech(client = api, voice = "default") {
   const controller = useRef<AbortController | null>(null);
   const generation = useRef(0);
   const rate = useRef(1);
+  const explicitRate = useRef<0.8 | 1 | null>(null);
   const autoplayEnabled = useRef(true);
 
   const stop = useCallback(() => {
     completion.current?.(false);
     completion.current = null;
     setWorking(false);
+    explicitRate.current = null;
     generation.current++;
     controller.current?.abort();
     controller.current = null;
@@ -50,7 +52,8 @@ export function useSpeech(client = api, voice = "default") {
 
   useEffect(() => {
     rate.current = slow ? 0.8 : 1;
-    if (player.current) player.current.playbackRate = rate.current;
+    if (player.current && explicitRate.current === null)
+      player.current.playbackRate = rate.current;
   }, [slow]);
 
   function preference(key: string, value: boolean) {
@@ -104,8 +107,13 @@ export function useSpeech(client = api, voice = "default") {
     }
   }
 
-  async function speak(text: string, wait = false): Promise<boolean> {
+  async function speak(
+    text: string,
+    wait = false,
+    playbackRate?: 0.8 | 1,
+  ): Promise<boolean> {
     stop();
+    explicitRate.current = playbackRate ?? null;
     setNotice("");
     setWorking(true);
     const current = generation.current;
@@ -123,7 +131,7 @@ export function useSpeech(client = api, voice = "default") {
       audio.src = url;
       audio.volume = 1;
       player.current = audio;
-      audio.playbackRate = rate.current;
+      audio.playbackRate = explicitRate.current ?? rate.current;
       const ended = new Promise<boolean>((resolve) => {
         completion.current = resolve;
       });
@@ -203,6 +211,8 @@ export function useSpeech(client = api, voice = "default") {
     blocked,
     stop,
     speak,
+    speakAtRate: (text: string, playbackRate: 0.8 | 1) =>
+      speak(text, false, playbackRate),
     playResponse,
     toggleAutoplay,
     toggleSlow,

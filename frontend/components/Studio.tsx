@@ -676,10 +676,10 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                   )
                   .map((message) => message.id) || []
               }
-              onSpeak={(text) => {
+              onSpeak={(text, playbackRate) => {
                 pauseVoice();
                 speech.unlock();
-                void speech.speak(text);
+                void speech.speakAtRate(text, playbackRate ?? 1);
               }}
               onRewrite={async (text, style, targetLanguage) => {
                 return client.rewrite(text, style, targetLanguage);
