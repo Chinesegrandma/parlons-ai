@@ -1,6 +1,6 @@
 # A · Sauge Verre — design preview
 
-This change is isolated on `design/sage-glass`. Do not merge into `main` until the owner has tested and approved it.
+This change is isolated on `dev`. Do not merge into `main` until the owner has tested and approved it.
 
 ## Scope
 
@@ -19,7 +19,7 @@ No backend changes, API/route changes, provider changes or real provider calls. 
 - `frontend/public/fonts/`: local Inter and Fraunces variable WOFF2, Latin/Latin Extended, plus upstream SIL Open Font Licenses. Source: Fontsource 5.3.0 packages. No runtime third-party font requests or new npm dependency.
 - `frontend/scripts/build-demo.mjs`: includes theme and embeds fonts for the standalone offline demo.
 - `frontend/tests/glass-notice.test.tsx`: notice dismissal leaves the text interface usable.
-- `docs/design/sage-glass-*.png`: actual browser screenshots, not generated mockups.
+- `docs/dev-*.png`: actual browser screenshots, not generated mockups.
 
 ## Details
 

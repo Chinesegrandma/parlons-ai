@@ -1,6 +1,6 @@
 # Direction A: primary correction + optional expression exploration
 
-Implemented on `design/inline-learning-chat`, not merged into main.
+Implemented on `dev`, not merged into main.
 
 The message capsule still shows the corrected French directly. Opening it now shows one primary correction block rather than three peer tabs:
 

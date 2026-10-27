@@ -1,6 +1,6 @@
 # Conversation layout preview: inline learning and desktop rail
 
-Branch: `design/inline-learning-chat`. Based on the latest main (`a7bebd8`), including its existing translation / rewrite features. This implementation is not merged into main.
+Branch: `dev`. Based on the latest main (`a7bebd8`), including its existing translation / rewrite features. This implementation is not merged into main.
 
 ## Layout
 

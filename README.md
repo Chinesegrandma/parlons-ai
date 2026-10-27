@@ -15,9 +15,13 @@ tests, builds, or the included offline evaluations.**
 真实调用使用 `--tunnel --real`。终端会显示 HTTPS 地址和本次访问口令。
 安装、密钥输入和关闭方法见 [临时隧道指南](docs/TEMPORARY_TUNNEL.md)。
 
-## 聊天布局预览分支
+## 分支与最新版
 
-`design/inline-learning-chat`：单行 Camille 顶栏、底部输入栏、默认折叠的学习胶囊，
+**只保留两个分支：`main` 是稳定版，`dev` 是包含最新 UI 和功能的测试版。**
+日常改动统一在 `dev` 上继续，测试通过并得到确认后再合并到 `main`。
+[分支整理说明](docs/BRANCHES.md) · [下载最新版 dev](https://github.com/Chinesegrandma/parlons-ai/archive/refs/heads/dev.zip)
+
+`dev`：单行 Camille 顶栏、底部输入栏、默认折叠的学习胶囊，
 手机原地展开 / 宽屏右侧学习栏。学习卡采用 [A 方案](docs/DIRECTION_A_LEARNING.md)：纠错为主体，下方可选更礼貌、俚语（含 verlan 小词典）；
 俚语按语境生成，不强行替换，见 [定义与验证限制](docs/FRENCH_SLANG.md)。
 设置与笔记本在 Camille 的下拉菜单中。

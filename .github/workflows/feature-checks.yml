@@ -1,9 +1,9 @@
 name: Parlons feature checks
 on:
   push:
-    branches: [feat/feedback-below-learner]
+    branches: [main, dev]
   pull_request:
-    branches: [design/sage-glass]
+    branches: [main, dev]
 jobs:
   backend:
     runs-on: ubuntu-latest
