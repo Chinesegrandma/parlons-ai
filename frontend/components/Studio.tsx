@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, AudioLines, Mic, Pause, ChevronDown } from "lucide-react";
 import { StudioHeader, PracticeSettings } from "./AppChrome";
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
+import { ChallengePanel } from "./ChallengePanel";
+import { challengeFor } from "../lib/challenges";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessageList";
 import { PracticeHome } from "./PracticeHome";
@@ -521,7 +523,8 @@ export function Studio({ demo = false }: { demo?: boolean }) {
           canResume={canResume}
           language={language}
           disabled={busy}
-          onStart={(topic) => void begin(topic)}
+          onStart={(topic, options) => void begin(topic, options)}
+          level={learning.options.level}
           onResume={() => void begin()}
         />
       ) : (
@@ -595,6 +598,31 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               {t("连续对话", "Conversation")}
             </button>
           </div>
+          {session && challengeFor(session.topic) && (
+            <ChallengePanel
+              key={session.id}
+              session={session}
+              language={language}
+              disabled={
+                busy ||
+                recorder.listening ||
+                demoListening ||
+                voiceActive ||
+                Boolean(conversation.input.trim())
+              }
+              onNext={() =>
+                void begin(session.topic, {
+                  level: session.options?.level ?? learning.options.level,
+                  challenge: {
+                    seed: ((session.options?.challenge?.seed ?? 0) + 1) % 3,
+                    side: session.options?.challenge?.side ?? "for",
+                    timer_seconds:
+                      session.options?.challenge?.timer_seconds ?? 0,
+                  },
+                })
+              }
+            />
+          )}
           {mode === "conversation" && (
             <section
               className={`voice-session ${voiceActive ? "active" : ""}`}

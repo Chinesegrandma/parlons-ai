@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
 from app import providers, security
+from app.challenges import BY_TOPIC, challenge_opening, challenge_prompt, review_guidance
 from app.learning import PracticeOptions, load_options
 from app.persona import introduce
 from app.social import SOCIAL_CONVERSATION
@@ -90,6 +91,8 @@ def init_db():
 def opening_text(db, session_id, topic):
     row = db.execute("SELECT options FROM sessions WHERE id=?", (session_id,)).fetchone()
     options = load_options(row["options"]) if row else PracticeOptions()
+    if topic in BY_TOPIC:
+        return introduce(challenge_opening(topic, options))
     if options.review_targets:
         return introduce(
             "Bonjour ! On va réutiliser une expression dans une nouvelle situation. "
@@ -206,11 +209,15 @@ def health():
 
 @app.post("/sessions")
 def create_session(payload: SessionCreate):
+    if payload.options.challenge and payload.topic not in BY_TOPIC:
+        raise HTTPException(422, "Challenge options require a challenge topic")
+    if payload.topic in BY_TOPIC and (payload.options.situation or payload.options.review_targets):
+        raise HTTPException(422, "Challenge topics use their own configuration")
     session_id = str(payload.id or uuid.uuid4())
     with connect() as db:
         db.execute(
             "INSERT OR IGNORE INTO sessions(id, topic, created_at, options) VALUES (?, ?, ?, ?)",
-            (session_id, payload.topic, now(), payload.options.model_dump_json()),
+            (session_id, payload.topic, now(), payload.options.model_dump_json(exclude_none=True)),
         )
         session = require_session(db, session_id)
         if session["topic"] != payload.topic:
@@ -288,6 +295,8 @@ async def chat(payload: MessageCreate):
             update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
         )
     instructions += options.prompt()
+    if session["topic"] in BY_TOPIC:
+        instructions += challenge_prompt(session["topic"], options)
     if (
         any(scene["id"] == session["topic"] and scene["category"] == "social" for scene in CATALOG)
         and not options.situation
@@ -415,7 +424,7 @@ class ReviewRequest(BaseModel):
 @app.post("/sessions/{session_id}/review")
 async def review(session_id: str, payload: ReviewRequest):
     with connect() as db:
-        require_session(db, session_id)
+        session = require_session(db, session_id)
         turns = session_messages(db, session_id)
     if not any(turn["role"] == "user" for turn in turns):
         raise HTTPException(409, "Send at least one message before requesting a review.")
@@ -425,7 +434,12 @@ async def review(session_id: str, payload: ReviewRequest):
             413, "Conversation too long for one review; no partial review generated."
         )
     try:
-        result = await providers.review_session(app, context, payload.language)
+        if session["topic"] in BY_TOPIC:
+            result = await providers.review_session(
+                app, context, payload.language, guidance=review_guidance(session["topic"])
+            )
+        else:
+            result = await providers.review_session(app, context, payload.language)
     except Exception as exc:
         raise HTTPException(502, providers.failure_detail("OpenAI", "review", exc)) from exc
     return result.model_dump()

@@ -37,7 +37,13 @@ export const topics = catalog.map((scene) => ({
   emoji: "✦",
 }));
 
+export type ChallengeOptions = {
+  seed: number;
+  side: "for" | "against";
+  timer_seconds: 0 | 60;
+};
 export type PracticeOptions = {
+  challenge?: ChallengeOptions | null;
   scene: string;
   situation: string;
   goals: string[];

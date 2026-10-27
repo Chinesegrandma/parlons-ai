@@ -1,0 +1,106 @@
+{
+  "opinion": {
+    "id": "challenge_opinion",
+    "zh": "一分钟观点",
+    "en": "One-minute opinion",
+    "descriptionZh": "表达立场，用理由和例子支持观点。计时可选。",
+    "descriptionEn": "State a view and support it with reasons and examples. Timer optional.",
+    "howZh": "先说观点，再给一个理由和例子。可以分几次说，不按速度打分。",
+    "howEn": "Give your view, a reason and an example. Multiple turns are welcome; speed is not graded.",
+    "seeds": [
+      {
+        "zh": "城市还是乡村？",
+        "en": "City or countryside?",
+        "fr": "Tu préfères vivre en ville ou à la campagne ?"
+      },
+      {
+        "zh": "早起还是晚睡？",
+        "en": "Early bird or night owl?",
+        "fr": "Tu préfères te lever tôt ou te coucher tard ?"
+      },
+      {
+        "zh": "独自旅行还是结伴？",
+        "en": "Travel alone or together?",
+        "fr": "Tu préfères voyager seul ou avec des amis ?"
+      }
+    ]
+  },
+  "describe": {
+    "id": "challenge_describe",
+    "zh": "描述猜词",
+    "en": "Describe & guess",
+    "descriptionZh": "不说出目标词，让 Camille 根据线索猜出来。",
+    "descriptionEn": "Describe a hidden word and let Camille guess from your clues.",
+    "howZh": "目标词只有你在玩法卡里看到。用用途、外观或场景描述，不直接说词，也不直接翻译；AI 不会提前拿到答案。",
+    "howEn": "Only you see the target in the guide. Describe its use, appearance or context without saying or translating it. The AI is not given the answer.",
+    "seeds": [
+      {
+        "zh": "雨伞",
+        "en": "Umbrella",
+        "fr": "un parapluie"
+      },
+      {
+        "zh": "冰箱",
+        "en": "Refrigerator",
+        "fr": "un réfrigérateur"
+      },
+      {
+        "zh": "自行车",
+        "en": "Bicycle",
+        "fr": "un vélo"
+      }
+    ]
+  },
+  "story": {
+    "id": "challenge_story",
+    "zh": "故事接龙",
+    "en": "Story relay",
+    "descriptionZh": "和 Camille 轮流接一两句，把故事讲下去。",
+    "descriptionEn": "Take turns adding one or two sentences to a shared story.",
+    "howZh": "保留已经发生的情节，每次增加一两句；可以说“结束故事”来收尾。没有标准答案。",
+    "howEn": "Keep earlier events consistent and add one or two sentences per turn. Ask to end the story when ready. There is no single right answer.",
+    "seeds": [
+      {
+        "zh": "火车上的无名信",
+        "en": "An unsigned letter",
+        "fr": "Dans un train, tu trouves une lettre sans nom sur ton siège."
+      },
+      {
+        "zh": "会说话的猫",
+        "en": "A talking cat",
+        "fr": "Un matin, le chat de ton voisin te demande un service."
+      },
+      {
+        "zh": "突然消失的钥匙",
+        "en": "The missing key",
+        "fr": "Devant ta porte, tu découvres que ta clé a disparu, mais tu entends de la musique chez toi."
+      }
+    ]
+  },
+  "debate": {
+    "id": "challenge_debate",
+    "zh": "讨论与辩论",
+    "en": "Discussion & debate",
+    "descriptionZh": "选择立场，回应不同意见，练习解释与让步。",
+    "descriptionEn": "Choose a side, respond to objections and practise explaining or conceding.",
+    "howZh": "你和 Camille 持不同立场，每轮回应一个论点。评价清晰度、理由和回应，不以赞同 AI 或输赢打分。",
+    "howEn": "Take opposite sides and address one argument each turn. Feedback focuses on clarity, reasons and responses, not agreement or winning.",
+    "seeds": [
+      {
+        "zh": "远程办公应成为常态",
+        "en": "Remote work should be the norm",
+        "fr": "Le télétravail devrait devenir la norme."
+      },
+      {
+        "zh": "城市中心应减少汽车",
+        "en": "City centres should have fewer cars",
+        "fr": "Les centres-villes devraient limiter la place des voitures."
+      },
+      {
+        "zh": "学校应减少家庭作业",
+        "en": "Schools should reduce homework",
+        "fr": "Les écoles devraient donner moins de devoirs."
+      }
+    ]
+  }
+}

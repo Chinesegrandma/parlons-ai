@@ -18,9 +18,13 @@ const result = await build({
 });
 let css = (
   await Promise.all(
-    ["globals.css", "studio.css", "sage-glass.css", "chat-learning.css"].map(
-      (file) => readFile(path.join(root, "app", file), "utf8"),
-    ),
+    [
+      "globals.css",
+      "studio.css",
+      "sage-glass.css",
+      "chat-learning.css",
+      "challenges.css",
+    ].map((file) => readFile(path.join(root, "app", file), "utf8")),
   )
 ).join("\n");
 // Embed local font assets so the downloadable single-file demo also works offline.

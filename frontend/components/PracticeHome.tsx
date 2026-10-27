@@ -7,10 +7,21 @@ import {
   GraduationCap,
   MessagesSquare,
   BriefcaseBusiness,
+  Sparkles,
 } from "lucide-react";
+import { ChallengeSetup } from "./ChallengeSetup";
+import { challengeFor } from "../lib/challenges";
 import { catalog } from "../lib/catalog";
-import type { Language, Topic } from "../lib/types";
+import type { Language, Topic, PracticeOptions } from "../lib/types";
 const sections = [
+  {
+    id: "challenge",
+    zh: "表达挑战",
+    en: "Expression challenges",
+    subZh: "观点、猜词、故事与辩论，换一种方式开口",
+    subEn: "Opinions, guessing, stories and debate",
+    icon: Sparkles,
+  },
   {
     id: "admin",
     zh: "办事",
@@ -64,14 +75,17 @@ export function PracticeHome({
   onResume,
   canResume = true,
   onCustom,
+  level = "B1-B2",
 }: {
   language: Language;
-  onStart: (topic: Topic) => void;
+  onStart: (topic: Topic, options?: Partial<PracticeOptions>) => void;
+  level?: PracticeOptions["level"];
   disabled: boolean;
   onResume: () => void;
   canResume?: boolean;
   onCustom?: (text: string) => void;
 }) {
+  const [selected, setSelected] = useState<Topic | null>(null);
   const [custom, setCustom] = useState("");
   const [category, setCategory] = useState("");
   const [group, setGroup] = useState("");
@@ -86,35 +100,58 @@ export function PracticeHome({
   const grouped = [
     ...new Set(available.map((scene) => scene.group).filter(Boolean)),
   ];
+  if (selected)
+    return (
+      <main className="practice-home">
+        <ChallengeSetup
+          key={selected}
+          topic={selected}
+          language={language}
+          initialLevel={level}
+          disabled={disabled}
+          onBack={() => setSelected(null)}
+          onStart={onStart}
+        />
+      </main>
+    );
   return (
-    <main className="practice-home">
-      <div className="home-intro">
-        <span className="eyebrow">UN PEU, CHAQUE JOUR</span>
-        <h1>
-          {t("让法语，走进你的生活。", "A little French. A little more life.")}
-        </h1>
-        <p>
-          {t(
-            "选一个真实情境，剩下的对话，让我们一起展开。",
-            "Choose a real-life situation. We’ll take the conversation from there.",
-          )}
-        </p>
-      </div>
-      <div className="home-quick">
-        <div>
-          <span className="quick-mark">✦</span>
-          <h2>{t("不选场景，也可以聊。", "Just feel like talking?")}</h2>
-          <p>
-            {t(
-              "从今天发生的小事开始，AI 会主动带你聊下去。",
-              "Start with your day. Your partner will ask the next question.",
-            )}
-          </p>
-        </div>
-        <button disabled={disabled} onClick={() => onStart("daily")}>
-          {t("直接开始聊天", "Start chatting")} <ArrowUpRight size={18} />
-        </button>
-      </div>
+    <main
+      className={`practice-home ${category === "challenge" ? "challenge-home" : ""}`}
+    >
+      {category !== "challenge" && (
+        <>
+          <div className="home-intro">
+            <span className="eyebrow">UN PEU, CHAQUE JOUR</span>
+            <h1>
+              {t(
+                "让法语，走进你的生活。",
+                "A little French. A little more life.",
+              )}
+            </h1>
+            <p>
+              {t(
+                "选一个真实情境，剩下的对话，让我们一起展开。",
+                "Choose a real-life situation. We’ll take the conversation from there.",
+              )}
+            </p>
+          </div>
+          <div className="home-quick">
+            <div>
+              <span className="quick-mark">✦</span>
+              <h2>{t("不选场景，也可以聊。", "Just feel like talking?")}</h2>
+              <p>
+                {t(
+                  "从今天发生的小事开始，AI 会主动带你聊下去。",
+                  "Start with your day. Your partner will ask the next question.",
+                )}
+              </p>
+            </div>
+            <button disabled={disabled} onClick={() => onStart("daily")}>
+              {t("直接开始聊天", "Start chatting")} <ArrowUpRight size={18} />
+            </button>
+          </div>
+        </>
+      )}
       {category ? (
         <>
           <div className="category-heading">
@@ -130,10 +167,15 @@ export function PracticeHome({
                 : current?.[language === "en" ? "en" : "zh"]}
             </h2>
             <p>
-              {t(
-                "点击具体场景，即可进入对话。",
-                "Choose a situation to enter the conversation.",
-              )}
+              {category === "challenge"
+                ? t(
+                    "选择玩法，再选题目和难度，就可以开始。",
+                    "Choose a challenge, then a prompt and difficulty to begin.",
+                  )
+                : t(
+                    "点击具体场景，即可进入对话。",
+                    "Choose a situation to enter the conversation.",
+                  )}
             </p>
           </div>
           <div className="subscene-grid">
@@ -162,10 +204,20 @@ export function PracticeHome({
                   className="subscene-card"
                   key={scene.id}
                   disabled={disabled}
-                  onClick={() => onStart(scene.id)}
+                  onClick={() =>
+                    scene.category === "challenge"
+                      ? setSelected(scene.id)
+                      : onStart(scene.id)
+                  }
                 >
                   <span>{scene[language]}</span>
-                  <small>{t("进入对话", "Enter conversation")}</small>
+                  <small>
+                    {scene.category === "challenge"
+                      ? language === "en"
+                        ? challengeFor(scene.id)?.descriptionEn
+                        : challengeFor(scene.id)?.descriptionZh
+                      : t("进入对话", "Enter conversation")}
+                  </small>
                   <ArrowUpRight size={18} />
                 </button>
               ))}
@@ -196,14 +248,16 @@ export function PracticeHome({
               <span className="category-footer">
                 {section.id === "interview"
                   ? t("进入对话", "Enter conversation")
-                  : t("探索场景", "Explore situations")}
+                  : section.id === "challenge"
+                    ? t("探索挑战", "Explore challenges")
+                    : t("探索场景", "Explore situations")}
                 <ArrowUpRight size={18} />
               </span>
             </button>
           ))}
         </div>
       )}
-      {onCustom && (
+      {onCustom && category !== "challenge" && (
         <details className="custom-practice">
           <summary>
             {t("自定义一个真实情境", "Create your own situation")}

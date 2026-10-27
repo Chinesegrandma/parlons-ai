@@ -30,6 +30,12 @@ tests, builds, or the included offline evaluations.**
 
 社交场景新增 [关注个人细节的对话节奏与逐条 0.8× 播放](docs/SOCIAL_CONVERSATION_AND_SLOW_AUDIO.md)。
 
+## 表达挑战
+
+首页新增 **表达挑战**：一分钟观点、描述猜词、故事接龙、讨论与辩论。
+每项提供三个起始题目和三档练习难度，辩论可选立场；观点计时可关闭或暂停，不自动发送。
+沿用语音、慢速播放、纠错、收藏和总结。说明与验证范围见 [表达挑战](docs/EXPRESSION_CHALLENGES.md)。
+
 ## Features
 
 - A category-first practice home: life admin, everyday life, social life, study/work,

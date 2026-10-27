@@ -187,5 +187,41 @@
     "en": "Job interview",
     "role": "un entretien d’embauche ; tu es le recruteur et poses une question à la fois",
     "opening": "Bonjour ! Pouvez-vous vous présenter en quelques phrases ?"
+  },
+  {
+    "id": "challenge_opinion",
+    "category": "challenge",
+    "group": "",
+    "zh": "一分钟观点",
+    "en": "One-minute opinion",
+    "role": "exprimer une opinion avec une raison et un exemple ; tu es un partenaire attentif",
+    "opening": "Tu préfères vivre en ville ou à la campagne ? Donne ton avis avec une raison et, si tu veux, un exemple."
+  },
+  {
+    "id": "challenge_describe",
+    "category": "challenge",
+    "group": "",
+    "zh": "描述猜词",
+    "en": "Describe & guess",
+    "role": "deviner un mot à partir des indices de l’apprenant sans connaître la réponse",
+    "opening": "Décris ton mot sans le nommer. Je vais essayer de le deviner à partir de tes indices."
+  },
+  {
+    "id": "challenge_story",
+    "category": "challenge",
+    "group": "",
+    "zh": "故事接龙",
+    "en": "Story relay",
+    "role": "inventer une histoire à deux, une ou deux phrases par tour",
+    "opening": "Dans un train, tu trouves une lettre sans nom sur ton siège. À toi : ajoute une ou deux phrases."
+  },
+  {
+    "id": "challenge_debate",
+    "category": "challenge",
+    "group": "",
+    "zh": "讨论与辩论",
+    "en": "Discussion & debate",
+    "role": "discuter de points de vue opposés avec respect, un argument à la fois",
+    "opening": "Notre sujet : Le télétravail devrait devenir la norme. Tu es pour ; je présenterai le point de vue opposé. Quel est ton premier argument ?"
   }
 ]

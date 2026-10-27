@@ -1,4 +1,5 @@
 import { assistantOpening } from "./persona";
+import { challengeFor, challengeOpening } from "./challenges";
 import { catalog } from "./catalog";
 import type { api } from "./api";
 import type { Session, Topic } from "./types";
@@ -119,11 +120,13 @@ export const demoApi: typeof api = {
           {
             id: 1,
             role: "assistant",
-            content: options?.situation
-              ? assistantOpening(
-                  "Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?",
-                )
-              : openings[topic],
+            content: challengeFor(topic)
+              ? assistantOpening(challengeOpening(topic, options?.challenge))
+              : options?.situation
+                ? assistantOpening(
+                    "Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?",
+                  )
+                : openings[topic],
           },
         ],
       });
@@ -154,6 +157,12 @@ export const demoApi: typeof api = {
     }
     if (preferences?.practice_mode === "conversation") correction = "";
     const replies: Partial<Record<Topic, string>> = {
+      challenge_opinion: "Peux-tu donner un exemple pour soutenir ton idée ?",
+      challenge_describe: "Est-ce un objet que l’on utilise à la maison ?",
+      challenge_story:
+        "Soudain, un personnage entend un bruit tout près. À toi de continuer.",
+      challenge_debate:
+        "Cette solution ne convient peut-être pas à tout le monde. Comment réponds-tu à cette objection ?",
       restaurant:
         "Bien sûr ! Je vous recommande le plat du jour. Souhaitez-vous voir la carte ?",
       shopping:
