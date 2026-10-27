@@ -69,7 +69,7 @@ export const demoApi: typeof api = {
       ? {
           expression: /^J[’']aime cette musique\.$/.test(text.trim())
             ? "Je kiffe cette musique."
-            : text,
+            : text.replace(/\bune café(?=[\s.,!?;:]|$)/gi, "un café"),
           explanation: /^J[’']aime cette musique\.$/.test(text.trim())
             ? language === "zh"
               ? "示例：kiffer 表示 aimer，属于俚语，不是 verlan。适合熟人之间，正式场景仍用 aimer。"
@@ -79,21 +79,14 @@ export const demoApi: typeof api = {
               : "Mock fixture: no suitable slang rewrite is configured here. Casual wording alone is not slang.",
         }
       : {
-          expression: /café/i.test(text)
-            ? style === "polite"
-              ? "Je souhaiterais un café, s’il vous plaît."
-              : "Un café, s’il te plaît."
-            : style === "polite"
-              ? "Est-ce que vous pourriez me donner un coup de main, s'il vous plaît ?"
-              : "Tu peux me filer un coup de main ?",
+          expression: text.replace(
+            /\bje voudrais une? café(?=[\s.,!?;:]|$)/gi,
+            "Je souhaiterais un café",
+          ),
           explanation:
             language === "zh"
-              ? style === "polite"
-                ? "示例：礼貌、自然，适合不熟悉的人或正式场合。"
-                : "示例：适合熟悉的朋友之间，口语化但不粗俗。"
-              : style === "polite"
-                ? "Demo: polite and natural for formal settings."
-                : "Demo: casual contemporary French among friends.",
+              ? "模拟示例：保留完整发言，仅对已配置的点单句式展示更礼貌表达，其余保持原句。"
+              : "Mock fixture: keeps your full message; only configured coffee requests are rewritten politely, other wording stays unchanged.",
         },
 
   translate: async (text, language) => ({

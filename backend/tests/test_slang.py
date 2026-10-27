@@ -90,3 +90,23 @@ def test_slang_provider_failure_is_mocked_and_does_not_save_feedback(api, sessio
     assert response.status_code == 502
     assert "private upstream data" not in response.text
     assert api.get(f"/sessions/{session}/messages").json() == before
+
+
+@pytest.mark.parametrize("style", ["polite", "slang"])
+def test_full_utterance_rewrite_preserves_other_clauses_in_mock_contract(api, transport, style):
+    import json
+
+    original = "Je voudrais une café. Ensuite, je vais retrouver mes amis au cinéma."
+    calls = []
+
+    def handler(request):
+        calls.append(json.loads(request.content))
+        return providers.mock_response(request)
+
+    transport(handler)
+    response = api.post("/rewrite", json={"text": original, "style": style, "language": "en"})
+    assert response.status_code == 200
+    assert calls[0]["messages"][-1]["content"] == original
+    assert "ENTIRE user message" in calls[0]["messages"][0]["content"]
+    assert "Ensuite, je vais retrouver mes amis au cinéma." in response.json()["expression"]
+    assert "un café" in response.json()["expression"]

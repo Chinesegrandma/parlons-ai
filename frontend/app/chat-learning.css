@@ -472,3 +472,32 @@
     animation: none;
   }
 }
+/* One persistent control at the same location: record → stop → transcribe → send. */
+.sage-conversation .focused-chat .composer {
+  padding-left: 18px;
+}
+.composer-action {
+  flex: none;
+  position: relative;
+}
+.composer-action[data-action="transcribing"] {
+  opacity: 0.7;
+}
+.action-loading {
+  animation: action-turn 1.4s var(--sage-ease) infinite;
+}
+@keyframes action-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.exploration-scope {
+  margin: -3px 0 12px;
+  font: 400 11px/1.7 var(--sage-ui);
+  color: var(--sage-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .action-loading {
+    animation: none;
+  }
+}

@@ -121,7 +121,7 @@ export function CorrectionCard({
   const [pending, setPending] = useState("");
   const [failed, setFailed] = useState("");
   const [retry, setRetry] = useState(0);
-  const rewriteText = style === "slang" ? corrected || original : original;
+  const rewriteText = original;
   const key = language + ":" + style + ":" + rewriteText;
   const alternative = alternatives[key];
   useEffect(() => {
@@ -246,6 +246,12 @@ export function CorrectionCard({
         aria-label={t("换一种表达", "Explore another expression")}
       >
         <h3>{t("换一种表达", "Explore another expression")}</h3>
+        <p className="exploration-scope">
+          {t(
+            "改写你的完整发言，保留原意。",
+            "Rewrite your entire message, keeping its meaning.",
+          )}
+        </p>
         <div className="exploration-actions">
           {modes.map((mode) => (
             <button
@@ -280,14 +286,6 @@ export function CorrectionCard({
             aria-live="polite"
             aria-busy={pending === key && !alternative && failed !== key}
           >
-            {style === "slang" && (
-              <p className="slang-context">
-                {t(
-                  "俚语 / verlan · 按语境使用，不强行替换",
-                  "Argot / verlan · context matters; no forced rewrites",
-                )}
-              </p>
-            )}
             {alternative ? (
               <>
                 <p lang="fr" className="alternative-expression">

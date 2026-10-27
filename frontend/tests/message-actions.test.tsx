@@ -121,7 +121,7 @@ describe("inline learning", () => {
     fireEvent.click(screen.getByRole("button", { name: "Slang" }));
     await screen.findByText("A casual request.");
     expect(rewrite).toHaveBeenLastCalledWith(
-      "Je voudrais un café.",
+      "Je voudrais une café.",
       "slang",
       "en",
     );
@@ -172,7 +172,7 @@ it("translates an existing explanation on opening after the interface language c
   ).toBeNull();
 });
 
-it("offers slang distinctly from correction and politeness, using the corrected sentence", async () => {
+it("offers slang distinctly from correction and politeness, using the whole original message", async () => {
   const rewrite = vi.fn(async () => ({
     expression: "Je voudrais un café.",
     explanation: "No suitable slang substitution here.",
@@ -193,8 +193,43 @@ it("offers slang distinctly from correction and politeness, using the corrected 
   fireEvent.click(screen.getByRole("button", { name: "Slang" }));
   await screen.findByText("No suitable slang substitution here.");
   expect(rewrite).toHaveBeenCalledExactlyOnceWith(
-    "Je voudrais un café.",
+    "Je voudrais une café.",
     "slang",
     "en",
   );
+});
+
+it("rewrites the entire user utterance for both styles even when correction contains only a fragment", async () => {
+  const original =
+    "Je voudrais une café. Ensuite, je vais retrouver mes amis au cinéma.";
+  const rewrite = vi.fn(async () => ({
+    expression:
+      "Je souhaiterais un café. Ensuite, je vais retrouver mes amis au cinéma.",
+    explanation: "完整改写。",
+  }));
+  render(
+    <MessageList
+      {...defaults}
+      messages={[
+        { id: 1, role: "user", content: original },
+        {
+          id: 2,
+          role: "assistant",
+          content: "D’accord.",
+          correction: "café 是阳性。",
+          corrected_text: "un café",
+        },
+      ]}
+      onRewrite={rewrite}
+    />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: /查看解释和其他表达/ }));
+  fireEvent.click(screen.getByRole("button", { name: "更礼貌" }));
+  await screen.findByText("完整改写。");
+  expect(rewrite).toHaveBeenLastCalledWith(original, "polite", "zh");
+  fireEvent.click(screen.getByRole("button", { name: "俚语" }));
+  await waitFor(() =>
+    expect(rewrite).toHaveBeenLastCalledWith(original, "slang", "zh"),
+  );
+  expect(screen.queryByText(/俚语 \/ verlan/)).toBeNull();
 });

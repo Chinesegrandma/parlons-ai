@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, Mic, Square, ScanText, X } from "lucide-react";
+import { ArrowUp, Mic, Square, ScanText, X, LoaderCircle } from "lucide-react";
 import type { Transcript, Language } from "../lib/types";
 export function Composer({
   language = "zh",
@@ -34,6 +34,22 @@ export function Composer({
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const [seconds, setSeconds] = useState(0);
+  const hasDraft = Boolean(input.trim());
+  const canRecord = !hideMicrophone && sttReady;
+  const action = listening
+    ? "stop"
+    : transcribing
+      ? "transcribing"
+      : hasDraft || hideMicrophone
+        ? "send"
+        : "record";
+  const actionLabel = listening
+    ? t("停止录音", "Stop recording")
+    : transcribing
+      ? t("正在转写", "Transcribing")
+      : hasDraft || hideMicrophone
+        ? t("发送", "Send")
+        : t("录制法语", "Record French");
   useEffect(() => {
     setSeconds(0);
     if (!listening) return;
@@ -107,34 +123,6 @@ export function Composer({
         </div>
       )}
       <div className={`composer ${listening ? "is-listening" : ""}`}>
-        {!hideMicrophone && (
-          <button
-            className={`mic ${listening ? "recording" : ""}`}
-            disabled={disabled || !sttReady || (!listening && Boolean(input))}
-            onClick={onRecord}
-            aria-label={
-              listening
-                ? t("停止录音", "Stop recording")
-                : t("录制法语", "Record French")
-            }
-            title={
-              !sttReady
-                ? t("语音识别不可用", "Speech recognition unavailable")
-                : demo
-                  ? t(
-                      "演示录音流程（不录音）",
-                      "Demo recording (no microphone)",
-                    )
-                  : t("开始录音", "Start recording")
-            }
-          >
-            {listening ? (
-              <Square size={17} fill="currentColor" />
-            ) : (
-              <Mic size={21} />
-            )}
-          </button>
-        )}
         <textarea
           rows={2}
           aria-label={
@@ -150,7 +138,10 @@ export function Composer({
               event.key === "Enter" &&
               !event.shiftKey &&
               !event.nativeEvent.isComposing &&
-              !listening
+              !listening &&
+              !transcribing &&
+              !disabled &&
+              hasDraft
             ) {
               event.preventDefault();
               onSend();
@@ -167,15 +158,34 @@ export function Composer({
                   "Say something, or write in French…",
                 )
           }
-          disabled={disabled || listening}
+          disabled={disabled || listening || transcribing}
         />
         <button
-          className="send"
-          onClick={onSend}
-          disabled={!input.trim() || disabled || listening}
-          aria-label={t("发送", "Send")}
+          type="button"
+          className={`composer-action ${(hasDraft || hideMicrophone) && !listening ? "send" : "mic"} ${listening ? "recording" : ""}`}
+          data-action={action}
+          onClick={() => {
+            if (disabled || transcribing) return;
+            if (listening) onRecord();
+            else if (hasDraft) onSend();
+            else if (canRecord) onRecord();
+          }}
+          disabled={
+            disabled || transcribing || (!listening && !hasDraft && !canRecord)
+          }
+          aria-label={actionLabel}
+          aria-busy={transcribing}
+          title={actionLabel}
         >
-          <ArrowUp size={21} />
+          {listening ? (
+            <Square size={17} fill="currentColor" />
+          ) : transcribing ? (
+            <LoaderCircle size={21} className="action-loading" />
+          ) : hasDraft || hideMicrophone ? (
+            <ArrowUp size={21} />
+          ) : (
+            <Mic size={21} />
+          )}
         </button>
       </div>
     </div>

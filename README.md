@@ -25,6 +25,7 @@ tests, builds, or the included offline evaluations.**
 手机原地展开 / 宽屏右侧学习栏。学习卡采用 [A 方案](docs/DIRECTION_A_LEARNING.md)：纠错为主体，下方可选更礼貌、俚语（含 verlan 小词典）；
 俚语按语境生成，不强行替换，见 [定义与验证限制](docs/FRENCH_SLANG.md)。
 设置与笔记本在 Camille 的下拉菜单中。
+输入栏已改为 [同位置录音、停止、发送](docs/SINGLE_ACTION_COMPOSER.md)，两种表达改写均针对完整发言。
 详情、截图和测试步骤见 [聊天布局说明](docs/INLINE_LEARNING_CHAT.md)。本次改动暂不合并 main。
 
 ## Features

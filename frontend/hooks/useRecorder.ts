@@ -44,7 +44,8 @@ export function useRecorder(
 
   async function toggle(sessionId: string) {
     if (listening) {
-      recorder.current?.stop();
+      if (recorder.current && recorder.current.state !== "inactive")
+        recorder.current.stop();
       return;
     }
     if (starting.current || transcribing) return;

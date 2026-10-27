@@ -11,7 +11,7 @@ The message capsule still shows the corrected French directly. Opening it now sh
 
 Each secondary button is a native disclosure button with expanded/control semantics. Clicking it shows its alternative below the buttons; clicking it again closes it. Switching choices replaces only the optional alternative. The primary corrected sentence and explanation remain visible, including during loading and errors. There is no tablist or artificial tab keyboard behavior; native keyboard activation and focus apply.
 
-Existing on-demand generation, corrected-input slang behavior, cached requests, language separation, late-response protection, glossary and retry remain. The mobile inline / desktop rail layout and one-open-card rule remain. Original utterances are preserved, never overwritten. Continuous conversation still defers learning feedback to its final review.
+Existing on-demand generation, full-message slang behavior, cached requests, language separation, late-response protection, glossary and retry remain. The mobile inline / desktop rail layout and one-open-card rule remain. Original utterances are preserved, never overwritten. Continuous conversation still defers learning feedback to its final review.
 
 Files: `frontend/components/CorrectionCard.tsx`, `frontend/app/chat-learning.css`, related component/interaction tests. No backend, routes or provider changes.
 
@@ -26,3 +26,5 @@ python3 scripts/run_local.py --tunnel --port 3200 --api-port 8200
 ```
 
 Open the newly printed URL. No real provider calls or deployment were performed.
+
+Later refinement: [single action and complete-message rewrites](SINGLE_ACTION_COMPOSER.md).

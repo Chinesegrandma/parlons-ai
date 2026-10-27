@@ -1,6 +1,6 @@
 # Slang / argot / verlan learning tab
 
-The **俚语 / Slang** exploration choice sits below the primary correction in direction A, alongside More polite. It remains opt-in, with the existing on-demand `/rewrite` route and shared call budget. It starts from the corrected sentence when one is available, so a no-slang fallback does not reintroduce the learner's original grammar error.
+The **俚语 / Slang** exploration choice sits below the primary correction in direction A, alongside More polite. It remains opt-in, with the existing on-demand `/rewrite` route and shared call budget. It rewrites the complete original learner message, corrects grammar where necessary and preserves correct clauses; it does not use the possibly partial correction field as the source.
 
 ## Definitions used
 
@@ -48,7 +48,7 @@ These URLs are provided as verification starting points, not quotations or a cla
 - `backend/app/slang.py`: semantic guardrails, category distinctions and clearly labeled mock fixtures.
 - `backend/app/providers.py`: attaches this guidance to the slang request, keeps learner input in its user-data message, validates the returned expression/explanation, and exercises the same SDK/request/schema path in mock mode.
 - `backend/app/main.py`: accepts `slang`; retains `local` as a compatibility alias for older clients, now using the slang guidance.
-- `frontend/components/CorrectionCard.tsx`: Slang exploration choice; uses corrected input, keeps explanation language and request caching.
+- `frontend/components/CorrectionCard.tsx`: Slang exploration choice; uses the complete original input, keeps explanation language and request caching.
 - `frontend/components/SlangGuide.tsx`: a collapsed mini glossary, available without any API request.
 - `frontend/lib/demo.ts`: explicit fixture Je kiffe cette musique; otherwise honest no-slang fallback. The offline demo does not have an actual language model.
 
@@ -58,7 +58,7 @@ Explanations are requested in the current Chinese/English interface language. Th
 
 All development used `MOCK_AI=true`, with external provider sockets blocked in backend tests. **172 backend tests and 79 frontend tests passed**, plus Ruff/formatting, Prettier, ESLint, TypeScript and production build.
 
-New checks cover slang and legacy style acceptance, non-verlan kiffer labeling, preserving a coffee sentence without invented slang, unchanged conversation history, real request structure via mocked transport, timeout and malformed response fallback, and the frontend sending the corrected sentence only when the slang button is selected.
+New checks cover slang and legacy style acceptance, non-verlan kiffer labeling, preserving a coffee sentence without invented slang, unchanged conversation history, real request structure via mocked transport, timeout and malformed response fallback, and the frontend sending the complete learner message only when the slang button is selected.
 
 A Chromium offline browser check verified Chinese Slang tab, kiffer fixture, expandable verlan glossary, corrected-coffee fallback, mobile/wide-screen layout, zero external requests and zero page errors. Screenshots: `docs/design/slang-learning-{mobile,guide,desktop}.png`.
 

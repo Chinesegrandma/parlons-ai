@@ -153,3 +153,28 @@ it("rejects oversized recordings without uploading", async () => {
   expect(api.transcribe).not.toHaveBeenCalled();
   expect(trackStop).toHaveBeenCalled();
 });
+
+it("ignores a second stop tap while the browser has not delivered its stop event", async () => {
+  const received = vi.fn();
+  const { result } = renderHook(() => useRecorder(received, vi.fn()));
+  await act(async () => {
+    await result.current.toggle("session");
+  });
+  const recorder = MockRecorder.current;
+  const stop = vi.spyOn(recorder, "stop").mockImplementation(() => {
+    if (recorder.state === "inactive")
+      throw new DOMException("Already stopped", "InvalidStateError");
+    recorder.state = "inactive";
+  });
+  await act(async () => {
+    await result.current.toggle("session");
+    await result.current.toggle("session");
+  });
+  expect(stop).toHaveBeenCalledOnce();
+  await act(async () => {
+    recorder.ondataavailable?.({ data: new Blob(["mock recording"]) });
+    recorder.onstop?.();
+  });
+  await waitFor(() => expect(received).toHaveBeenCalledOnce());
+  expect(api.transcribe).toHaveBeenCalledOnce();
+});

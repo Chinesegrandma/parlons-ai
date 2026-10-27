@@ -4,6 +4,8 @@ Definitions are established linguistic examples, not fresh web research. Public
 reference pages were inaccessible (HTTP 403) on 2026-10-26; see docs/FRENCH_SLANG.md.
 """
 
+import re
+
 SLANG_REGISTER = (
     "established colloquial French slang (argot), including attested verlan when it "
     "fits the input, for an informal conversation among familiar peers in France. "
@@ -47,7 +49,7 @@ def mock_slang(text: str, language: str) -> dict[str, str]:
             ),
         }
     return {
-        "expression": text,
+        "expression": re.sub(r"\bune café\b", "un café", text, flags=re.IGNORECASE),
         "explanation": (
             "模拟示例：此句未配置合适的俚语改写，不强行造词。真实模式会按原意判断；"
             "普通口语不等于俚语，不能为了加俚语改变意思。"

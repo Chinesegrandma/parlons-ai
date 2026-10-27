@@ -56,9 +56,7 @@ export function SlangGuide({ language }: { language: Language }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   return (
     <details className="slang-guide">
-      <summary>
-        {t("俚语与 verlan 小词典", "Slang & verlan mini guide")}
-      </summary>
+      <summary>{t("俚语小词典", "Slang mini guide")}</summary>
       <p>
         {t(
           "已有的常见用法示例，不代表所有年轻人的用语。verlan 是音节逆序并变音，不是句法倒装。",
