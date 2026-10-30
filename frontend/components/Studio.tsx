@@ -614,7 +614,9 @@ export function Studio({ demo = false }: { demo?: boolean }) {
                 void begin(session.topic, {
                   level: session.options?.level ?? learning.options.level,
                   challenge: {
-                    seed: ((session.options?.challenge?.seed ?? 0) + 1) % 3,
+                    seed:
+                      ((session.options?.challenge?.seed ?? 0) + 1) %
+                      challengeFor(session.topic)!.seeds.length,
                     side: session.options?.challenge?.side ?? "for",
                     timer_seconds:
                       session.options?.challenge?.timer_seconds ?? 0,
@@ -682,6 +684,7 @@ export function Studio({ demo = false }: { demo?: boolean }) {
             aria-label={t("法语对话", "French conversation")}
           >
             <MessageList
+              key={session?.id ?? "empty"}
               messages={session?.messages || []}
               busy={busy}
               busyLabel={
@@ -712,6 +715,9 @@ export function Studio({ demo = false }: { demo?: boolean }) {
               onRewrite={async (text, style, targetLanguage) => {
                 return client.rewrite(text, style, targetLanguage);
               }}
+              onLookup={(text, context, targetLanguage) =>
+                client.lookup(text, context, targetLanguage)
+              }
               onTranslate={async (text, targetLanguage) => {
                 const result = await client.translate(text, targetLanguage);
                 return result.translation;

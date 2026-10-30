@@ -1,4 +1,5 @@
 import type {
+  LookupResult,
   Health,
   Session,
   Topic,
@@ -58,6 +59,8 @@ export const api = {
       "/chat",
       json({ session_id, message, transcript_id, ...preferences }),
     ),
+  lookup: (text: string, context: string, language: Language) =>
+    request<LookupResult>("/lookup", json({ text, context, language })),
   rewrite: (text: string, style: RewriteStyle, language: Language) =>
     request<RewriteSuggestion>("/rewrite", json({ text, style, language })),
   translate: (text: string, language: Language, signal?: AbortSignal) =>

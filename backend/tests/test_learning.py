@@ -15,7 +15,15 @@ def test_preferences_persist_and_reach_provider(api, transport):
             {
                 "reply": "Quel obstacle rencontrez-vous ?",
                 "correction": "Use the past participle.",
-                "corrected_text": "Je suis allé au bureau.",
+                "corrected_text": "Je suis allé.",
+                "correction_source": "Je suis aller",
+                "correction_details": [
+                    {
+                        "original": "aller",
+                        "suggestion": "allé",
+                        "explanation": "Use the past participle.",
+                    }
+                ],
                 "review_prompt": "Describe a visit yesterday.",
             }
         )
@@ -42,7 +50,7 @@ def test_preferences_persist_and_reach_provider(api, transport):
     for expected in ("Project update", "grammar", "English", "challenging", "review_targets"):
         assert expected in instructions
     message = api.get(f"/sessions/{session['id']}").json()["messages"][-1]
-    assert message["corrected_text"] == "Je suis allé au bureau."
+    assert message["corrected_text"] == "Je suis allé."
     assert message["review_prompt"] == "Describe a visit yesterday."
 
 

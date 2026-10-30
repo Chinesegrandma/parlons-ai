@@ -117,3 +117,39 @@
   font-size: 12px;
   line-height: 1.8;
 }
+.custom-target input {
+  width: 100%;
+  padding: 12px;
+  min-height: 44px;
+  border: 1px solid #aebeab;
+  border-radius: 14px;
+  background: #ffffffb3;
+  color: var(--sage-ink);
+  font: inherit;
+}
+.custom-target p {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.custom-target button {
+  min-height: 44px;
+  border: 1px solid #aebeab;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #f5f7ee;
+  color: var(--sage-ink);
+}
+.saved-targets {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.saved-targets li {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}

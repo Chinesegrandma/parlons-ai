@@ -160,6 +160,8 @@ def test_unauthenticated_requests_never_reach_provider(private_api):
         "/speech/transcribe",
         "/speech/synthesize",
         "/api/backend/speech/synthesize",
+        "/lookup",
+        "/api/backend/lookup",
     ]:
         assert private_api.post(path, json={"text": "Bonjour"}).status_code == 401
     assert calls == []
@@ -204,3 +206,17 @@ def test_learning_actions_share_provider_budget(private_api, monkeypatch, path):
     response = private_api.post(path, json=payload)
     assert response.status_code == 429
     assert int(response.headers["retry-after"]) > 0
+
+
+def test_lookups_share_the_budget_and_csrf_protection(private_api, monkeypatch):
+    login(private_api)
+    payload = {"text": "Bonjour", "context": "Bonjour"}
+    assert (
+        private_api.post(
+            "/lookup", json=payload, headers={"origin": "https://evil.example"}
+        ).status_code
+        == 403
+    )
+    monkeypatch.setenv("MAX_CALLS_PER_DAY", "1")
+    assert private_api.post("/api/backend/lookup", json=payload).status_code == 200
+    assert private_api.post("/speech/synthesize", json={"text": "Bonjour"}).status_code == 429

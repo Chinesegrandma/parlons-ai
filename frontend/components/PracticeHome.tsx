@@ -15,14 +15,6 @@ import { catalog } from "../lib/catalog";
 import type { Language, Topic, PracticeOptions } from "../lib/types";
 const sections = [
   {
-    id: "challenge",
-    zh: "表达挑战",
-    en: "Expression challenges",
-    subZh: "观点、猜词、故事与辩论，换一种方式开口",
-    subEn: "Opinions, guessing, stories and debate",
-    icon: Sparkles,
-  },
-  {
     id: "admin",
     zh: "办事",
     en: "Life admin",
@@ -61,6 +53,14 @@ const sections = [
     subZh: "自信表达经历与优势",
     subEn: "Talk about your experience with confidence",
     icon: BriefcaseBusiness,
+  },
+  {
+    id: "challenge",
+    zh: "表达挑战",
+    en: "Expression challenges",
+    subZh: "观点、猜词、故事与辩论，换一种方式开口",
+    subEn: "Opinions, guessing, stories and debate",
+    icon: Sparkles,
   },
 ];
 const groups = {

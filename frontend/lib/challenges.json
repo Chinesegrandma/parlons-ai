@@ -37,17 +37,368 @@
       {
         "zh": "雨伞",
         "en": "Umbrella",
-        "fr": "un parapluie"
+        "fr": "un parapluie",
+        "category": "home"
       },
       {
         "zh": "冰箱",
         "en": "Refrigerator",
-        "fr": "un réfrigérateur"
+        "fr": "un réfrigérateur",
+        "category": "home"
       },
       {
         "zh": "自行车",
         "en": "Bicycle",
-        "fr": "un vélo"
+        "fr": "un vélo",
+        "category": "travel"
+      },
+      {
+        "fr": "une brosse à dents",
+        "zh": "牙刷",
+        "en": "Toothbrush",
+        "category": "home"
+      },
+      {
+        "fr": "une éponge",
+        "zh": "海绵",
+        "en": "Sponge",
+        "category": "home"
+      },
+      {
+        "fr": "un aspirateur",
+        "zh": "吸尘器",
+        "en": "Vacuum cleaner",
+        "category": "home"
+      },
+      {
+        "fr": "une bouilloire",
+        "zh": "电水壶",
+        "en": "Kettle",
+        "category": "home"
+      },
+      {
+        "fr": "une casserole",
+        "zh": "炖锅",
+        "en": "Saucepan",
+        "category": "home"
+      },
+      {
+        "fr": "un coussin",
+        "zh": "靠垫",
+        "en": "Cushion",
+        "category": "home"
+      },
+      {
+        "fr": "un réveil",
+        "zh": "闹钟",
+        "en": "Alarm clock",
+        "category": "home"
+      },
+      {
+        "fr": "un miroir",
+        "zh": "镜子",
+        "en": "Mirror",
+        "category": "home"
+      },
+      {
+        "fr": "une télécommande",
+        "zh": "遥控器",
+        "en": "Remote control",
+        "category": "home"
+      },
+      {
+        "fr": "un lave-linge",
+        "zh": "洗衣机",
+        "en": "Washing machine",
+        "category": "home"
+      },
+      {
+        "fr": "une baguette",
+        "zh": "法棍",
+        "en": "Baguette",
+        "category": "food"
+      },
+      {
+        "fr": "un croissant",
+        "zh": "可颂",
+        "en": "Croissant",
+        "category": "food"
+      },
+      {
+        "fr": "une fraise",
+        "zh": "草莓",
+        "en": "Strawberry",
+        "category": "food"
+      },
+      {
+        "fr": "un citron",
+        "zh": "柠檬",
+        "en": "Lemon",
+        "category": "food"
+      },
+      {
+        "fr": "une courgette",
+        "zh": "西葫芦",
+        "en": "Courgette",
+        "category": "food"
+      },
+      {
+        "fr": "un champignon",
+        "zh": "蘑菇",
+        "en": "Mushroom",
+        "category": "food"
+      },
+      {
+        "fr": "une fourchette",
+        "zh": "叉子",
+        "en": "Fork",
+        "category": "food"
+      },
+      {
+        "fr": "un tire-bouchon",
+        "zh": "开瓶器",
+        "en": "Corkscrew",
+        "category": "food"
+      },
+      {
+        "fr": "une passoire",
+        "zh": "滤篮",
+        "en": "Colander",
+        "category": "food"
+      },
+      {
+        "fr": "une valise",
+        "zh": "行李箱",
+        "en": "Suitcase",
+        "category": "travel"
+      },
+      {
+        "fr": "un passeport",
+        "zh": "护照",
+        "en": "Passport",
+        "category": "travel"
+      },
+      {
+        "fr": "un quai",
+        "zh": "站台",
+        "en": "Platform",
+        "category": "travel"
+      },
+      {
+        "fr": "un rond-point",
+        "zh": "环岛",
+        "en": "Roundabout",
+        "category": "travel"
+      },
+      {
+        "fr": "un feu rouge",
+        "zh": "红绿灯",
+        "en": "Traffic light",
+        "category": "travel"
+      },
+      {
+        "fr": "un casque",
+        "zh": "头盔",
+        "en": "Helmet",
+        "category": "travel"
+      },
+      {
+        "fr": "une trottinette",
+        "zh": "滑板车",
+        "en": "Scooter",
+        "category": "travel"
+      },
+      {
+        "fr": "une carte bancaire",
+        "zh": "银行卡",
+        "en": "Bank card",
+        "category": "travel"
+      },
+      {
+        "fr": "un distributeur de billets",
+        "zh": "自动取款机",
+        "en": "Cash machine",
+        "category": "travel"
+      },
+      {
+        "fr": "une boîte aux lettres",
+        "zh": "信箱",
+        "en": "Letterbox",
+        "category": "travel"
+      },
+      {
+        "fr": "un hérisson",
+        "zh": "刺猬",
+        "en": "Hedgehog",
+        "category": "nature"
+      },
+      {
+        "fr": "une abeille",
+        "zh": "蜜蜂",
+        "en": "Bee",
+        "category": "nature"
+      },
+      {
+        "fr": "un papillon",
+        "zh": "蝴蝶",
+        "en": "Butterfly",
+        "category": "nature"
+      },
+      {
+        "fr": "une tortue",
+        "zh": "乌龟",
+        "en": "Tortoise",
+        "category": "nature"
+      },
+      {
+        "fr": "un écureuil",
+        "zh": "松鼠",
+        "en": "Squirrel",
+        "category": "nature"
+      },
+      {
+        "fr": "un tournesol",
+        "zh": "向日葵",
+        "en": "Sunflower",
+        "category": "nature"
+      },
+      {
+        "fr": "une cascade",
+        "zh": "瀑布",
+        "en": "Waterfall",
+        "category": "nature"
+      },
+      {
+        "fr": "un arc-en-ciel",
+        "zh": "彩虹",
+        "en": "Rainbow",
+        "category": "nature"
+      },
+      {
+        "fr": "un coquillage",
+        "zh": "贝壳",
+        "en": "Seashell",
+        "category": "nature"
+      },
+      {
+        "fr": "un pharmacien",
+        "zh": "药剂师",
+        "en": "Pharmacist",
+        "category": "people"
+      },
+      {
+        "fr": "un pompier",
+        "zh": "消防员",
+        "en": "Firefighter",
+        "category": "people"
+      },
+      {
+        "fr": "une infirmière",
+        "zh": "护士",
+        "en": "Nurse",
+        "category": "people"
+      },
+      {
+        "fr": "un boulanger",
+        "zh": "面包师",
+        "en": "Baker",
+        "category": "people"
+      },
+      {
+        "fr": "un facteur",
+        "zh": "邮递员",
+        "en": "Postman",
+        "category": "people"
+      },
+      {
+        "fr": "un traducteur",
+        "zh": "翻译员",
+        "en": "Translator",
+        "category": "people"
+      },
+      {
+        "fr": "un voisin",
+        "zh": "邻居",
+        "en": "Neighbour",
+        "category": "people"
+      },
+      {
+        "fr": "un entretien d’embauche",
+        "zh": "求职面试",
+        "en": "Job interview",
+        "category": "ideas"
+      },
+      {
+        "fr": "un déménagement",
+        "zh": "搬家",
+        "en": "Moving house",
+        "category": "ideas"
+      },
+      {
+        "fr": "un embouteillage",
+        "zh": "堵车",
+        "en": "Traffic jam",
+        "category": "ideas"
+      },
+      {
+        "fr": "le décalage horaire",
+        "zh": "时差",
+        "en": "Jet lag",
+        "category": "ideas"
+      },
+      {
+        "fr": "la nostalgie",
+        "zh": "怀旧",
+        "en": "Nostalgia",
+        "category": "ideas"
+      },
+      {
+        "fr": "la confiance",
+        "zh": "信任",
+        "en": "Trust",
+        "category": "ideas"
+      },
+      {
+        "fr": "un malentendu",
+        "zh": "误会",
+        "en": "Misunderstanding",
+        "category": "ideas"
+      },
+      {
+        "fr": "la solidarité",
+        "zh": "团结互助",
+        "en": "Solidarity",
+        "category": "ideas"
+      },
+      {
+        "fr": "un compromis",
+        "zh": "妥协",
+        "en": "Compromise",
+        "category": "ideas"
+      },
+      {
+        "fr": "la procrastination",
+        "zh": "拖延",
+        "en": "Procrastination",
+        "category": "ideas"
+      },
+      {
+        "fr": "un coup de foudre",
+        "zh": "一见钟情",
+        "en": "Love at first sight",
+        "category": "ideas"
+      },
+      {
+        "fr": "la liberté",
+        "zh": "自由",
+        "en": "Freedom",
+        "category": "ideas"
+      },
+      {
+        "fr": "la patience",
+        "zh": "耐心",
+        "en": "Patience",
+        "category": "ideas"
       }
     ]
   },

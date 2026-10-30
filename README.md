@@ -22,7 +22,7 @@ tests, builds, or the included offline evaluations.**
 [分支整理说明](docs/BRANCHES.md) · [下载最新版 dev](https://github.com/Chinesegrandma/parlons-ai/archive/refs/heads/dev.zip)
 
 `dev`：单行 Camille 顶栏、底部输入栏、默认折叠的学习胶囊，
-手机原地展开 / 宽屏右侧学习栏。学习卡采用 [A 方案](docs/DIRECTION_A_LEARNING.md)：纠错为主体，下方可选更礼貌、俚语（含 verlan 小词典）；
+手机原地展开 / 宽屏右侧学习栏。学习卡采用 [A 方案](docs/DIRECTION_A_LEARNING.md)：纠错为主体，下方可选更礼貌、俚语；
 俚语按语境生成，不强行替换，见 [定义与验证限制](docs/FRENCH_SLANG.md)。
 设置与笔记本在 Camille 的下拉菜单中。
 输入栏已改为 [同位置录音、停止、发送](docs/SINGLE_ACTION_COMPOSER.md)，两种表达改写均针对完整发言。
@@ -30,10 +30,12 @@ tests, builds, or the included offline evaluations.**
 
 社交场景新增 [关注个人细节的对话节奏与逐条 0.8× 播放](docs/SOCIAL_CONVERSATION_AND_SLOW_AUDIO.md)。
 
+聊天纠错现在按 1、2、3 列出各处错误；更正句支持发音、复制。点 AI 句子、自己的句子或更正句中的词，或拖选短语，可打开语境查义，点击“查询含义”后才调用 AI。查义跟随中/英文界面，结果不会写入聊天历史。修复、使用方法和验证范围见 [纠错与查词更新](docs/FEEDBACK_AND_LOOKUP.md)。
+
 ## 表达挑战
 
-首页新增 **表达挑战**：一分钟观点、描述猜词、故事接龙、讨论与辩论。
-每项提供三个起始题目和三档练习难度，辩论可选立场；观点计时可关闭或暂停，不自动发送。
+首页最后一个板块为 **表达挑战**：一分钟观点、描述猜词、故事接龙、讨论与辩论。
+猜词提供 61 个分类目标词，支持自定义词条并保存在当前浏览器；其余挑战各有三个起始题。均可选择三档练习难度，辩论可选立场；观点计时可关闭或暂停，不自动发送。
 沿用语音、慢速播放、纠错、收藏和总结。说明与验证范围见 [表达挑战](docs/EXPRESSION_CHALLENGES.md)。
 
 ## Features
@@ -210,7 +212,7 @@ Back up any valuable database before a version upgrade.
 | `OPENAI_MODEL` | Text model; default `gpt-4.1-mini`. |
 | `ELEVENLABS_API_KEY` | Server-side key for real STT/TTS, ignored in mock mode. |
 | `ELEVENLABS_VOICE_ID` | Default TTS voice; the launcher supplies the project default when absent. |
-| `ELEVENLABS_VOICES_JSON` | Optional JSON object of voice aliases to `{name, voice_id}`; up to 64 custom entries. |
+| `ELEVENLABS_VOICES_JSON` | Optional JSON object of voice aliases to `{name, voice_id}`; up to 61 custom entries. |
 | `ELEVENLABS_TTS_MODEL` | Default `eleven_multilingual_v2`; check account availability before real tests. |
 | `ELEVENLABS_STT_MODEL` | Default `scribe_v1`; check account availability before real tests. |
 | `FRONTEND_ORIGIN` | Default `http://localhost:3000`. |

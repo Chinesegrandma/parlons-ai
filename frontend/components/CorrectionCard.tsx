@@ -1,5 +1,5 @@
 import type { Language, RewriteStyle, RewriteSuggestion } from "../lib/types";
-import { SlangGuide } from "./SlangGuide";
+import { TextActions } from "./TextActions";
 import { useEffect, useState, useId } from "react";
 import {
   BookOpen,
@@ -57,7 +57,11 @@ export function CorrectionCard({
   onClose,
   canSave = true,
   onExplain,
+  onSpeak,
+  speechReady = false,
 }: {
+  onSpeak?: (text: string, rate?: 0.8 | 1) => void;
+  speechReady?: boolean;
   language?: Language;
   original: string;
   corrected: string;
@@ -180,7 +184,7 @@ export function CorrectionCard({
                 <span className="sr-only">
                   {t("更自然的说法", "A more natural expression")}
                 </span>
-                <p lang="fr">
+                <p lang="fr" data-lookup-text tabIndex={0}>
                   {words.corrected.map((word, index) =>
                     word.changed ? (
                       <mark key={index}>{word.text}</mark>
@@ -189,6 +193,12 @@ export function CorrectionCard({
                     ),
                   )}
                 </p>
+                <TextActions
+                  text={corrected}
+                  language={language}
+                  speechReady={speechReady}
+                  onSpeak={onSpeak}
+                />
               </div>
             )}
             {needsLocalization &&
@@ -209,15 +219,22 @@ export function CorrectionCard({
                 </p>
               )
             ) : (
-              <p className="correction-explanation">
-                {localized?.key === explanationKey
-                  ? localized.text
-                  : explanation}
-              </p>
+              <ErrorExplanation
+                text={
+                  localized?.key === explanationKey
+                    ? localized.text
+                    : explanation
+                }
+              />
             )}
             <details className="learning-original">
               <summary>{t("你说的", "You said")}</summary>
-              <p lang="fr" className="correction-source">
+              <p
+                lang="fr"
+                data-lookup-text
+                tabIndex={0}
+                className="correction-source"
+              >
                 {words.original.map((word, index) =>
                   word.changed ? <del key={index}>{word.text}</del> : word.text,
                 )}
@@ -288,9 +305,21 @@ export function CorrectionCard({
           >
             {alternative ? (
               <>
-                <p lang="fr" className="alternative-expression">
+                <p
+                  lang="fr"
+                  data-lookup-text
+                  tabIndex={0}
+                  className="alternative-expression"
+                >
                   {alternative.expression}
                 </p>
+                <TextActions
+                  key={alternative.expression}
+                  text={alternative.expression}
+                  language={language}
+                  speechReady={speechReady}
+                  onSpeak={onSpeak}
+                />
                 <p className="correction-explanation">
                   {alternative.explanation}
                 </p>
@@ -312,10 +341,22 @@ export function CorrectionCard({
             ) : (
               <p>{t("正在生成表达…", "Generating an expression…")}</p>
             )}
-            {style === "slang" && <SlangGuide language={language} />}
           </div>
         )}
       </section>
     </aside>
   );
+}
+
+function ErrorExplanation({ text }: { text: string }) {
+  const entries = text.split(/\n(?=\s*\d+[.)]\s)/);
+  if (/^\s*1[.)]\s/.test(text))
+    return (
+      <ol className="correction-explanation error-list">
+        {entries.map((entry, index) => (
+          <li key={index}>{entry.replace(/^\s*\d+[.)]\s*/, "")}</li>
+        ))}
+      </ol>
+    );
+  return <p className="correction-explanation">{text}</p>;
 }

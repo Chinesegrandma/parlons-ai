@@ -321,7 +321,19 @@ def test_successful_correction_is_persisted(api, session, transport):
     def handler(request):
         data = providers.mock_response(request).json()
         data["choices"][0]["message"]["content"] = json.dumps(
-            {"reply": "Et où êtes-vous allés ?", "correction": "aller 的过去分词是 allé。"}
+            {
+                "reply": "Et où êtes-vous allés ?",
+                "correction": "aller 的过去分词是 allé。",
+                "correction_source": "Je suis aller au café.",
+                "corrected_text": "Je suis allé au café.",
+                "correction_details": [
+                    {
+                        "original": "aller",
+                        "suggestion": "allé",
+                        "explanation": "aller 的过去分词是 allé。",
+                    }
+                ],
+            }
         )
         return httpx.Response(200, json=data)
 

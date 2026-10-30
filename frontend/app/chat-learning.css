@@ -501,3 +501,98 @@
     animation: none;
   }
 }
+
+/* Text stays selectable; lookups never mutate a message or start on selection alone. */
+.lookup-surface {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.lookup-surface > .conversation-layout {
+  flex: 1;
+  min-width: 0;
+}
+[data-lookup-text] {
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+[data-lookup-text]:focus-visible {
+  outline: 2px solid var(--sage-deep);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+.text-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 3px;
+}
+.text-actions .speak {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--sage-ink);
+  font: 500 11px var(--sage-ui);
+}
+.text-actions > span {
+  font: 12px var(--sage-ui);
+}
+.learner-feedback > .text-actions {
+  justify-content: flex-end;
+}
+.error-list {
+  padding-left: 24px;
+  white-space: pre-wrap;
+}
+.error-list li + li {
+  margin-top: 12px;
+}
+.word-lookup {
+  position: fixed;
+  z-index: 30;
+  bottom: calc(110px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(45dvh, 350px);
+  overflow-y: auto;
+  background: #f6f8f1f5;
+  border: 1px solid var(--sage-border);
+  border-radius: 24px;
+  box-shadow: var(--sage-shadow);
+  padding: 16px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  color: var(--sage-ink);
+  font: 14px/1.7 var(--sage-ui);
+}
+.word-lookup header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.word-lookup header strong {
+  flex: 1;
+  overflow-wrap: anywhere;
+  font-family: var(--sage-french);
+  font-size: 20px;
+}
+.word-lookup button {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid #aebeab;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--sage-ink);
+  padding: 8px 12px;
+}
+.word-lookup [lang="fr"] {
+  font-family: var(--sage-french);
+}

@@ -55,7 +55,8 @@ export function ChallengePanel({
         </summary>
         <p>{language === "en" ? definition.howEn : definition.howZh}</p>
         <p className="challenge-seed" lang="fr">
-          {definition.seeds[seed].fr}
+          {session.options?.challenge?.custom_target ||
+            definition.seeds[seed]?.fr}
         </p>
         {session.topic === "challenge_describe" && (
           <small>

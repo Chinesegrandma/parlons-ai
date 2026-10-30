@@ -1,5 +1,7 @@
 # Slang / argot / verlan learning tab
 
+Update: the fixed mini glossary was removed from the UI in the [feedback/lookup update](FEEDBACK_AND_LOOKUP.md). The definitions below document the provider guidance and earlier verification, not a current glossary feature.
+
 The **俚语 / Slang** exploration choice sits below the primary correction in direction A, alongside More polite. It remains opt-in, with the existing on-demand `/rewrite` route and shared call budget. It rewrites the complete original learner message, corrects grammar where necessary and preserves correct clauses; it does not use the possibly partial correction field as the source.
 
 ## Definitions used
@@ -49,7 +51,7 @@ These URLs are provided as verification starting points, not quotations or a cla
 - `backend/app/providers.py`: attaches this guidance to the slang request, keeps learner input in its user-data message, validates the returned expression/explanation, and exercises the same SDK/request/schema path in mock mode.
 - `backend/app/main.py`: accepts `slang`; retains `local` as a compatibility alias for older clients, now using the slang guidance.
 - `frontend/components/CorrectionCard.tsx`: Slang exploration choice; uses the complete original input, keeps explanation language and request caching.
-- `frontend/components/SlangGuide.tsx`: a collapsed mini glossary, available without any API request.
+- The former `frontend/components/SlangGuide.tsx` was removed; contextual slang rewriting remains.
 - `frontend/lib/demo.ts`: explicit fixture Je kiffe cette musique; otherwise honest no-slang fallback. The offline demo does not have an actual language model.
 
 Explanations are requested in the current Chinese/English interface language. They must describe the actual term, its standard meaning, category and appropriate social setting. Production linguistic quality is still dependent on the model and has not been validated in this task.

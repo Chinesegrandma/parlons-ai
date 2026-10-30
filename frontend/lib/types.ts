@@ -13,6 +13,12 @@ export type Message = {
   content: string;
   correction?: string | null;
   corrected_text?: string | null;
+  feedback_for?: number | null;
+  correction_details?: {
+    original: string;
+    suggestion: string;
+    explanation: string;
+  }[];
   review_prompt?: string | null;
   original_transcript?: string | null;
   edited_transcript?: string | null;
@@ -39,6 +45,7 @@ export const topics = catalog.map((scene) => ({
 
 export type ChallengeOptions = {
   seed: number;
+  custom_target?: string;
   side: "for" | "against";
   timer_seconds: 0 | 60;
 };
@@ -58,3 +65,5 @@ export type Voice = { id: string; name: string };
 
 export type RewriteStyle = "polite" | "slang";
 export type RewriteSuggestion = { expression: string; explanation: string };
+
+export type LookupResult = { meaning: string; example: string };

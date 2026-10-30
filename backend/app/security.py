@@ -14,7 +14,14 @@ from starlette.datastructures import Headers
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 
 COOKIE = "parlons_session"
-BILLABLE_PATHS = {"/chat", "/speech/transcribe", "/speech/synthesize", "/translate", "/rewrite"}
+BILLABLE_PATHS = {
+    "/chat",
+    "/speech/transcribe",
+    "/speech/synthesize",
+    "/translate",
+    "/rewrite",
+    "/lookup",
+}
 MAX_BODY = 9 * 1024 * 1024
 
 
@@ -233,7 +240,17 @@ class PublicSiteMiddleware:
         if path != "/auth/login" and not authenticated:
             response = (
                 JSONResponse({"detail": "Login required"}, 401)
-                if path.startswith(("/sessions", "/chat", "/speech", "/health"))
+                if path.startswith(
+                    (
+                        "/sessions",
+                        "/chat",
+                        "/speech",
+                        "/health",
+                        "/lookup",
+                        "/translate",
+                        "/rewrite",
+                    )
+                )
                 else RedirectResponse("/auth/login", status_code=303)
             )
             return await respond(response)

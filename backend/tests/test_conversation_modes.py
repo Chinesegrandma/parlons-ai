@@ -17,7 +17,7 @@ def test_preferences_and_proactive_prompt(api, session, transport, language, mod
         response = providers.mock_response(request)
         body = response.json()
         body["choices"][0]["message"]["content"] = json.dumps(
-            {"reply": "Et ensuite ?", "correction": "example"}
+            {"reply": "Et ensuite ?", "correction": "example" if mode == "conversation" else ""}
         )
         import httpx
 

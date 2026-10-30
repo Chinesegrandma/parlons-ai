@@ -61,6 +61,14 @@ def test_english_feedback_repairs_french_without_translating_reply(api, session,
                 "reply": "Et avec ça ?",
                 "correction": "Le nom café est masculin. Il faut utiliser un café.",
                 "corrected_text": "Je voudrais un café.",
+                "correction_source": "Je voudrais une café.",
+                "correction_details": [
+                    {
+                        "original": "une",
+                        "suggestion": "un",
+                        "explanation": "Le nom café est masculin.",
+                    }
+                ],
                 "review_prompt": "",
             }
         )
@@ -73,7 +81,11 @@ def test_english_feedback_repairs_french_without_translating_reply(api, session,
     assert result.status_code == 200
     assert result.json()["reply"] == "Et avec ça ?"
     assert result.json()["corrected_text"] == "Je voudrais un café."
-    assert result.json()["correction"] == "Use un café: café is a masculine noun."
+    assert result.json()["correction"] == "1. une → un : Use un café: café is a masculine noun."
+    assert (
+        result.json()["correction_details"][0]["explanation"]
+        == "Use un café: café is a masculine noun."
+    )
     assert result.json()["review_prompt"] == ""
     assert len(seen) == 2
     assert "LANGUAGE CONTRACT" in seen[0]["messages"][0]["content"]
@@ -109,7 +121,18 @@ def test_failed_language_repair_is_bounded_and_does_not_store_french_feedback(
         body = providers.mock_response(request).json()
         feedback = {"correction": "Le nom café est masculin.", "review_prompt": ""}
         if "LOCALIZE_FEEDBACK" not in payload["messages"][0]["content"]:
-            feedback.update(reply="Et avec ça ?", corrected_text="Un café.")
+            feedback.update(
+                reply="Et avec ça ?",
+                corrected_text="Un café.",
+                correction_source="Une café",
+                correction_details=[
+                    {
+                        "original": "Une",
+                        "suggestion": "Un",
+                        "explanation": "Le nom café est masculin.",
+                    }
+                ],
+            )
         body["choices"][0]["message"]["content"] = json.dumps(feedback)
         return httpx.Response(200, json=body)
 

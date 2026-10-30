@@ -65,6 +65,13 @@ function tone() {
 }
 /** Local, scripted UI demonstration. No fetch, providers, microphone or real evaluation. */
 export const demoApi: typeof api = {
+  lookup: async (_text, _context, language) => ({
+    meaning:
+      language === "zh"
+        ? "离线演示：这里只展示查词界面，不提供真实词义。"
+        : "Offline demo: a lookup UI fixture, not a real definition.",
+    example: "",
+  }),
   rewrite: async (text, style, language) =>
     style === "slang"
       ? {
@@ -155,7 +162,38 @@ export const demoApi: typeof api = {
         ? "Demo feedback: café is masculine. Say un café."
         : "Demo feedback: use the past participle allé (allée for a female speaker).";
     }
-    if (preferences?.practice_mode === "conversation") correction = "";
+    let correctionDetails: NonNullable<
+      import("./types").Message["correction_details"]
+    > = [];
+    if (text.trim() === "tu utilise quand il pluie") {
+      const en = preferences?.language === "en";
+      correctionDetails = [
+        {
+          original: "utilise",
+          suggestion: "utilises",
+          explanation: en
+            ? "With tu, utiliser takes -s: tu utilises."
+            : "主语 tu 对应 utilises，词尾要加 s。",
+        },
+        {
+          original: "pluie",
+          suggestion: "pleut",
+          explanation: en
+            ? "Pluie is a noun; use the verb pleuvoir: il pleut."
+            : "pluie 是名词；表达下雨用动词 pleuvoir：il pleut。",
+        },
+      ];
+      correction = correctionDetails
+        .map(
+          (item, index) =>
+            `${index + 1}. ${item.original} → ${item.suggestion} : ${item.explanation}`,
+        )
+        .join("\n");
+    }
+    if (preferences?.practice_mode === "conversation") {
+      correction = "";
+      correctionDetails = [];
+    }
     const replies: Partial<Record<Topic, string>> = {
       challenge_opinion: "Peux-tu donner un exemple pour soutenir ton idée ?",
       challenge_describe: "Est-ce un objet que l’on utilise à la maison ?",
@@ -219,11 +257,17 @@ export const demoApi: typeof api = {
         role: "assistant",
         content: reply,
         correction,
-        corrected_text: /une café/i.test(text)
-          ? text.replace(/une café/gi, "un café")
-          : /je suis aller/i.test(text)
-            ? text.replace(/je suis aller/gi, "Je suis allé")
-            : "",
+        feedback_for: nextId,
+        correction_details: correctionDetails,
+        corrected_text: !correction
+          ? ""
+          : correctionDetails.length
+            ? "tu utilises quand il pleut"
+            : /une café/i.test(text)
+              ? text.replace(/une café/gi, "un café")
+              : /je suis aller/i.test(text)
+                ? text.replace(/je suis aller/gi, "Je suis allé")
+                : "",
         review_prompt: correction
           ? "换一种饮品，试着用正确的冠词礼貌点单。"
           : "",

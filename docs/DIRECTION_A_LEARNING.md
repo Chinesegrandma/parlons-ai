@@ -1,6 +1,6 @@
 # Direction A: primary correction + optional expression exploration
 
-Implemented on `dev`, not merged into main.
+Implemented on `dev`, not merged into main. Subsequent [feedback and lookup changes](FEEDBACK_AND_LOOKUP.md) remove the fixed slang glossary and add numbered errors, pronunciation/copy and contextual word lookup.
 
 The message capsule still shows the corrected French directly. Opening it now shows one primary correction block rather than three peer tabs:
 
