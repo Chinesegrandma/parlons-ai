@@ -95,6 +95,10 @@ def init_db():
             if name not in message_columns:
                 db.execute(f"ALTER TABLE messages ADD COLUMN {name} TEXT")
         security.init_tables(db)
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS deleted_users "
+            "(user_id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL)"
+        )
         # Old sessions never stored their frontend opener; backfill exactly once.
         for session in db.execute("SELECT * FROM sessions").fetchall():
             insert_opening(db, session["id"], session["topic"], session["created_at"])
@@ -635,6 +639,43 @@ def delete_my_data():
         raise HTTPException(404, "Not found")
     owner = cloud_auth.user_id()
     with connect() as db:
+        ids = "SELECT id FROM sessions WHERE owner_id=?"
+        db.execute(f"DELETE FROM messages WHERE session_id IN ({ids})", (owner,))
+        db.execute(f"DELETE FROM transcripts WHERE session_id IN ({ids})", (owner,))
+        db.execute("DELETE FROM sessions WHERE owner_id=?", (owner,))
+    return {"deleted": True}
+
+
+@app.delete("/me/account")
+async def delete_my_account():
+    """Delete the verified owner's Supabase identity and stored content."""
+    if not cloud_auth.enabled():
+        raise HTTPException(404, "Not found")
+    owner = cloud_auth.user_id()
+    url, _ = cloud_auth.config()
+    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    if not service_key:
+        raise HTTPException(503, "Account deletion is not configured")
+    import httpx
+
+    try:
+        async with httpx.AsyncClient(timeout=10, trust_env=False) as client:
+            response = await client.delete(
+                f"{url}/auth/v1/admin/users/{owner}",
+                headers={
+                    "apikey": service_key,
+                    "Authorization": f"Bearer {service_key}",
+                },
+            )
+        if response.status_code not in (200, 204):
+            raise HTTPException(502, "Identity provider could not delete account")
+    except httpx.HTTPError as exc:
+        raise HTTPException(503, "Identity provider unavailable") from exc
+    with connect() as db:
+        db.execute(
+            "INSERT OR IGNORE INTO deleted_users(user_id, deleted_at) VALUES (?, ?)",
+            (owner, now()),
+        )
         ids = "SELECT id FROM sessions WHERE owner_id=?"
         db.execute(f"DELETE FROM messages WHERE session_id IN ({ids})", (owner,))
         db.execute(f"DELETE FROM transcripts WHERE session_id IN ({ids})", (owner,))
