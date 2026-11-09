@@ -1,4 +1,4 @@
-import { Studio } from "../components/Studio";
+import { CloudAuthGate } from "../components/CloudAuthGate";
 export default function Home() {
-  return <Studio />;
+  return <CloudAuthGate />;
 }
