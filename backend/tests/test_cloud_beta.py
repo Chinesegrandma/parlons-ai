@@ -66,8 +66,14 @@ def test_users_cannot_read_or_claim_each_others_sessions(cloud_api):
     alice = new_session(cloud_api, "alice")
     assert alice.status_code == 200
     session_id = alice.json()["id"]
-    assert cloud_api.get(f"/api/backend/sessions/{session_id}", headers=auth("alice")).status_code == 200
-    assert cloud_api.get(f"/api/backend/sessions/{session_id}", headers=auth("bob")).status_code == 404
+    assert (
+        cloud_api.get(f"/api/backend/sessions/{session_id}", headers=auth("alice")).status_code
+        == 200
+    )
+    assert (
+        cloud_api.get(f"/api/backend/sessions/{session_id}", headers=auth("bob")).status_code
+        == 404
+    )
     assert (
         cloud_api.get(
             f"/api/backend/sessions/{session_id}/messages", headers=auth("bob")
@@ -150,7 +156,10 @@ def test_deleted_supabase_identity_cannot_reuse_old_jwt(cloud_api, monkeypatch):
         assert db.execute(
             "SELECT COUNT(*) FROM sessions WHERE id=?", (user_session,)
         ).fetchone()[0] == 0
-    assert cloud_api.post("/sessions", json={"topic": "cafe"}, headers=auth("alice")).status_code == 401
+    assert (
+        cloud_api.post("/sessions", json={"topic": "cafe"}, headers=auth("alice")).status_code
+        == 401
+    )
     assert new_session(cloud_api, "bob").status_code == 200
 
 
