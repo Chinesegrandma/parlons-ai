@@ -12,8 +12,13 @@ export function useLearning(
   demo: boolean,
   session: Session | null,
   language: Language = "zh",
+  userId?: string,
 ) {
-  const prefix = demo ? "parlons-demo-learning" : "parlons-learning";
+  const prefix = demo
+    ? "parlons-demo-learning"
+    : userId
+      ? `parlons-learning:${userId}`
+      : "parlons-learning";
   const [options, setOptions] = useState<PracticeOptions>(defaults);
   const [voice, setVoice] = useState("default");
   const [book, setBook] = useState<Notebook>({ cards: [], seen: [] });
