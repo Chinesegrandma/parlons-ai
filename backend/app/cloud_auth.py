@@ -47,6 +47,16 @@ def config() -> tuple[str, str]:
         raise RuntimeError("Cloud beta requires a server-only service role key for account deletion")
     if not os.getenv("DATABASE_PATH", "").strip():
         raise RuntimeError("Cloud beta requires DATABASE_PATH on a durable volume")
+    if not (
+        os.getenv("PARLONS_OPENAI_API_KEY", "").strip()
+        or os.getenv("OPENAI_API_KEY", "").strip()
+    ):
+        raise RuntimeError("Cloud beta requires a real OpenAI API key")
+    if not (
+        os.getenv("ELEVENLABS_API_KEY", "").strip()
+        and os.getenv("ELEVENLABS_VOICE_ID", "").strip()
+    ):
+        raise RuntimeError("Cloud beta requires configured ElevenLabs STT and TTS")
     for name, default in (
         ("BETA_USER_CALLS_PER_MINUTE", 12),
         ("BETA_USER_CALLS_PER_DAY", 60),
