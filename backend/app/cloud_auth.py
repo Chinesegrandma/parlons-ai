@@ -40,6 +40,8 @@ def config() -> tuple[str, str]:
         raise RuntimeError("Private tunnel and cloud beta modes cannot both be enabled")
     if os.getenv("MOCK_AI", "true").lower() != "false":
         raise RuntimeError("Cloud beta cannot run with mock AI enabled")
+    if not os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip():
+        raise RuntimeError("Cloud beta requires a server-only service role key for account deletion")
     if not os.getenv("DATABASE_PATH", "").strip():
         raise RuntimeError("Cloud beta requires DATABASE_PATH on a durable volume")
     for name, default in (
@@ -114,7 +116,7 @@ class CloudAuthMiddleware:
             or path == "/lookup"
             or path == "/translate"
             or path == "/rewrite"
-            or path == "/me/data"
+            or path in {"/me/data", "/me/account"}
             or path.startswith("/sessions")
             or path.startswith("/speech/")
         )
@@ -136,6 +138,15 @@ class CloudAuthMiddleware:
             return await respond(401, "Invalid or expired access token")
         except Exception:
             return await respond(503, "Authentication provider unavailable")
+
+        try:
+            with self.db_factory() as db:
+                if db.execute(
+                    "SELECT 1 FROM deleted_users WHERE user_id=?", (user,)
+                ).fetchone():
+                    return await respond(401, "Account has been deleted")
+        except Exception:
+            return await respond(503, "User database temporarily unavailable")
 
         if method == "POST":
             limits = []
