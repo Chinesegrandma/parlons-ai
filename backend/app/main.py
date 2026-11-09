@@ -216,6 +216,11 @@ def session_messages(db, session_id: str) -> list[dict]:
     return result
 
 
+@app.get("/health/live")
+def health_live():
+    return {"status": "ok"}
+
+
 @app.get("/auth/config")
 def auth_config():
     if not cloud_auth.enabled():
