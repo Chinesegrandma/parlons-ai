@@ -44,7 +44,9 @@ def config() -> tuple[str, str]:
     if "@" not in support or len(support) > 254:
         raise RuntimeError("Cloud beta requires a real SUPPORT_EMAIL for user requests")
     if not os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip():
-        raise RuntimeError("Cloud beta requires a server-only service role key for account deletion")
+        raise RuntimeError(
+            "Cloud beta requires a server-only service role key for account deletion"
+        )
     if not os.getenv("DATABASE_PATH", "").strip():
         raise RuntimeError("Cloud beta requires DATABASE_PATH on a durable volume")
     if not (
