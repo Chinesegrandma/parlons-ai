@@ -32,7 +32,7 @@ import type {
 } from "../lib/types";
 
 type Phase = "idle" | "listening" | "thinking" | "speaking" | "paused";
-export function Studio({ demo = false }: { demo?: boolean }) {
+export function Studio({ demo = false, userId }: { demo?: boolean; userId?: string }) {
   const client = demo ? demoApi : api;
   const { language, setLanguage, t } = useLanguage();
   const conversation = useConversation(
