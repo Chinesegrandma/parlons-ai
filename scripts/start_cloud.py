@@ -24,10 +24,16 @@ def main():
     env["PARLONS_BACKEND_URL"] = f"http://127.0.0.1:{port}"
     env["NEXT_PUBLIC_API_URL"] = "/api/backend"
     # Real provider calls occur only after authenticated user actions.
+    frontend_env = {**env, "PORT": str(frontend_port)}
+    for secret in (
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "PARLONS_OPENAI_API_KEY",
+        "OPENAI_API_KEY",
+        "ELEVENLABS_API_KEY",
+    ):
+        frontend_env.pop(secret, None)
     processes = [
-        subprocess.Popen(
-            ["node", "server.js"], cwd=UI, env={**env, "PORT": str(frontend_port)}
-        ),
+        subprocess.Popen(["node", "server.js"], cwd=UI, env=frontend_env),
         subprocess.Popen(
             [
                 sys.executable, "-m", "uvicorn", "app.main:app", "--host",
