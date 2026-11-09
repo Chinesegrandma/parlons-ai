@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const dynamic = "force-dynamic";
 
 export const metadata = {
@@ -18,7 +20,7 @@ export default function PrivacyPage() {
         lineHeight: 1.8,
       }}
     >
-      <a href="/" style={{ color: "#123bea" }}>← Parlons AI</a>
+      <Link href="/" style={{ color: "#123bea" }}>← Parlons AI</Link>
       <h1>Parlons AI Beta · 隐私说明 / Privacy notice</h1>
       <p>更新于 2026-11-09。本页面是 Beta 隐私信息说明，正式推广前需要进行适用法律审查。</p>
       <h2>1. 我们处理什么 / What we process</h2>
