@@ -30,6 +30,8 @@ services:
         value: "60"
       - key: BETA_GLOBAL_CALLS_PER_DAY
         value: "500"
+      - key: SUPPORT_EMAIL
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY
