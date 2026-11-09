@@ -1,3 +1,4 @@
+import { accessToken } from "./cloud-auth";
 import type {
   LookupResult,
   Health,
@@ -34,7 +35,10 @@ async function failure(response: Response): Promise<ApiError> {
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API}${path}`, init);
+  const token = await accessToken();
+  const headers = new Headers(init?.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(`${API}${path}`, { ...init, headers });
   if (!response.ok) throw await failure(response);
   return response.json() as Promise<T>;
 }
@@ -88,8 +92,13 @@ export const api = {
     });
   },
   synthesize: async (text: string, signal: AbortSignal, voice = "default") => {
+    const token = await accessToken();
     const response = await fetch(`${API}/speech/synthesize`, {
       ...json({ text, voice }),
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       signal,
     });
     if (!response.ok) throw await failure(response);
