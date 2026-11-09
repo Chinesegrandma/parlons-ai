@@ -14,6 +14,7 @@ from app import main, providers  # noqa: E402
 def no_external_network(monkeypatch):
     monkeypatch.setenv("MOCK_AI", "true")
     monkeypatch.setenv("PARLONS_PUBLIC_SITE", "false")
+    monkeypatch.setenv("PARLONS_CLOUD_SITE", "false")
 
     attempts = []
 
