@@ -20,6 +20,9 @@ def cloud_api(tmp_path, monkeypatch):
     monkeypatch.setenv("SUPPORT_EMAIL", "owner@example.com")
     monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "public-test-key")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "fake-service-role-test-key")
+    monkeypatch.setenv("PARLONS_OPENAI_API_KEY", "fake-openai-key")
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "fake-eleven-key")
+    monkeypatch.setenv("ELEVENLABS_VOICE_ID", "fake-voice-id")
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "beta.sqlite3"))
     monkeypatch.setattr(main, "DB_PATH", tmp_path / "beta.sqlite3")
 
