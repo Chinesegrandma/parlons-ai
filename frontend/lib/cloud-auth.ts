@@ -129,8 +129,8 @@ export async function signUp(email: string, password: string): Promise<boolean> 
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
-  await authRequest("/recover", {
-    body: { email, redirect_to: window.location.origin },
+  await authRequest("/recover?redirect_to=" + encodeURIComponent(window.location.origin), {
+    body: { email },
   });
 }
 
@@ -174,6 +174,17 @@ export async function accessToken(): Promise<string | null> {
   return current.access_token;
 }
 
+async function withUser(value: CloudSession): Promise<CloudSession> {
+  if (value.user?.id) return value;
+  const user = await authRequest<{ id: string; email?: string }>("/user", {
+    method: "GET",
+    token: value.access_token,
+  });
+  const complete = { ...value, user: { id: user.id, email: user.email } };
+  save(complete);
+  return complete;
+}
+
 export async function restoreCloudSession(): Promise<{
   session: CloudSession | null;
   recovering: boolean;
@@ -189,12 +200,12 @@ export async function restoreCloudSession(): Promise<{
       expires_in: Number(params.get("expires_in") || 3600),
     });
     history.replaceState(null, "", window.location.pathname + window.location.search);
-    return { session: result, recovering };
+    return { session: await withUser(result), recovering };
   }
   const current = session();
   if (!current) return { session: null, recovering: false };
   const valid = await accessToken();
-  return { session: valid ? session() : null, recovering: false };
+  return { session: valid ? await withUser(session()!) : null, recovering: false };
 }
 
 export async function signOut(): Promise<void> {
@@ -210,9 +221,13 @@ export async function signOut(): Promise<void> {
 }
 
 export function clearBrowserLearningData() {
-  for (const key of Object.keys(localStorage)) {
-    if (key.startsWith("parlons-learning") || key.startsWith("parlons-session"))
-      localStorage.removeItem(key);
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("parlons-learning") || key.startsWith("parlons-session"))
+        localStorage.removeItem(key);
+    }
+    localStorage.removeItem("parlons-guessing-words");
+  } catch {
+    /* Storage may have been blocked by browser privacy settings. */
   }
-  localStorage.removeItem("parlons-guessing-words");
 }
