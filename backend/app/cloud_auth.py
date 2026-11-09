@@ -114,6 +114,34 @@ class CloudAuthMiddleware:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http" or not enabled():
             return await self.app(scope, receive, send)
+        original_send = send
+
+        async def guarded_send(message):
+            if message["type"] == "http.response.start":
+                message = dict(message)
+                headers = list(message.get("headers", []))
+                existing = {name.lower() for name, _ in headers}
+                extra = {
+                    b"x-content-type-options": b"nosniff",
+                    b"x-frame-options": b"DENY",
+                    b"referrer-policy": b"no-referrer",
+                    b"permissions-policy": b"microphone=(self), camera=()",
+                    b"content-security-policy": (
+                        b"default-src 'self'; script-src 'self' 'unsafe-inline'; "
+                        b"style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; "
+                        b"media-src 'self' blob:; connect-src 'self' https://*.supabase.co; "
+                        b"frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+                    ),
+                }
+                headers.extend(
+                    (name, value)
+                    for name, value in extra.items()
+                    if name not in existing
+                )
+                message["headers"] = headers
+            await original_send(message)
+
+        send = guarded_send
         path = scope["path"]
         if path.startswith("/api/backend/"):
             path = path[len("/api/backend") :]
