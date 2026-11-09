@@ -38,7 +38,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = await accessToken();
   const headers = new Headers(init?.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(`${API}${path}`, { ...init, headers });
+  const response = await fetch(
+    `${API}${path}`,
+    token ? { ...init, headers } : init,
+  );
   if (!response.ok) throw await failure(response);
   return response.json() as Promise<T>;
 }
