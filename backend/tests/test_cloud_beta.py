@@ -17,6 +17,7 @@ def cloud_api(tmp_path, monkeypatch):
     monkeypatch.setenv("PARLONS_CLOUD_SITE", "true")
     monkeypatch.setenv("MOCK_AI", "false")
     monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPPORT_EMAIL", "owner@example.com")
     monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "public-test-key")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "fake-service-role-test-key")
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "beta.sqlite3"))
