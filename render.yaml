@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: parlons-ai-public-beta
+    runtime: docker
+    region: frankfurt
+    plan: 1c-2g
+    branch: dev
+    autoDeployTrigger: checksPass
+    healthCheckPath: /health/live
+    disk:
+      name: parlons-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PARLONS_CLOUD_SITE
+        value: "true"
+      - key: PARLONS_PUBLIC_SITE
+        value: "false"
+      - key: MOCK_AI
+        value: "false"
+      - key: DATABASE_PATH
+        value: /var/data/parlons.sqlite3
+      - key: PORT
+        value: "10000"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: BETA_USER_CALLS_PER_MINUTE
+        value: "12"
+      - key: BETA_USER_CALLS_PER_DAY
+        value: "60"
+      - key: BETA_GLOBAL_CALLS_PER_DAY
+        value: "500"
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: PARLONS_OPENAI_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        sync: false

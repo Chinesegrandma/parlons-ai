@@ -32,15 +32,15 @@ import type {
 } from "../lib/types";
 
 type Phase = "idle" | "listening" | "thinking" | "speaking" | "paused";
-export function Studio({ demo = false }: { demo?: boolean }) {
+export function Studio({ demo = false, userId }: { demo?: boolean; userId?: string }) {
   const client = demo ? demoApi : api;
   const { language, setLanguage, t } = useLanguage();
   const conversation = useConversation(
     client,
-    demo ? "parlons-demo-session" : "parlons-session",
+    demo ? "parlons-demo-session" : userId ? `parlons-session:${userId}` : "parlons-session",
     false,
   );
-  const learning = useLearning(demo, conversation.session, language);
+  const learning = useLearning(demo, conversation.session, language, userId);
   const [voices, setVoices] = useState<Voice[]>([]);
   const speech = useSpeech(
     client,

@@ -13,7 +13,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, Response, Uploa
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
-from app import providers, security
+from app import cloud_auth, providers, security
 from app.challenges import BY_TOPIC, challenge_opening, challenge_prompt, review_guidance
 from app.feedback import FEEDBACK_CONTRACT, numbered_feedback, validate_feedback
 from app.learning import PracticeOptions, load_options
@@ -46,6 +46,8 @@ def connect():
 
 
 def init_db():
+    if cloud_auth.enabled():
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with connect() as db:
         db.execute(
             "CREATE TABLE IF NOT EXISTS sessions "
@@ -56,6 +58,13 @@ def init_db():
             "(id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, "
             "role TEXT NOT NULL, content TEXT NOT NULL, correction TEXT, "
             "created_at TEXT NOT NULL, FOREIGN KEY(session_id) REFERENCES sessions(id))"
+        )
+        # Legacy sessions remain unowned and cannot be accessed in cloud mode.
+        owner_columns = {row["name"] for row in db.execute("PRAGMA table_info(sessions)")}
+        if "owner_id" not in owner_columns:
+            db.execute("ALTER TABLE sessions ADD COLUMN owner_id TEXT")
+        db.execute(
+            "CREATE INDEX IF NOT EXISTS sessions_owner_id_idx ON sessions(owner_id, id)"
         )
         # Additive migration preserves databases created by v0.2.
         columns = {row["name"] for row in db.execute("PRAGMA table_info(messages)")}
@@ -86,6 +95,10 @@ def init_db():
             if name not in message_columns:
                 db.execute(f"ALTER TABLE messages ADD COLUMN {name} TEXT")
         security.init_tables(db)
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS deleted_users "
+            "(user_id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL)"
+        )
         # Old sessions never stored their frontend opener; backfill exactly once.
         for session in db.execute("SELECT * FROM sessions").fetchall():
             insert_opening(db, session["id"], session["topic"], session["created_at"])
@@ -118,6 +131,8 @@ def insert_opening(db, session_id: str, topic: str, created_at: str):
 async def lifespan(_app: FastAPI):
     if security.public_enabled():
         security.settings()
+    if cloud_auth.enabled():
+        cloud_auth.config()
     init_db()
     yield
 
@@ -133,6 +148,7 @@ app.add_middleware(
 
 
 app.add_middleware(security.PublicSiteMiddleware, db_factory=connect)
+app.add_middleware(cloud_auth.CloudAuthMiddleware, db_factory=connect)
 
 
 class SessionCreate(BaseModel):
@@ -176,7 +192,13 @@ class SpeechRequest(BaseModel):
 
 
 def require_session(db, session_id: str):
-    session = db.execute("SELECT * FROM sessions WHERE id=?", (session_id,)).fetchone()
+    if cloud_auth.enabled():
+        session = db.execute(
+            "SELECT * FROM sessions WHERE id=? AND owner_id=?",
+            (session_id, cloud_auth.user_id()),
+        ).fetchone()
+    else:
+        session = db.execute("SELECT * FROM sessions WHERE id=?", (session_id,)).fetchone()
     if not session:
         raise HTTPException(404, "Session not found")
     return session
@@ -196,6 +218,23 @@ def session_messages(db, session_id: str) -> list[dict]:
     for item in result:
         item["correction_details"] = json.loads(item["correction_details"] or "[]")
     return result
+
+
+@app.get("/health/live")
+def health_live():
+    return {"status": "ok"}
+
+
+@app.get("/auth/config")
+def auth_config():
+    if not cloud_auth.enabled():
+        return {"enabled": False}
+    url, key = cloud_auth.config()
+    return Response(
+        json.dumps({"enabled": True, "url": url, "publishable_key": key}),
+        media_type="application/json",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/health")
@@ -230,8 +269,15 @@ def create_session(payload: SessionCreate):
     session_id = str(payload.id or uuid.uuid4())
     with connect() as db:
         db.execute(
-            "INSERT OR IGNORE INTO sessions(id, topic, created_at, options) VALUES (?, ?, ?, ?)",
-            (session_id, payload.topic, now(), payload.options.model_dump_json(exclude_none=True)),
+            "INSERT OR IGNORE INTO sessions(id, topic, created_at, options, owner_id) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                session_id,
+                payload.topic,
+                now(),
+                payload.options.model_dump_json(exclude_none=True),
+                cloud_auth.user_id(),
+            ),
         )
         session = require_session(db, session_id)
         if session["topic"] != payload.topic:
@@ -399,6 +445,7 @@ async def chat(payload: MessageCreate):
         corrected_text = review_prompt = ""
         correction_details = []
     with connect() as db:
+        require_session(db, payload.session_id)
         user_row = db.execute(
             "INSERT INTO messages(session_id, role, content, created_at, transcript_id, "
             "original_transcript, edited_transcript) VALUES (?, 'user', ?, ?, ?, ?, ?)",
@@ -585,10 +632,61 @@ async def synthesize(payload: SpeechRequest):
     return Response(audio, media_type=mime, headers={"Cache-Control": "no-store"})
 
 
+@app.delete("/me/data")
+def delete_my_data():
+    """Permanently delete conversations and transcripts owned by this user."""
+    if not cloud_auth.enabled():
+        raise HTTPException(404, "Not found")
+    owner = cloud_auth.user_id()
+    with connect() as db:
+        ids = "SELECT id FROM sessions WHERE owner_id=?"
+        db.execute(f"DELETE FROM messages WHERE session_id IN ({ids})", (owner,))
+        db.execute(f"DELETE FROM transcripts WHERE session_id IN ({ids})", (owner,))
+        db.execute("DELETE FROM sessions WHERE owner_id=?", (owner,))
+    return {"deleted": True}
+
+
+@app.delete("/me/account")
+async def delete_my_account():
+    """Delete the verified owner's Supabase identity and stored content."""
+    if not cloud_auth.enabled():
+        raise HTTPException(404, "Not found")
+    owner = cloud_auth.user_id()
+    url, _ = cloud_auth.config()
+    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    if not service_key:
+        raise HTTPException(503, "Account deletion is not configured")
+    import httpx
+
+    try:
+        async with httpx.AsyncClient(timeout=10, trust_env=False) as client:
+            response = await client.delete(
+                f"{url}/auth/v1/admin/users/{owner}",
+                headers={
+                    "apikey": service_key,
+                    "Authorization": f"Bearer {service_key}",
+                },
+            )
+        if response.status_code not in (200, 204):
+            raise HTTPException(502, "Identity provider could not delete account")
+    except httpx.HTTPError as exc:
+        raise HTTPException(503, "Identity provider unavailable") from exc
+    with connect() as db:
+        db.execute(
+            "INSERT OR IGNORE INTO deleted_users(user_id, deleted_at) VALUES (?, ?)",
+            (owner, now()),
+        )
+        ids = "SELECT id FROM sessions WHERE owner_id=?"
+        db.execute(f"DELETE FROM messages WHERE session_id IN ({ids})", (owner,))
+        db.execute(f"DELETE FROM transcripts WHERE session_id IN ({ids})", (owner,))
+        db.execute("DELETE FROM sessions WHERE owner_id=?", (owner,))
+    return {"deleted": True}
+
+
 @app.api_route("/{path:path}", methods=["GET", "HEAD"], include_in_schema=False)
 async def frontend_gateway(path: str, request: Request):
     """Production gateway: the sole public port protects both UI and API."""
-    if not security.public_enabled():
+    if not (security.public_enabled() or cloud_auth.enabled()):
         raise HTTPException(404, "Not found")
     import httpx
 

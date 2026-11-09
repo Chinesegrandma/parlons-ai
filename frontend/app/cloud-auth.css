@@ -1,0 +1,83 @@
+.cloud-auth-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background: #faf9f6;
+  color: #242424;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.cloud-auth-panel {
+  width: min(100%, 430px);
+  background: #fff;
+  border: 1px solid #e4e0d9;
+  border-radius: 22px;
+  padding: 38px 30px;
+  box-shadow: 0 20px 54px rgba(35, 30, 25, .045);
+}
+.cloud-auth-logo {
+  font-family: Georgia, serif;
+  font-size: 39px;
+  letter-spacing: -2px;
+  font-weight: bold;
+}
+.cloud-auth-logo span { color: #123bea; }
+.cloud-auth-eyebrow { color: #77736d; letter-spacing: .12em; font-size: 10px; margin: 18px 0 10px; }
+.cloud-auth-panel h1 { font-size: 24px; line-height: 1.35; margin: 0 0 10px; }
+.cloud-auth-subtitle { color: #6b6762; line-height: 1.7; font-size: 14px; margin: 0 0 24px; }
+.cloud-auth-panel form { display: flex; flex-direction: column; gap: 18px; }
+.cloud-auth-panel label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; }
+.cloud-auth-panel input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  background: #faf9f6;
+  border: 1px solid #d8d5ce;
+  border-radius: 10px;
+  outline-offset: 2px;
+}
+.cloud-auth-panel form > button {
+  border: none; border-radius: 10px; background: #123bea; color: white;
+  min-height: 46px; font-weight: 700;
+}
+.cloud-auth-panel form > button:disabled { opacity: .5; }
+.cloud-auth-error, .cloud-auth-notice {
+  padding: 12px 14px; border-radius: 10px;
+  font-size: 13px; line-height: 1.5; word-break: break-word;
+}
+.cloud-auth-error { background: #fff1ef; color: #9e2721; }
+.cloud-auth-notice { background: #eef6f0; color: #21563b; }
+.cloud-auth-switch { display: flex; flex-wrap: wrap; gap: 14px; margin: 22px 0; }
+.cloud-auth-switch button {
+  border: none; background: none; padding: 0;
+  font-size: 13px; color: #123bea; text-decoration: underline;
+}
+.cloud-auth-footer { color: #77736d; font-size: 11px; line-height: 1.7; margin: 18px 0 0; }
+.cloud-auth-footer a { text-decoration: underline; }
+.cloud-account-menu {
+  position: fixed; right: 16px; bottom: 18px; z-index: 1200;
+  font-family: Arial, Helvetica, sans-serif; color: #242424;
+  font-size: 12px; max-width: min(90vw, 320px);
+}
+.cloud-account-menu > summary {
+  cursor: pointer; background: #fff; border: 1px solid #d8d5ce;
+  padding: 10px 15px; border-radius: 999px; list-style: none;
+  box-shadow: 0 2px 16px #0001;
+}
+.cloud-account-menu[open] > summary { border-radius: 12px 12px 0 0; }
+.cloud-account-content {
+  background: #fff; padding: 15px; border: 1px solid #d8d5ce;
+  border-radius: 12px 0 12px 12px;
+  display: grid; gap: 12px;
+}
+.cloud-account-content p { overflow-wrap: anywhere; margin: 0; }
+.cloud-account-content button {
+  background: #f3f2ef; border: 1px solid #ddd; border-radius: 7px;
+  padding: 9px; text-align: left;
+}
+.cloud-account-content .cloud-danger { color: #a92c28; }
+.cloud-account-content a { text-decoration: underline; }
+@media (max-width: 480px) {
+  .cloud-auth-panel { padding: 30px 22px; }
+  .cloud-account-menu { right: 8px; bottom: 72px; }
+}
