@@ -40,6 +40,9 @@ def config() -> tuple[str, str]:
         raise RuntimeError("Private tunnel and cloud beta modes cannot both be enabled")
     if os.getenv("MOCK_AI", "true").lower() != "false":
         raise RuntimeError("Cloud beta cannot run with mock AI enabled")
+    support = os.getenv("SUPPORT_EMAIL", "").strip()
+    if "@" not in support or len(support) > 254:
+        raise RuntimeError("Cloud beta requires a real SUPPORT_EMAIL for user requests")
     if not os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip():
         raise RuntimeError("Cloud beta requires a server-only service role key for account deletion")
     if not os.getenv("DATABASE_PATH", "").strip():
