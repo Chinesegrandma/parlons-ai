@@ -37,10 +37,10 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const { language, setLanguage, t } = useLanguage();
   const conversation = useConversation(
     client,
-    demo ? "parlons-demo-session" : "parlons-session",
+    demo ? "parlons-demo-session" : userId ? `parlons-session:${userId}` : "parlons-session",
     false,
   );
-  const learning = useLearning(demo, conversation.session, language);
+  const learning = useLearning(demo, conversation.session, language, userId);
   const [voices, setVoices] = useState<Voice[]>([]);
   const speech = useSpeech(
     client,
