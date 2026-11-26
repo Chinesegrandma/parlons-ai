@@ -283,6 +283,7 @@ it("supports opening autoplay opt-out", async () => {
 });
 it("hands-free mode sends after silence, waits for playback end, then listens again", async () => {
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "结束后总结" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));

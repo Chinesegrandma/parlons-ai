@@ -20,6 +20,7 @@ BILLABLE_PATHS = {
     "/speech/synthesize",
     "/translate",
     "/rewrite",
+    "/assist",
     "/lookup",
 }
 MAX_BODY = 9 * 1024 * 1024

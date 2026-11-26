@@ -66,6 +66,8 @@ export const api = {
       "/chat",
       json({ session_id, message, transcript_id, ...preferences }),
     ),
+  assist: (session_id: string, mode: "hint" | "express", text: string, language: Language) =>
+    request<RewriteSuggestion>("/assist", json({ session_id, mode, text, language })),
   lookup: (text: string, context: string, language: Language) =>
     request<LookupResult>("/lookup", json({ text, context, language })),
   rewrite: (text: string, style: RewriteStyle, language: Language) =>
@@ -80,9 +82,10 @@ export const api = {
       ...json({ language }),
       signal,
     }),
-  transcribe: (sessionId: string, audio: Blob, signal: AbortSignal) => {
+  transcribe: (sessionId: string, audio: Blob, signal: AbortSignal, languageCode: "fra" | "auto" = "fra") => {
     const form = new FormData();
     form.append("session_id", sessionId);
+    if (languageCode === "auto") form.append("language_code", "auto");
     form.append(
       "file",
       audio,

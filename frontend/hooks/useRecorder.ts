@@ -42,7 +42,7 @@ export function useRecorder(
   }, []);
   useEffect(() => cancel, [cancel]);
 
-  async function toggle(sessionId: string) {
+  async function toggle(sessionId: string, languageCode: "fra" | "auto" = "fra") {
     if (listening) {
       if (recorder.current && recorder.current.state !== "inactive")
         recorder.current.stop();
@@ -101,7 +101,9 @@ export function useRecorder(
         const abort = new AbortController();
         controller.current = abort;
         try {
-          const result = await api.transcribe(sessionId, blob, abort.signal);
+          const result = languageCode === "auto"
+            ? await api.transcribe(sessionId, blob, abort.signal, "auto")
+            : await api.transcribe(sessionId, blob, abort.signal);
           if (current === generation.current) onTranscript(result);
         } catch (error) {
           if (current === generation.current)

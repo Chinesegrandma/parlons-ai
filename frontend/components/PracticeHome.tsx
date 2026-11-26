@@ -76,10 +76,14 @@ export function PracticeHome({
   canResume = true,
   onCustom,
   level = "B1-B2",
+  feedback = "each_turn",
+  onFeedbackChange,
 }: {
   language: Language;
   onStart: (topic: Topic, options?: Partial<PracticeOptions>) => void;
   level?: PracticeOptions["level"];
+  feedback?: PracticeOptions["feedback"];
+  onFeedbackChange?: (value: PracticeOptions["feedback"]) => void;
   disabled: boolean;
   onResume: () => void;
   canResume?: boolean;
@@ -89,6 +93,7 @@ export function PracticeHome({
   const [custom, setCustom] = useState("");
   const [category, setCategory] = useState("");
   const [group, setGroup] = useState("");
+  const [surprise, setSurprise] = useState(false);
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const current = sections.find((section) => section.id === category);
   const available = catalog.filter(
@@ -100,9 +105,37 @@ export function PracticeHome({
   const grouped = [
     ...new Set(available.map((scene) => scene.group).filter(Boolean)),
   ];
+  const preferences = (
+    <section className="practice-preferences" aria-label={t("练习设置", "Practice settings")}>
+      {onFeedbackChange && (
+        <div className="mode-switch" aria-label={t("纠错方式", "Feedback mode")}>
+          <button aria-pressed={feedback === "each_turn"} onClick={() => onFeedbackChange("each_turn")}>
+            {t("即时纠错", "Correct each turn")}
+          </button>
+          <button aria-pressed={feedback === "after_session"} onClick={() => onFeedbackChange("after_session")}>
+            {t("结束后总结", "Review at the end")}
+          </button>
+        </div>
+      )}
+      {category !== "challenge" && (
+        <label className="scenario-surprise">
+          <input type="checkbox" checked={surprise} onChange={(event) => setSurprise(event.target.checked)} />
+          {t("真实场景中加入随机意外", "Include an unexpected event in role-play")}
+        </label>
+      )}
+    </section>
+  );
+  const startScene = (topic: Topic) => {
+    if (surprise && topic !== "daily") onStart(topic, { scenario_variant: "surprise" });
+    else onStart(topic);
+  };
   if (selected)
     return (
       <main className="practice-home">
+        {preferences}
+        <button className="end-review" disabled={disabled} onClick={() => onStart("daily")}>
+          {t("自由聊天", "Free chat")}
+        </button>
         <ChallengeSetup
           key={selected}
           topic={selected}
@@ -118,7 +151,7 @@ export function PracticeHome({
     <main
       className={`practice-home ${category === "challenge" ? "challenge-home" : ""}`}
     >
-      {category !== "challenge" && (
+      {(
         <>
           <div className="home-intro">
             <span className="eyebrow">UN PEU, CHAQUE JOUR</span>
@@ -138,7 +171,7 @@ export function PracticeHome({
           <div className="home-quick">
             <div>
               <span className="quick-mark">✦</span>
-              <h2>{t("不选场景，也可以聊。", "Just feel like talking?")}</h2>
+              <h2>{t("自由聊天 · 任何话题", "Free chat · Any topic")}</h2>
               <p>
                 {t(
                   "从今天发生的小事开始，AI 会主动带你聊下去。",
@@ -152,6 +185,7 @@ export function PracticeHome({
           </div>
         </>
       )}
+      {preferences}
       {category ? (
         <>
           <div className="category-heading">
@@ -207,7 +241,7 @@ export function PracticeHome({
                   onClick={() =>
                     scene.category === "challenge"
                       ? setSelected(scene.id)
-                      : onStart(scene.id)
+                      : startScene(scene.id)
                   }
                 >
                   <span>{scene[language]}</span>
@@ -233,7 +267,7 @@ export function PracticeHome({
               disabled={disabled}
               onClick={() =>
                 section.id === "interview"
-                  ? onStart("interview")
+                  ? startScene("interview")
                   : setCategory(section.id)
               }
             >

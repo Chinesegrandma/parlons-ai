@@ -159,6 +159,7 @@ class CloudAuthMiddleware:
             or path == "/lookup"
             or path == "/translate"
             or path == "/rewrite"
+            or path == "/assist"
             or path in {"/me/data", "/me/account"}
             or path.startswith("/sessions")
             or path.startswith("/speech/")

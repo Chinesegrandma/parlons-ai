@@ -65,6 +65,10 @@ function tone() {
 }
 /** Local, scripted UI demonstration. No fetch, providers, microphone or real evaluation. */
 export const demoApi: typeof api = {
+  assist: async (_id, _mode, _text, language) => ({
+    expression: "Pourriez-vous m’en dire un peu plus ?",
+    explanation: language === "zh" ? "离线演示，不是真实翻译。" : "Offline fixture, not a real translation.",
+  }),
   lookup: async (_text, _context, language) => ({
     meaning:
       language === "zh"

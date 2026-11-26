@@ -19,6 +19,7 @@ from app.feedback import FEEDBACK_CONTRACT, numbered_feedback, validate_feedback
 from app.learning import PracticeOptions, load_options
 from app.persona import introduce
 from app.social import SOCIAL_CONVERSATION
+from app.scenario_events import scenario_event_prompt
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 DB_PATH = Path(
@@ -365,6 +366,18 @@ async def chat(payload: MessageCreate):
             update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
         )
     instructions += options.prompt()
+    if session["topic"] == "daily":
+        instructions += (
+            " Conversation libre : accepte tout sujet proposé par l’apprenant, "
+            "sans le ramener systématiquement à sa journée. Suis ses intérêts."
+        )
+    if options.scenario_variant == "surprise" and not options.situation:
+        with connect() as db:
+            count = db.execute(
+                "SELECT COUNT(*) FROM messages WHERE session_id=? AND role='user'",
+                (payload.session_id,),
+            ).fetchone()[0]
+        instructions += scenario_event_prompt(session["topic"], payload.session_id, count)
     if session["topic"] in BY_TOPIC:
         instructions += challenge_prompt(session["topic"], options)
     if (
@@ -483,6 +496,33 @@ async def chat(payload: MessageCreate):
     }
 
 
+class AssistRequest(BaseModel):
+    session_id: str
+    mode: Literal["hint", "express"]
+    text: str = Field(default="", max_length=2000)
+    language: Literal["zh", "en"] = "zh"
+
+
+@app.post("/assist")
+async def assist(payload: AssistRequest):
+    if payload.mode == "express" and not payload.text.strip():
+        raise HTTPException(422, "Enter what you want to say")
+    with connect() as db:
+        session = require_session(db, payload.session_id)
+        context = [
+            {"role": item["role"], "content": item["content"]}
+            for item in session_messages(db, payload.session_id)[-6:]
+        ]
+    try:
+        result = await providers.suggest_answer(
+            app, context, payload.mode, payload.text, payload.language,
+            load_options(session["options"]).level,
+        )
+    except Exception as exc:
+        raise HTTPException(502, providers.failure_detail("OpenAI", "assist", exc)) from exc
+    return result.model_dump()
+
+
 class RewriteRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
     style: Literal["polite", "slang", "local"]
@@ -569,7 +609,11 @@ async def review(session_id: str, payload: ReviewRequest):
 
 
 @app.post("/speech/transcribe")
-async def transcribe(file: UploadFile = File(...), session_id: str = Form(...)):
+async def transcribe(
+    file: UploadFile = File(...),
+    session_id: str = Form(...),
+    language_code: Literal["fra", "auto"] = Form("fra"),
+):
     """Retain exact transcript text; audio exists only in request memory."""
     try:
         with connect() as db:
@@ -593,7 +637,7 @@ async def transcribe(file: UploadFile = File(...), session_id: str = Form(...)):
             raise HTTPException(413, "Audio must be between 1 byte and 8 MB")
         try:
             text = await providers.speech_to_text(
-                app, file.filename or "recording.webm", data, mime
+                app, file.filename or "recording.webm", data, mime, language_code
             )
         except Exception as exc:
             raise HTTPException(

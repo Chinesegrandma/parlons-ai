@@ -6,6 +6,7 @@ import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { ChallengePanel } from "./ChallengePanel";
 import { challengeFor } from "../lib/challenges";
 import { Composer } from "./Composer";
+import { PracticeAid } from "./PracticeAid";
 import { MessageList } from "./MessageList";
 import { PracticeHome } from "./PracticeHome";
 import { ReviewPanel } from "./ReviewPanel";
@@ -41,6 +42,9 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     false,
   );
   const learning = useLearning(demo, conversation.session, language, userId);
+  const feedback = learning.options.feedback;
+  const feedbackMode: PracticeMode =
+    feedback === "after_session" ? "conversation" : "guided";
   const [voices, setVoices] = useState<Voice[]>([]);
   const speech = useSpeech(
     client,
@@ -247,7 +251,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       text: value.original_text,
       transcriptId: value.id,
       language,
-      practice_mode: "conversation",
+      practice_mode: feedbackMode,
     });
     pending.current = request;
     const reply = await request;
@@ -293,7 +297,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       goals: [],
       review_targets: [],
       explanation_language: language === "en" ? "English" : "Chinese",
-      feedback: mode === "conversation" ? "after_session" : "each_turn",
+      feedback,
+      scenario_variant: "standard",
       ...extra,
     };
     const result = await conversation.start(topic, topic ? options : undefined);
@@ -315,7 +320,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       text: conversation.input,
       transcriptId: conversation.transcript?.id,
       language,
-      practice_mode: mode,
+      practice_mode: feedbackMode,
     });
     pending.current = request;
     const reply = await request;
@@ -525,6 +530,10 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           disabled={busy}
           onStart={(topic, options) => void begin(topic, options)}
           level={learning.options.level}
+          feedback={feedback}
+          onFeedbackChange={(value) =>
+            learning.setOptions((old) => ({ ...old, feedback: value }))
+          }
           onResume={() => void begin()}
         />
       ) : (
@@ -583,7 +592,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           </div>
           <div
             className="mode-switch"
-            aria-label={t("对话模式", "Practice mode")}
+            aria-label={t("录音方式", "Recording mode")}
           >
             <button
               aria-pressed={mode === "guided"}
@@ -596,6 +605,26 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               onClick={() => switchMode("conversation")}
             >
               {t("连续对话", "Conversation")}
+            </button>
+          </div>
+          <div className="mode-switch" aria-label={t("纠错方式", "Feedback mode")}>
+            <button
+              aria-pressed={feedback === "each_turn"}
+              disabled={busy || voiceActive || recorder.listening}
+              onClick={() =>
+                learning.setOptions((old) => ({ ...old, feedback: "each_turn" }))
+              }
+            >
+              {t("即时纠错", "Correct each turn")}
+            </button>
+            <button
+              aria-pressed={feedback === "after_session"}
+              disabled={busy || voiceActive || recorder.listening}
+              onClick={() =>
+                learning.setOptions((old) => ({ ...old, feedback: "after_session" }))
+              }
+            >
+              {t("结束后总结", "Review at the end")}
             </button>
           </div>
           {session && challengeFor(session.topic) && (
@@ -694,7 +723,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               }
               speechReady={speechReady && !voiceActive}
               language={language}
-              hideCorrections={mode === "conversation"}
+              hideCorrections={feedback === "after_session"}
               onSaveCorrection={learning.saveCorrection}
               savedCorrectionIds={
                 session?.messages
@@ -738,6 +767,21 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               <GlassNotice key={speech.notice} language={language}>
                 {localizedError(speech.notice)}
               </GlassNotice>
+            )}
+            {!voiceActive && session && (
+              <PracticeAid
+                key={session.id}
+                language={language}
+                sessionId={session.id}
+                client={client}
+                disabled={busy || recorder.listening || demoListening}
+                demo={demo}
+                sttReady={health?.stt_ready ?? false}
+                onUse={(text) => {
+                  conversation.discard();
+                  conversation.setInput(text);
+                }}
+              />
             )}
             {!voiceActive && (
               <Composer

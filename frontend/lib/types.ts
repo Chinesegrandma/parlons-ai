@@ -51,6 +51,7 @@ export type ChallengeOptions = {
 };
 export type PracticeOptions = {
   challenge?: ChallengeOptions | null;
+  scenario_variant?: "standard" | "surprise";
   scene: string;
   situation: string;
   goals: string[];

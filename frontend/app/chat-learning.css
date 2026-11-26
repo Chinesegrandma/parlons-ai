@@ -596,3 +596,33 @@
 .word-lookup [lang="fr"] {
   font-family: var(--sage-french);
 }
+
+.practice-preferences,
+.practice-aid {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.7rem 0;
+}
+.scenario-surprise {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+.practice-aid-body {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  border: 1px solid #dce5dc;
+  border-radius: 14px;
+  background: #fafbf8;
+}
+.practice-aid-body textarea {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.4rem;
+  border: 1px solid #dce5dc;
+  border-radius: 8px;
+  font: inherit;
+}
