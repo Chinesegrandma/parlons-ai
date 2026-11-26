@@ -750,3 +750,67 @@
   .sage-conversation .voice-session { margin-bottom: 6px; }
   .sage-conversation .chat-mode-options { max-height: 45dvh; overflow-y: auto; }
 }
+
+/* Scene hierarchy: the hero belongs exclusively to the landing page. */
+.parlons-app .practice-home.scene-selection { padding-top: 20px; }
+.parlons-app .scene-selection .category-heading { margin: 0 0 16px; }
+.parlons-app .scene-selection .category-heading h2 { margin: 12px 0 5px; }
+.parlons-app .scene-selection .category-heading p { margin: 0; }
+.scene-surprise-option {
+  min-height: 44px;
+  margin: 0 0 12px;
+  padding: 6px 12px;
+  border: 1px solid var(--sage-border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.32);
+  cursor: pointer;
+}
+.scene-surprise-option input { width: 18px; height: 18px; accent-color: var(--sage-deep); flex: none; }
+.parlons-app .practice-home:focus { outline: none; }
+/* Pin chat to the actual visual viewport. The document must not scroll with the keyboard. */
+html.parlons-chat-open, html.parlons-chat-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  height: 100%;
+}
+.parlons-app.sage-conversation {
+  position: fixed;
+  top: var(--chat-viewport-top, 0px);
+  left: 0;
+  right: 0;
+  height: var(--chat-viewport-height, 100dvh);
+  min-height: 0;
+  max-height: var(--chat-viewport-height, 100dvh);
+  overflow: hidden;
+}
+.sage-conversation .conversation-page { height: 100%; max-height: 100%; overflow: hidden; }
+.sage-conversation .focused-chat { flex: 1 1 0; min-height: 0; }
+.sage-conversation .lookup-surface, .sage-conversation .conversation-layout { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.sage-conversation .focused-chat .conversation { flex: 1 1 0; min-height: 0; height: 0; overflow-y: auto; }
+.sage-conversation .focused-chat .composerarea { flex: 0 0 auto; min-height: 0; max-height: 48%; overflow-y: auto; overscroll-behavior: contain; }
+.sage-conversation .focused-chat .composer textarea {
+  display: block;
+  font-size: 16px;
+  line-height: 1.4;
+  min-height: 44px;
+  max-height: 88px;
+  overflow-y: auto;
+  resize: none;
+  padding: 10px 0;
+  outline: none;
+  border-radius: 8px;
+}
+.sage-conversation .focused-chat .composer:focus-within { border-color: var(--sage-deep); }
+.sage-conversation .focused-chat .composer textarea:focus-visible { outline: none; }
+@media (max-width: 700px) {
+  .parlons-app:not(.sage-conversation) > .app-header {
+    height: calc(64px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+  .parlons-app .practice-home.scene-selection { padding-top: 16px; }
+  .parlons-keyboard-open .sage-conversation { padding-bottom: 0; }
+  .parlons-keyboard-open .sage-conversation .conversation-page { padding-top: 4px; }
+  .parlons-keyboard-open .sage-conversation .chat-mode-picker { margin-bottom: 3px; }
+  .parlons-keyboard-open .sage-conversation .practice-aid { max-height: 24%; }
+  .parlons-keyboard-open .sage-conversation .focused-chat .composerarea { max-height: 55%; }
+}

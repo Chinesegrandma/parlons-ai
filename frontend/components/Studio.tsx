@@ -433,18 +433,42 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             )
           : t("准备好时，开启连续对话。", "Start when you are ready.");
   useEffect(() => {
-    if (page !== "chat" || !window.visualViewport) return;
+    if (page !== "chat") return;
+    const root = document.documentElement;
     const viewport = window.visualViewport;
-    const resize = () =>
-      document.documentElement.style.setProperty(
-        "--chat-viewport-height",
-        `${viewport.height}px`,
-      );
-    resize();
-    viewport.addEventListener("resize", resize);
+    const previousScroll = window.scrollY;
+    root.classList.add("parlons-chat-open");
+    window.scrollTo?.(0, 0);
+    let frame = 0;
+    const update = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const height = viewport?.height ?? window.innerHeight;
+        const top = viewport?.offsetTop ?? 0;
+        root.style.setProperty("--chat-viewport-height", `${Math.round(height)}px`);
+        root.style.setProperty("--chat-viewport-top", `${Math.max(0, Math.round(top))}px`);
+        const focused = document.activeElement;
+        const editing = focused instanceof HTMLTextAreaElement || focused instanceof HTMLInputElement;
+        root.classList.toggle("parlons-keyboard-open", Boolean(editing && window.innerHeight - height > 100));
+      });
+    };
+    update();
+    viewport?.addEventListener("resize", update);
+    viewport?.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    document.addEventListener("focusin", update);
+    document.addEventListener("focusout", update);
     return () => {
-      viewport.removeEventListener("resize", resize);
-      document.documentElement.style.removeProperty("--chat-viewport-height");
+      window.cancelAnimationFrame(frame);
+      viewport?.removeEventListener("resize", update);
+      viewport?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      document.removeEventListener("focusin", update);
+      document.removeEventListener("focusout", update);
+      root.classList.remove("parlons-chat-open", "parlons-keyboard-open");
+      root.style.removeProperty("--chat-viewport-height");
+      root.style.removeProperty("--chat-viewport-top");
+      window.scrollTo?.(0, previousScroll);
     };
   }, [page]);
   const navigation = (
@@ -542,10 +566,6 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           disabled={busy}
           onStart={(topic, options) => void begin(topic, options)}
           level={learning.options.level}
-          feedback={feedback}
-          onFeedbackChange={(value) =>
-            learning.setOptions((old) => ({ ...old, feedback: value }))
-          }
           onResume={() => void begin()}
         />
       ) : (

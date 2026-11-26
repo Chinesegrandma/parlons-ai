@@ -54,7 +54,7 @@ export function MessageList({
   ) => Promise<RewriteSuggestion>;
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
-  const bottom = useRef<HTMLDivElement>(null);
+  const history = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const [learningId, setLearningId] = useState<number | null>(null);
   const [wide, setWide] = useState(false);
@@ -162,12 +162,10 @@ export function MessageList({
     }
   }
   useEffect(() => {
-    bottom.current?.scrollIntoView?.({
-      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-        ? "instant"
-        : "smooth",
-      block: "nearest",
-    });
+    const list = history.current;
+    if (!list) return;
+    // Scroll only the history, never Safari's outer document or visual viewport.
+    list.scrollTop = list.scrollHeight;
   }, [messages, busy]);
   return (
     <WordLookup key={historyId} language={language} onLookup={onLookup}>
@@ -175,6 +173,7 @@ export function MessageList({
         className={`conversation-layout ${showLearning ? "has-learning" : ""}`}
       >
         <div
+          ref={history}
           className="conversation"
           aria-label="Conversation history"
           aria-live="polite"
@@ -407,7 +406,7 @@ export function MessageList({
               <small>{busyLabel}</small>
             </div>
           )}
-          <div ref={bottom} />
+          <div aria-hidden="true" />
         </div>
         {wide && showLearning && (
           <div id={panelId} className="learning-rail">

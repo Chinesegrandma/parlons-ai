@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUp, Mic, Square, ScanText, X, LoaderCircle } from "lucide-react";
 import type { Transcript, Language } from "../lib/types";
 export function Composer({
@@ -34,6 +34,13 @@ export function Composer({
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const [seconds, setSeconds] = useState(0);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const field = inputRef.current;
+    if (!field) return;
+    field.style.height = "auto";
+    field.style.height = `${Math.max(44, Math.min(88, field.scrollHeight))}px`;
+  }, [input]);
   const hasDraft = Boolean(input.trim());
   const canRecord = !hideMicrophone && sttReady;
   const action = listening
@@ -124,7 +131,8 @@ export function Composer({
       )}
       <div className={`composer ${listening ? "is-listening" : ""}`}>
         <textarea
-          rows={2}
+          ref={inputRef}
+          rows={1}
           aria-label={
             transcript
               ? t("编辑转写", "Edit transcript")
@@ -154,8 +162,8 @@ export function Composer({
                   "Prenez votre temps… Take your time",
                 )
               : t(
-                  "说点什么，或者用法语写下来…",
-                  "Say something, or write in French…",
+                  "输入或说一句法语…",
+                  "Say or type something in French…",
                 )
           }
           disabled={disabled || listening || transcribing}

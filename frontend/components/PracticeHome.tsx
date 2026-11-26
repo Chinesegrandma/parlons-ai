@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -76,14 +76,10 @@ export function PracticeHome({
   canResume = true,
   onCustom,
   level = "B1-B2",
-  feedback = "each_turn",
-  onFeedbackChange,
 }: {
   language: Language;
   onStart: (topic: Topic, options?: Partial<PracticeOptions>) => void;
   level?: PracticeOptions["level"];
-  feedback?: PracticeOptions["feedback"];
-  onFeedbackChange?: (value: PracticeOptions["feedback"]) => void;
   disabled: boolean;
   onResume: () => void;
   canResume?: boolean;
@@ -94,6 +90,17 @@ export function PracticeHome({
   const [category, setCategory] = useState("");
   const [group, setGroup] = useState("");
   const [surprise, setSurprise] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const previousView = useRef("");
+  useEffect(() => {
+    const view = `${category}:${group}:${selected ?? ""}`;
+    if (previousView.current && previousView.current !== view) {
+      window.scrollTo?.(0, 0);
+      mainRef.current?.focus({ preventScroll: true });
+    }
+    previousView.current = view;
+    setSurprise(false);
+  }, [category, group, selected]);
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const current = sections.find((section) => section.id === category);
   const available = catalog.filter(
@@ -105,37 +112,22 @@ export function PracticeHome({
   const grouped = [
     ...new Set(available.map((scene) => scene.group).filter(Boolean)),
   ];
-  const preferences = (
-    <section className="practice-preferences" aria-label={t("练习设置", "Practice settings")}>
-      {onFeedbackChange && (
-        <div className="mode-switch" aria-label={t("纠错方式", "Feedback mode")}>
-          <button aria-pressed={feedback === "each_turn"} onClick={() => onFeedbackChange("each_turn")}>
-            {t("即时纠错", "Correct each turn")}
-          </button>
-          <button aria-pressed={feedback === "after_session"} onClick={() => onFeedbackChange("after_session")}>
-            {t("结束后总结", "Review at the end")}
-          </button>
-        </div>
-      )}
-      {category !== "challenge" && (
-        <label className="scenario-surprise">
-          <input type="checkbox" checked={surprise} onChange={(event) => setSurprise(event.target.checked)} />
-          {t("真实场景中加入随机意外", "Include an unexpected event in role-play")}
-        </label>
-      )}
-    </section>
-  );
+  const visibleScenes = available.filter((scene) => group || !scene.group);
+  const eventScenes = new Set<string>([
+    "bank_card", "bank_transfer", "doctor", "symptoms", "renting", "post",
+    "customer_service", "restaurant", "cafe", "shopping", "transport", "travel",
+    "self_intro", "friends", "invite", "decline", "course", "teacher", "report",
+    "interview",
+  ]);
+  const showSurprise = visibleScenes.some((scene) => eventScenes.has(scene.id));
   const startScene = (topic: Topic) => {
-    if (surprise && topic !== "daily") onStart(topic, { scenario_variant: "surprise" });
+    if (surprise && showSurprise && eventScenes.has(topic))
+      onStart(topic, { scenario_variant: "surprise" });
     else onStart(topic);
   };
   if (selected)
     return (
-      <main className="practice-home">
-        {preferences}
-        <button className="end-review" disabled={disabled} onClick={() => onStart("daily")}>
-          {t("自由聊天", "Free chat")}
-        </button>
+      <main ref={mainRef} tabIndex={-1} className="practice-home scene-selection">
         <ChallengeSetup
           key={selected}
           topic={selected}
@@ -149,9 +141,11 @@ export function PracticeHome({
     );
   return (
     <main
-      className={`practice-home ${category === "challenge" ? "challenge-home" : ""}`}
+      ref={mainRef}
+      tabIndex={-1}
+      className={`practice-home ${category ? "scene-selection" : ""} ${category === "challenge" ? "challenge-home" : ""}`}
     >
-      {(
+      {!category && (
         <>
           <div className="home-intro">
             <span className="eyebrow">UN PEU, CHAQUE JOUR</span>
@@ -185,7 +179,6 @@ export function PracticeHome({
           </div>
         </>
       )}
-      {preferences}
       {category ? (
         <>
           <div className="category-heading">
@@ -212,6 +205,12 @@ export function PracticeHome({
                   )}
             </p>
           </div>
+          {showSurprise && (
+            <label className="scenario-surprise scene-surprise-option">
+              <input type="checkbox" checked={surprise} onChange={(event) => setSurprise(event.target.checked)} />
+              {t("真实场景中加入随机意外", "Include an unexpected event in role-play")}
+            </label>
+          )}
           <div className="subscene-grid">
             {!group &&
               grouped.map((id) => (
@@ -265,11 +264,7 @@ export function PracticeHome({
               className={`category-card category-${section.id}`}
               key={section.id}
               disabled={disabled}
-              onClick={() =>
-                section.id === "interview"
-                  ? startScene("interview")
-                  : setCategory(section.id)
-              }
+              onClick={() => setCategory(section.id)}
             >
               <div>
                 <span className="category-icon">
@@ -280,9 +275,7 @@ export function PracticeHome({
               <h2>{section[language]}</h2>
               <p>{section[language === "en" ? "subEn" : "subZh"]}</p>
               <span className="category-footer">
-                {section.id === "interview"
-                  ? t("进入对话", "Enter conversation")
-                  : section.id === "challenge"
+                {section.id === "challenge"
                     ? t("探索挑战", "Explore challenges")
                     : t("探索场景", "Explore situations")}
                 <ArrowUpRight size={18} />
