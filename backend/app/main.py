@@ -446,7 +446,7 @@ async def chat(payload: MessageCreate):
                 ) from exc
         corrected_text, review_prompt = result.corrected_text, result.review_prompt
         reply, correction = result.reply, numbered_feedback(result)
-        correction_details = [item.model_dump() for item in result.correction_details]
+        correction_details = [item.model_dump(exclude_none=True) for item in result.correction_details]
         if payload.practice_mode == "conversation":
             correction = corrected_text = review_prompt = ""
             correction_details = []
@@ -605,7 +605,7 @@ async def review(session_id: str, payload: ReviewRequest):
             result = await providers.review_session(app, context, payload.language)
     except Exception as exc:
         raise HTTPException(502, providers.failure_detail("OpenAI", "review", exc)) from exc
-    return result.model_dump()
+    return result.model_dump(exclude_none=True)
 
 
 @app.post("/speech/transcribe")

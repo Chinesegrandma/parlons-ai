@@ -169,7 +169,12 @@ export type Memory = {
   due: number;
   created: number;
 };
-export type Notebook = { cards: Memory[]; seen: string[] };
+export type Notebook = {
+  cards: Memory[];
+  seen: string[];
+  mistakes?: import("./mistakes").Mistake[];
+  ignoredMistakes?: string[];
+};
 /** Preserve dismissed event IDs: navigating back to a session must not resurrect a deleted card. */
 export function collectMemories(
   book: Notebook,
@@ -218,7 +223,7 @@ export function collectMemories(
       created: now,
     });
   });
-  return changed ? { cards, seen: [...seen] } : book;
+  return changed ? { ...book, cards, seen: [...seen] } : book;
 }
 export function reviewMemory(
   card: Memory,

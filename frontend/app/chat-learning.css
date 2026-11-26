@@ -626,3 +626,28 @@
   border-radius: 8px;
   font: inherit;
 }
+
+.mistake-trainer {
+  display: grid;
+  gap: 1rem;
+}
+.mistake-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.6rem;
+}
+.mistake-grid button {
+  text-align: left;
+  display: grid;
+  gap: 0.5rem;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.mistake-question {
+  display: grid;
+  gap: 0.7rem;
+}
+.mistake-question button[aria-pressed="true"] {
+  outline: 2px solid #527c69;
+}

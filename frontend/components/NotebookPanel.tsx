@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MistakeTrainer } from "./MistakeTrainer";
 import {
   ArrowLeft,
   BookOpen,
@@ -29,6 +30,7 @@ export function NotebookPanel({
   speechReady: boolean;
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
+  const [view, setView] = useState<"notes" | "mistakes">("notes");
   const [expression, setExpression] = useState("");
   const [filter, setFilter] = useState("all");
   const [editing, setEditing] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export function NotebookPanel({
   );
   function exportNotes() {
     const url = URL.createObjectURL(
-      new Blob([JSON.stringify(learning.book.cards, null, 2)], {
+      new Blob([JSON.stringify(learning.book, null, 2)], {
         type: "application/json",
       }),
     );
@@ -66,7 +68,7 @@ export function NotebookPanel({
         </div>
         <button
           className="end-review"
-          disabled={!learning.book.cards.length}
+          disabled={!learning.book.cards.length && !learning.book.mistakes?.length}
           onClick={exportNotes}
         >
           <Download size={15} /> {t("导出", "Export")}
@@ -86,6 +88,17 @@ export function NotebookPanel({
           )}
         </p>
       )}
+      <div className="mode-switch notebook-filter">
+        <button aria-pressed={view === "notes"} onClick={() => setView("notes")}>
+          {t("收藏笔记", "Saved notes")}
+        </button>
+        <button aria-pressed={view === "mistakes"} onClick={() => setView("mistakes")}>
+          {t("分类错题", "Mistake categories")} ({learning.book.mistakes?.length || 0})
+        </button>
+      </div>
+      {view === "mistakes" ? (
+        <MistakeTrainer language={language} mistakes={learning.book.mistakes || []} onRemove={learning.removeMistake} />
+      ) : (<>
       <form
         className="notebook-add"
         onSubmit={(event) => {
@@ -254,6 +267,7 @@ export function NotebookPanel({
           </article>
         ))}
       </div>
+      </>)}
     </main>
   );
 }

@@ -7,6 +7,7 @@ import os
 import re
 import wave
 from contextlib import asynccontextmanager
+from typing import Literal
 
 import httpx
 from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI
@@ -216,7 +217,23 @@ async def provider_http(app):
         yield http
 
 
-class CorrectionDetail(BaseModel):
+MistakeCategory = Literal[
+    "tense", "conjugation", "agreement", "article", "preposition", "pronoun",
+    "syntax", "vocabulary", "spelling", "other",
+]
+MISTAKE_CATEGORY_GUIDANCE = (
+    " For each actual error include category: tense, conjugation, agreement, article, "
+    "preposition, pronoun, syntax, vocabulary, spelling, or other. "
+    "Use tense for tense choice, conjugation for verb form, agreement for gender/number, "
+    "article for determiners, and other when uncertain. Do not mark optional style as an error."
+)
+
+
+class CategorizedMistake(BaseModel):
+    category: MistakeCategory | None = None
+
+
+class CorrectionDetail(CategorizedMistake):
     model_config = ConfigDict(extra="forbid", strict=True)
     original: str = Field(min_length=1, max_length=1200)
     suggestion: str = Field(min_length=1, max_length=1200)
@@ -390,7 +407,7 @@ class Strength(BaseModel):
     reason: str = Field(min_length=1, max_length=2000)
 
 
-class Correction(BaseModel):
+class Correction(CategorizedMistake):
     model_config = ConfigDict(extra="forbid", strict=True)
     original: str = Field(min_length=1, max_length=2000)
     suggestion: str = Field(min_length=1, max_length=2000)
@@ -422,7 +439,7 @@ async def review_session(
         "suggestion reste en français. Les autres champs sont en "
         + ("anglais." if language == "en" else "chinois.")
     )
-    instructions += guidance
+    instructions += MISTAKE_CATEGORY_GUIDANCE + guidance
     async with provider_http(app) as http:
         client = AsyncOpenAI(
             api_key="mock-not-a-secret" if mock_enabled() else configured_openai_key(),
@@ -562,7 +579,7 @@ async def ensure_english_feedback(app, reply: TutorReply) -> TutorReply:
                             "correction": reply.correction,
                             "review_prompt": reply.review_prompt,
                             "correction_details": [
-                                item.model_dump() for item in reply.correction_details
+                                item.model_dump(exclude_none=True) for item in reply.correction_details
                             ],
                         },
                         ensure_ascii=False,
@@ -584,6 +601,8 @@ async def ensure_english_feedback(app, reply: TutorReply) -> TutorReply:
         (item.original, item.suggestion) for item in localized.correction_details
     ] or any(feedback_needs_english(item.explanation) for item in localized.correction_details):
         raise ValueError("Feedback detail language repair failed")
+    for original, translated in zip(reply.correction_details, localized.correction_details):
+        translated.category = original.category
     return TutorReply.model_validate({**reply.model_dump(), **localized.model_dump()})
 
 
@@ -670,6 +689,8 @@ async def localize_review_explanations(app, review: SessionReview, language: str
         or review_needs_localization(updated, language)
     ):
         raise ValueError("Review language repair failed")
+    for original, translated in zip(review.corrections, updated.corrections):
+        translated.category = original.category
     return updated
 
 

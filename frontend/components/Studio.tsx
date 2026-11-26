@@ -384,7 +384,11 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       await pending.current;
       if (abort.signal.aborted) return;
       const result = await client.review(id, language, abort.signal);
-      if (!abort.signal.aborted) setReview(result);
+      if (!abort.signal.aborted) {
+        setReview(result);
+        const source = await client.history(id);
+        if (!abort.signal.aborted) learning.saveReviewMistakes(source, result);
+      }
     } catch (error) {
       if (!abort.signal.aborted)
         setReviewError(

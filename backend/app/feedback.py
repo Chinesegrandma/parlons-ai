@@ -3,7 +3,7 @@
 import re
 from difflib import SequenceMatcher
 
-from .providers import TutorReply
+from .providers import MISTAKE_CATEGORY_GUIDANCE, TutorReply
 
 FEEDBACK_CONTRACT = (
     " FEEDBACK_CURRENT_TURN: corrige UNIQUEMENT le tout dernier message utilisateur, "
@@ -17,7 +17,7 @@ FEEDBACK_CONTRACT = (
     "le dernier message s’il y a une correction, sinon chaîne vide. correction reste "
     "un résumé compatible ; sans erreur, correction_details=[], correction_source='', "
     "correction='', corrected_text='', review_prompt=''. Réponse JSON uniquement."
-)
+) + MISTAKE_CATEGORY_GUIDANCE
 
 
 def words(text):

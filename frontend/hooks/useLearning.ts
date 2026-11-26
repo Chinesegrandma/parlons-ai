@@ -7,7 +7,8 @@ import {
   type Memory,
   reviewMemory,
 } from "../lib/learning";
-import type { PracticeOptions, Session, Language } from "../lib/types";
+import { collectMistakes } from "../lib/mistakes";
+import type { PracticeOptions, Session, Language, Review } from "../lib/types";
 export function useLearning(
   demo: boolean,
   session: Session | null,
@@ -44,7 +45,7 @@ export function useLearning(
   }, [prefix]);
   useEffect(() => {
     if (ready && session)
-      setBook((previous) => collectMemories(previous, session));
+      setBook((previous) => collectMistakes(collectMemories(previous, session), session));
   }, [ready, session]);
   useEffect(() => {
     if (!ready) return;
@@ -126,7 +127,17 @@ export function useLearning(
       };
     });
   };
+  const saveReviewMistakes = (source: Session, result: Review) =>
+    setBook((previous) => collectMistakes(previous, source, result));
+  const removeMistake = (id: string) =>
+    setBook((previous) => ({
+      ...previous,
+      mistakes: (previous.mistakes || []).filter((item) => item.id !== id),
+      ignoredMistakes: [...(previous.ignoredMistakes || []), id],
+    }));
   return {
+    saveReviewMistakes,
+    removeMistake,
     saveCorrection,
     options,
     setOptions,

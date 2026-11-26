@@ -2,10 +2,11 @@ import { catalog } from "./catalog";
 export type Topic = (typeof catalog)[number]["id"];
 export type Language = "zh" | "en";
 export type PracticeMode = "guided" | "conversation";
+export type MistakeCategory = "tense" | "conjugation" | "agreement" | "article" | "preposition" | "pronoun" | "syntax" | "vocabulary" | "spelling" | "other";
 export type Review = {
   summary: string;
   strengths: { quote: string; reason: string }[];
-  corrections: { original: string; suggestion: string; explanation: string }[];
+  corrections: { original: string; suggestion: string; explanation: string; category?: MistakeCategory | null }[];
 };
 export type Message = {
   id: number;
@@ -18,6 +19,7 @@ export type Message = {
     original: string;
     suggestion: string;
     explanation: string;
+    category?: MistakeCategory | null;
   }[];
   review_prompt?: string | null;
   original_transcript?: string | null;
