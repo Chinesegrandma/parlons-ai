@@ -199,7 +199,9 @@ EXTRA_EVENTS = {
 }
 EVENTS = {topic: events + tuple(EXTRA_EVENTS[topic]) for topic, events in EVENTS.items()}
 
-def scenario_event_prompt(topic: str, session_id: str, previous_turns: int, level: str = "B1-B2") -> str:
+def scenario_event_prompt(
+    topic: str, session_id: str, previous_turns: int, level: str = "B1-B2"
+) -> str:
     events = EVENTS.get(topic)
     if not events:
         return ""
@@ -208,11 +210,16 @@ def scenario_event_prompt(topic: str, session_id: str, previous_turns: int, leve
     event = events[digest[1] % len(events)]
     if previous_turns < trigger:
         return ""
-    difficulty = {"A1-A2": "une difficulté simple avec vocabulaire accessible", "C1": "une contrainte à négocier avec nuances"}.get(level, "une difficulté concrète à résoudre")
+    difficulty = {
+        "A1-A2": "une difficulté simple avec vocabulaire accessible",
+        "C1": "une contrainte à négocier avec nuances",
+    }.get(level, "une difficulté concrète à résoudre")
     if previous_turns == trigger:
         return (" ÉVÉNEMENT FICTIF: introduis clairement maintenant, sans donner la solution : "
                 + event + " Adapte la formulation : " + difficulty +
-                ". Donne à l’apprenant une occasion de clarifier, négocier ou proposer une solution.")
+                ". Donne à l’apprenant une occasion de clarifier, négocier ou proposer "
+                "une solution.")
     return (" Événement prévu précédemment : " + event +
             " Ne le réintroduis pas s’il a déjà été abordé. Vérifie le contexte : s’il reste à résoudre, "
-            "réponds à la tentative réelle de l’apprenant et avance vers une solution; s’il est résolu, poursuis naturellement.")
+            "réponds à la tentative réelle de l’apprenant et avance vers une solution; "
+            "s’il est résolu, poursuis naturellement.")

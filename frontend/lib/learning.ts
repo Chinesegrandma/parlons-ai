@@ -15,6 +15,9 @@ export type Lesson = {
   category: "Work" | "Everyday" | "Travel";
   topic: Topic;
   title: string;
+  titleEn: string;
+  opening: string;
+  goalsEn: string[];
   french: string;
   situation: string;
   goals: string[];
@@ -23,6 +26,9 @@ export type Lesson = {
 export const lessons: Lesson[] = [
   {
     id: "first-day",
+    titleEn: "First day at work",
+    opening: "Bonjour ! Bienvenue dans l'équipe. Tu peux te présenter ?",
+    goalsEn: ["Introduce yourself","Get to know the team","Clarify the first task"],
     category: "Work",
     topic: "interview",
     title: "第一天入职",
@@ -34,6 +40,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "presentation",
+    titleEn: "Present a project",
+    opening: "Bonjour ! De quel projet allez-vous nous parler aujourd'hui ?",
+    goalsEn: ["Describe the project","Explain its value","Answer a follow-up"],
     category: "Work",
     topic: "interview",
     title: "第一次做汇报",
@@ -45,6 +54,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "project-update",
+    titleEn: "Give a project update",
+    opening: "Bonjour, où en est le projet ?",
+    goalsEn: ["Explain progress","Explain a difficulty","Confirm the next step"],
     category: "Work",
     topic: "interview",
     title: "汇报项目进度",
@@ -56,6 +68,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "lunch",
+    titleEn: "Lunch with colleagues",
+    opening: "Salut ! On déjeune ensemble ?",
+    goalsEn: ["Join the conversation","Ask a follow-up","Invite someone"],
     category: "Work",
     topic: "friends",
     title: "和同事吃午饭",
@@ -67,6 +82,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "clarify",
+    titleEn: "Ask for clarification",
+    opening: "Pour demain, j'aurais besoin d'un petit bilan du projet. C'est possible ?",
+    goalsEn: ["Ask for clarification","Rephrase the request","Confirm the deadline"],
     category: "Work",
     topic: "interview",
     title: "请对方再说一次",
@@ -78,6 +96,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "disagree",
+    titleEn: "Disagree politely",
+    opening: "Je propose de lancer le projet lundi. Qu'en pensez-vous ?",
+    goalsEn: ["Respond to the suggestion","Explain a concern","Offer an alternative"],
     category: "Work",
     topic: "interview",
     title: "礼貌表达不同意见",
@@ -89,6 +110,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "coffee",
+    titleEn: "Order coffee",
+    opening: "Bonjour ! Qu'est-ce que je vous sers ?",
+    goalsEn: ["Order a drink","Ask about pastries","Choose takeaway or eat in"],
     category: "Everyday",
     topic: "cafe",
     title: "点一杯咖啡",
@@ -100,6 +124,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "appointment",
+    titleEn: "Book an appointment",
+    opening: "Bonjour, cabinet médical, je vous écoute.",
+    goalsEn: ["Explain your request","Agree on a time","Confirm the details"],
     category: "Everyday",
     topic: "doctor",
     title: "预约一个时间",
@@ -111,6 +138,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "dinner",
+    titleEn: "Dinner for two",
+    opening: "Bonsoir, vous êtes combien ?",
+    goalsEn: ["Ask about a table","Ask about ingredients","Request the bill"],
     category: "Everyday",
     topic: "restaurant",
     title: "两个人的晚餐",
@@ -122,6 +152,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "return",
+    titleEn: "Return an item",
+    opening: "Bonjour, qu'est-ce qui ne va pas avec cet article ?",
+    goalsEn: ["Explain the problem","Request an exchange","Clarify the conditions"],
     category: "Everyday",
     topic: "shopping",
     title: "退换商品",
@@ -133,6 +166,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "train",
+    titleEn: "Take the train",
+    opening: "Bonjour ! Quelle est votre destination ?",
+    goalsEn: ["Ask about departure","Confirm the platform","Ask about connections"],
     category: "Travel",
     topic: "travel",
     title: "乘坐火车",
@@ -143,6 +179,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "hotel",
+    titleEn: "Check into a hotel",
+    opening: "Bonjour, bienvenue à l'hôtel. Vous avez une réservation ?",
+    goalsEn: ["Explain your reservation","Ask about breakfast","Discuss room needs"],
     category: "Travel",
     topic: "travel",
     title: "办理酒店入住",
@@ -266,3 +305,207 @@ export function dailyLesson(history: PracticeRecord[], today = new Date()) {
   const index = Math.floor(Date.UTC(today.getFullYear(),today.getMonth(),today.getDate())/86400000);
   return pool[index % pool.length];
 }
+
+const sceneGoals: Partial<Record<Topic,[string[],string[]]>> = {
+  "bank_card": [
+    [
+      "说明开户需求",
+      "询问所需材料"
+    ],
+    [
+      "Explain account needs",
+      "Ask about required documents"
+    ]
+  ],
+  "bank_transfer": [
+    [
+      "说明转账需求",
+      "确认费用与时间"
+    ],
+    [
+      "Explain transfer needs",
+      "Confirm cost and timing"
+    ]
+  ],
+  "doctor": [
+    [
+      "说明预约需求",
+      "确认预约时间"
+    ],
+    [
+      "Explain appointment needs",
+      "Agree on a time"
+    ]
+  ],
+  "symptoms": [
+    [
+      "描述症状",
+      "说明持续时间"
+    ],
+    [
+      "Describe symptoms",
+      "Explain duration"
+    ]
+  ],
+  "renting": [
+    [
+      "描述租房需求",
+      "询问条件"
+    ],
+    [
+      "Describe housing needs",
+      "Ask about conditions"
+    ]
+  ],
+  "post": [
+    [
+      "说明寄件需求",
+      "确认价格与时效"
+    ],
+    [
+      "Explain mailing needs",
+      "Confirm price and timing"
+    ]
+  ],
+  "customer_service": [
+    [
+      "说明问题",
+      "提出解决方案"
+    ],
+    [
+      "Explain the issue",
+      "Request a solution"
+    ]
+  ],
+  "restaurant": [
+    [
+      "点餐",
+      "询问配料或结账"
+    ],
+    [
+      "Order food",
+      "Ask about ingredients or the bill"
+    ]
+  ],
+  "cafe": [
+    [
+      "点饮品",
+      "确认堂食或外带"
+    ],
+    [
+      "Order a drink",
+      "Confirm takeaway or eat in"
+    ]
+  ],
+  "shopping": [
+    [
+      "描述想买的商品",
+      "询问尺码或价格"
+    ],
+    [
+      "Describe what you want",
+      "Ask about size or price"
+    ]
+  ],
+  "transport": [
+    [
+      "说明目的地",
+      "询问票价或时间"
+    ],
+    [
+      "State your destination",
+      "Ask about fare or timing"
+    ]
+  ],
+  "travel": [
+    [
+      "说明目的地",
+      "确认路线"
+    ],
+    [
+      "State destination",
+      "Confirm route"
+    ]
+  ],
+  "self_intro": [
+    [
+      "自我介绍",
+      "自然追问"
+    ],
+    [
+      "Introduce yourself",
+      "Ask a follow-up"
+    ]
+  ],
+  "friends": [
+    [
+      "分享近况",
+      "回应对方"
+    ],
+    [
+      "Share news",
+      "Respond naturally"
+    ]
+  ],
+  "invite": [
+    [
+      "提出邀请",
+      "协商时间地点"
+    ],
+    [
+      "Make an invitation",
+      "Agree on time and place"
+    ]
+  ],
+  "decline": [
+    [
+      "礼貌拒绝",
+      "提出替代选择"
+    ],
+    [
+      "Decline politely",
+      "Offer an alternative"
+    ]
+  ],
+  "course": [
+    [
+      "说明选课需求",
+      "核对时间与条件"
+    ],
+    [
+      "Explain course needs",
+      "Check timing and requirements"
+    ]
+  ],
+  "teacher": [
+    [
+      "说明问题",
+      "请求澄清"
+    ],
+    [
+      "Explain a difficulty",
+      "Ask for clarification"
+    ]
+  ],
+  "report": [
+    [
+      "说明进展",
+      "确认下一步"
+    ],
+    [
+      "Explain progress",
+      "Confirm next steps"
+    ]
+  ],
+  "interview": [
+    [
+      "介绍经历",
+      "回应追问"
+    ],
+    [
+      "Describe experience",
+      "Answer a follow-up"
+    ]
+  ]
+};
+export function goalsFor(topic: Topic | undefined, language: "zh" | "en") { return topic ? sceneGoals[topic]?.[language==="en"?1:0] || [] : []; }

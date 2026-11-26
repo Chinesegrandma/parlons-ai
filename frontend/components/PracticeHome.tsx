@@ -171,8 +171,8 @@ export function PracticeHome({
           {book && (
             <section className="daily-practice" aria-label={t("今日练习", "Daily practice")}>
               <div className="daily-heading"><span>{t("今日练习", "Daily practice")}</span><small>{today ? t("今天已练习", "Practiced today") : t("每天一点", "A little every day")}{practiceStreak(history) > 0 ? t(" · 连续 ", " · Streak ") + practiceStreak(history) + t(" 天", " days") : ""}</small></div>
-              <button className="daily-main" disabled={disabled} onClick={() => onStart(lesson.topic, {scene: language === "zh" ? lesson.title : lesson.french, situation: lesson.situation, goals: language === "zh" ? lesson.goals : [],})}>
-                <span><strong>{language === "zh" ? lesson.title : lesson.french}</strong><small>{t("约 ", "About ")}{lesson.minutes}{t(" 分钟", " min")}</small></span><ArrowUpRight size={20}/>
+              <button className="daily-main" disabled={disabled} onClick={() => onStart(lesson.topic, {scene: language === "zh" ? lesson.title : lesson.titleEn, situation: lesson.situation, opening: lesson.opening, goals: language === "zh" ? lesson.goals : lesson.goalsEn,})}>
+                <span><strong>{language === "zh" ? lesson.title : lesson.titleEn}</strong><small>{t("约 ", "About ")}{lesson.minutes}{t(" 分钟", " min")}</small></span><ArrowUpRight size={20}/>
               </button>
               {due.length > 0 && onReview && <button className="daily-secondary" disabled={disabled} onClick={() => onReview(due[0])}>{t("复习 ", "Review ")}{due.length}{t(" 个表达", " expressions")} <ArrowUpRight size={15}/></button>}
               {onStudy && <button className="daily-secondary" onClick={onStudy}>{t("我的学习", "My learning")} <ArrowUpRight size={15}/></button>}

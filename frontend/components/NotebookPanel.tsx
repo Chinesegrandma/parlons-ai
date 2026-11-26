@@ -41,7 +41,7 @@ export function NotebookPanel({
   const [revealed, setRevealed] = useState<string | null>(null);
   const cards = learning.book.cards.filter(
     (card) =>
-      filter === "all" ? card.accepted : card.due <= Date.now(),
+      filter === "all" ? card.accepted : card.due <= Date.now() && Boolean(card.corrected || card.sent),
   );
   function exportNotes() {
     const url = URL.createObjectURL(

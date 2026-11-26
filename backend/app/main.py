@@ -378,7 +378,9 @@ async def chat(payload: MessageCreate):
                 "SELECT COUNT(*) FROM messages WHERE session_id=? AND role='user'",
                 (payload.session_id,),
             ).fetchone()[0]
-        instructions += scenario_event_prompt(session["topic"], payload.session_id, count, options.level)
+        instructions += scenario_event_prompt(
+            session["topic"], payload.session_id, count, options.level
+        )
     if session["topic"] in BY_TOPIC:
         instructions += challenge_prompt(session["topic"], options)
     if (
@@ -396,7 +398,8 @@ async def chat(payload: MessageCreate):
     if original is not None:
         instructions += (" L’utilisateur a dicté son message. Ne traite pas la ponctuation, "
                          "les majuscules, l’orthographe des homophones ou un probable artefact "
-                         "de transcription comme une faute orale; demande une clarification si nécessaire.")
+                         "de transcription comme une faute orale; "
+                         "demande une clarification si nécessaire.")
     language_name = options.explanation_language
     instructions += f" Écris toute explication de correction en {language_name}."
     if language_name == "English":
@@ -610,7 +613,12 @@ async def review(session_id: str, payload: ReviewRequest):
             )
         else:
             goals = load_options(session["options"]).goals
-            result = await providers.review_session(app, context, payload.language, goals=goals) if goals else await providers.review_session(app, context, payload.language)
+            if goals:
+                result = await providers.review_session(
+                    app, context, payload.language, goals=goals
+                )
+            else:
+                result = await providers.review_session(app, context, payload.language)
     except Exception as exc:
         raise HTTPException(502, providers.failure_detail("OpenAI", "review", exc)) from exc
     return result.model_dump(exclude_none=True)

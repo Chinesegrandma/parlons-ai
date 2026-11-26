@@ -21,6 +21,7 @@ import { useLanguage } from "../lib/language";
 import { api } from "../lib/api";
 import { demoApi } from "../lib/demo";
 import { catalog } from "../lib/catalog";
+import { goalsFor } from "../lib/learning";
 import type {
   Health,
   PracticeMode,
@@ -304,7 +305,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       scene: target?.[language] || "",
       opening: undefined,
       situation: "",
-      goals: [],
+      goals: goalsFor(topic, language),
       review_targets: [],
       explanation_language: language === "en" ? "English" : "Chinese",
       feedback,
@@ -656,8 +657,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             </button>
             {modeMenuOpen && (
               <div id="chat-mode-options" className="chat-mode-options">
-                <button className="mode-preset" disabled={busy || recorder.listening || voiceActive || aidBusy} aria-pressed={mode==="guided"&&feedback==="each_turn"} onClick={()=>{switchMode("guided");learning.setOptions(old=>({...old,feedback:"each_turn"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("学习模式","Learning mode")}</strong><small>{t("逐句练习 · 即时纠错","Review each turn")}</small></button>
-                <button className="mode-preset" disabled={busy || recorder.listening || voiceActive || aidBusy} aria-pressed={mode==="conversation"&&feedback==="after_session"} onClick={()=>{switchMode("conversation");learning.setOptions(old=>({...old,feedback:"after_session"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("沉浸模式","Immersion mode")}</strong><small>{t("连续对话 · 结束后总结","Hands-free · feedback at the end")}</small></button>
+                <button className="mode-preset" disabled={aidBusy} aria-pressed={mode==="guided"&&feedback==="each_turn"} onClick={()=>{switchMode("guided");learning.setOptions(old=>({...old,feedback:"each_turn"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("学习模式","Learning mode")}</strong><small>{t("逐句练习 · 即时纠错","Review each turn")}</small></button>
+                <button className="mode-preset" disabled={aidBusy} aria-pressed={mode==="conversation"&&feedback==="after_session"} onClick={()=>{switchMode("conversation");learning.setOptions(old=>({...old,feedback:"after_session"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("沉浸模式","Immersion mode")}</strong><small>{t("连续对话 · 结束后总结","Hands-free · feedback at the end")}</small></button>
                 <details className="mode-advanced"><summary>{t("高级设置","Advanced settings")}</summary>
                 <span className="chat-mode-label">{t("对话方式", "Recording mode")}</span>
                 <div className="mode-switch" role="group" aria-label={t("录音方式", "Recording mode")}>

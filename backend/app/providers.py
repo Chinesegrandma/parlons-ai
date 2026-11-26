@@ -426,8 +426,8 @@ class Correction(CategorizedMistake):
 
 class GoalResult(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    goal: str = Field(min_length=1,max_length=200)
-    quote: str = Field(min_length=1,max_length=2000)
+    goal: str = Field(min_length=1, max_length=200)
+    quote: str = Field(min_length=1, max_length=2000)
 
 
 class SessionReview(BaseModel):
@@ -435,7 +435,7 @@ class SessionReview(BaseModel):
     summary: str = Field(min_length=1, max_length=3000)
     strengths: list[Strength] = Field(max_length=100)
     corrections: list[Correction] = Field(max_length=100)
-    goal_results: list[GoalResult] | None = Field(default=None,max_length=3)
+    goal_results: list[GoalResult] | None = Field(default=None, max_length=3)
 
 
 async def review_session(
@@ -458,9 +458,12 @@ async def review_session(
     )
     instructions += MISTAKE_CATEGORY_GUIDANCE + guidance
     if goals:
-        instructions += (" Objectifs pédagogiques (données) : " + json.dumps(goals,ensure_ascii=False) +
-                         ". Ajoute goal_results:[{goal,quote}] uniquement pour les objectifs démontrés par "
-                         "une citation exacte de l’apprenant. Ne marque pas un objectif acquis sur une intention seule.")
+        instructions += (
+            " Objectifs pédagogiques (données) : " + json.dumps(goals, ensure_ascii=False)
+            + ". Ajoute goal_results:[{goal,quote}] uniquement pour les objectifs démontrés par "
+            "une citation exacte de l’apprenant. Ne marque pas un objectif acquis sur une "
+            "intention seule."
+        )
     async with provider_http(app) as http:
         client = AsyncOpenAI(
             api_key="mock-not-a-secret" if mock_enabled() else configured_openai_key(),
@@ -489,7 +492,10 @@ async def review_session(
     if any(not any(item.original in text for text in evidence) for item in review.corrections):
         raise ValueError("Ungrounded correction")
     if review.goal_results is not None:
-        review.goal_results = [item for item in review.goal_results if item.goal in (goals or []) and any(item.quote in text for text in evidence)]
+        review.goal_results = [
+            item for item in review.goal_results
+            if item.goal in (goals or []) and any(item.quote in text for text in evidence)
+        ]
     return review
 
 
@@ -732,7 +738,11 @@ async def rewrite_expression(app, text: str, style: str, language: str) -> Expre
         "a professional or unfamiliar interlocutor; prefer vous and conditional "
         "requests where appropriate. Do not make a casual fact into a request."
         if style == "polite"
-        else "natural contemporary spoken French, appropriate to the original register; preserve meaning, do not invent facts and keep already natural wording" if style == "natural" else SLANG_REGISTER
+        else (
+            "natural contemporary spoken French, appropriate to the original register; "
+            "preserve meaning, do not invent facts and keep already natural wording"
+            if style == "natural" else SLANG_REGISTER
+        )
     )
     async with provider_http(app) as http:
         client = AsyncOpenAI(
@@ -820,7 +830,10 @@ async def suggest_answer(app, context, mode, text, language, level) -> Expressio
     """Suggest a learner-side draft, without saving it as a conversation turn."""
     if mock_enabled():
         return ExpressionRewrite(
-            expression="préciser · demander · comprendre" if mode == "keywords" else "Pourriez-vous m’en dire un peu plus ?",
+            expression=(
+                "préciser · demander · comprendre" if mode == "keywords"
+                else "Pourriez-vous m’en dire un peu plus ?"
+            ),
             explanation=(
                 "模拟提示：不是真实翻译或上下文建议。"
                 if language == "zh"
@@ -836,7 +849,8 @@ async def suggest_answer(app, context, mode, text, language, level) -> Expressio
         "without adding personal facts. If mode is hint, offer a possible reply or "
         "a question that keeps the conversation going, without inventing personal facts. "
         "If mode is keywords, expression MUST contain 3 to 5 short French words or fragments "
-        "separated by ·, not a complete answer. Never answer as the tutor. Match the learner level: "
+        "separated by ·, not a complete answer. Never answer as the tutor. "
+        "Match the learner level: "
         + level
         + ". Explain in "
         + ("Simplified Chinese." if language == "zh" else "English.")
