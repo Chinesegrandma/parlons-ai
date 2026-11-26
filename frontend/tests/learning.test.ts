@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { collectMemories, reviewMemory } from "../lib/learning";
+import { collectMemories, reviewMemory, trackPractice, practiceStreak, dailyLesson } from "../lib/learning";
 import type { Session } from "../lib/types";
 const session: Session = {
   id: "s1",
@@ -46,11 +46,22 @@ it("schedules only explicit self-checks and resets after difficulty", () => {
   expect(once).toMatchObject({
     reviews: 1,
     due: 100 + 86400000,
-    accepted: true,
+    accepted: false,
   });
   expect(reviewMemory(once, true, 200).due).toBe(200 + 3 * 86400000);
   expect(reviewMemory(once, false, 300)).toMatchObject({
     reviews: 0,
     due: 300,
   });
+});
+
+it("records real turns once, retains practice history, and rotates daily lessons", () => {
+  const day = new Date(2026, 10, 26, 12);
+  const empty = { cards: [], seen: [] };
+  const book = trackPractice(empty, session, day);
+  expect(book.practiceHistory?.[0]).toMatchObject({ day: "2026-11-26", turns: 1, spokenTurns: 1 });
+  expect(trackPractice(book, session, day)).toBe(book);
+  expect(trackPractice(book, session, new Date(2026,10,27,12))).toBe(book);
+  expect(practiceStreak(book.practiceHistory || [], day)).toBe(1);
+  expect(dailyLesson(book.practiceHistory || [], day).situation).toBeTruthy();
 });

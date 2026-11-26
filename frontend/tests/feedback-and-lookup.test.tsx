@@ -210,6 +210,7 @@ it("expands the word library, filters categories and saves/deletes custom target
       onStart={start}
     />,
   );
+  await user.click(screen.getByText("Choose prompt & difficulty"));
   await user.selectOptions(screen.getByLabelText("Word category"), "nature");
   expect(
     screen.getByLabelText("Choose a target word").querySelectorAll("option")
@@ -242,6 +243,7 @@ it("expands the word library, filters categories and saves/deletes custom target
       onStart={start}
     />,
   );
+  await user.click(screen.getByText("Choose prompt & difficulty"));
   await user.selectOptions(screen.getByLabelText("Word source"), "custom");
   await user.click(screen.getByRole("button", { name: "un accordéon" }));
   expect(

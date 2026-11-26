@@ -32,6 +32,7 @@ it("opens four challenge choices and starts only after explicit setup", async ()
     ).toBeVisible();
   expect(start).not.toHaveBeenCalled();
   await user.click(screen.getByRole("button", { name: /Discussion & debate/ }));
+  await user.click(screen.getByText("Choose prompt & difficulty"));
   await user.selectOptions(screen.getByLabelText("Choose a prompt"), "1");
   await user.selectOptions(screen.getByLabelText("Your side"), "against");
   await user.selectOptions(screen.getByLabelText("Challenge difficulty"), "C1");
@@ -112,6 +113,7 @@ it("protects an unfinished challenge draft before starting the next round", asyn
   render(<Studio demo />);
   await user.click(screen.getByRole("button", { name: "表达挑战" }));
   await user.click(screen.getByRole("button", { name: /故事接龙/ }));
+  await user.click(screen.getByText("自选题目与难度"));
   await user.click(screen.getByRole("button", { name: /开始挑战/ }));
   const next = await screen.findByRole("button", { name: "换一题 · 新对话" });
   const input = screen.getByRole("textbox", { name: "输入内容" });

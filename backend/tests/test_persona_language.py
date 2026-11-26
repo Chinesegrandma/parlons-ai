@@ -11,7 +11,8 @@ def test_persona_opening_is_stored_once_and_sent_in_context(api, transport):
     for _ in range(3):
         history = api.get(f"/sessions/{session['id']}").json()["messages"]
         assert len(history) == 1
-        assert history[0]["content"].count("Camille") == 1
+        assert "assistante de français" not in history[0]["content"]
+        assert "sers" in history[0]["content"]
     seen = []
 
     def handler(request):
@@ -23,8 +24,8 @@ def test_persona_opening_is_stored_once_and_sent_in_context(api, transport):
         api.post("/chat", json={"session_id": session["id"], "message": "Bonjour"}).status_code
         == 200
     )
-    assert "Camille" in seen[0]["messages"][1]["content"]
-    assert "ne la répète pas" in seen[0]["messages"][0]["content"]
+    assert "sers" in seen[0]["messages"][1]["content"]
+    assert "Camille" in seen[0]["messages"][0]["content"]
 
 
 @pytest.mark.parametrize(

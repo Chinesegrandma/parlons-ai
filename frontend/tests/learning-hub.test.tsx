@@ -97,7 +97,8 @@ it("defers inline corrections in conversation mode and offers an end review", as
   await screen.findByText(
     assistantOpening("Salut ! Comment s’est passée ta journée ?"),
   );
-  await user.click(screen.getByRole("button", { name: "连续对话" }));
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByRole("button", { name: /沉浸模式/ }));
   await user.type(
     screen.getByRole("textbox", { name: /^(Message|输入内容)$/ }),
     "Je voudrais une café.",

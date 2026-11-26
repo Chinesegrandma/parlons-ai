@@ -284,8 +284,10 @@ it("supports opening autoplay opt-out", async () => {
 it("hands-free mode sends after silence, waits for playback end, then listens again", async () => {
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "结束后总结" }));
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -305,6 +307,7 @@ it("hands-free mode sends after silence, waits for playback end, then listens ag
   act(() => MockAudio.current.onended?.());
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "逐句练习" }));
   expect(Recorder.current.state).toBe("inactive");
   expect(api.transcribe).toHaveBeenCalledOnce();
@@ -323,6 +326,7 @@ it("explicit cancellation during a pending reply never restarts the microphone o
   );
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -339,10 +343,12 @@ it("explicit cancellation during a pending reply never restarts the microphone o
 it("mode switching stops capture and does not submit partial audio", async () => {
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "逐句练习" }));
   expect(Recorder.current.state).toBe("inactive");
   expect(api.transcribe).not.toHaveBeenCalled();
@@ -368,6 +374,7 @@ it("ends with strengths and corrections together", async () => {
 it("hiding the page stops capture without submitting the unfinished turn", async () => {
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -380,6 +387,7 @@ it("hiding the page stops capture without submitting the unfinished turn", async
 it("silence timeout pauses without invoking paid provider operations", async () => {
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -393,6 +401,7 @@ it("a failed automated reply stops the loop and retains the transcript draft", a
   vi.mocked(api.chat).mockRejectedValueOnce(new Error("failure"));
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -409,6 +418,7 @@ it("a failed automated reply stops the loop and retains the transcript draft", a
 it("Pause submits the current spoken turn, responds and does not restart listening", async () => {
   const user = await enter();
   await user.click(screen.getByRole("button", { name: "练习模式设置" }));
+  await user.click(screen.getByText("高级设置", {exact:true}));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -432,7 +442,7 @@ it("shows Camille’s female assistant avatar and plays her opening introduction
     screen.getAllByRole("img", { name: /Camille/ }).length,
   ).toBeGreaterThan(0);
   expect(api.synthesize).toHaveBeenCalledWith(
-    expect.stringContaining("Camille, ton assistante"),
+    expect.stringContaining("Comment s’est passée ta journée"),
     expect.any(AbortSignal),
   );
 });
@@ -446,6 +456,7 @@ it("edits a hint without sending and sends a fresh suggestion directly once", as
   });
   const user = await enter();
   await user.click(screen.getByRole("button", { name: /给我提示/ }));
+  await user.click(screen.getByRole("button", { name: "完整回答" }));
   await screen.findByText(suggestion);
   expect(screen.queryByText("建议回答（尚未发送）")).toBeNull();
   expect(screen.queryByText("This explanation should not be displayed.")).toBeNull();
@@ -454,6 +465,7 @@ it("edits a hint without sending and sends a fresh suggestion directly once", as
   expect(api.chat).not.toHaveBeenCalled();
   await user.clear(screen.getByRole("textbox", { name: "输入内容" }));
   await user.click(screen.getByRole("button", { name: /给我提示/ }));
+  await user.click(screen.getByRole("button", { name: "完整回答" }));
   await screen.findByText(suggestion);
   await user.click(screen.getByRole("button", { name: "发送" }));
   await screen.findByText("Avec plaisir ! Et ensuite ?");
@@ -469,6 +481,7 @@ it("retains a directly sent suggestion as an editable draft if the API fails", a
   vi.mocked(api.chat).mockRejectedValueOnce(new Error("offline"));
   const user = await enter();
   await user.click(screen.getByRole("button", { name: /给我提示/ }));
+  await user.click(screen.getByRole("button", { name: "完整回答" }));
   await screen.findByText("Un café, merci.");
   await user.click(screen.getByRole("button", { name: "发送" }));
   await waitFor(() => expect(screen.getByRole("textbox", { name: "输入内容" })).toHaveValue("Un café, merci."));

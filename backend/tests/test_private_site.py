@@ -48,7 +48,9 @@ def test_web_requires_login(private_api, path):
     assert response.headers["cache-control"] == "no-store"
 
 
-@pytest.mark.parametrize("path", ["/health", "/sessions", "/api/backend/health", "/api/backend/assist"])
+@pytest.mark.parametrize(
+    "path", ["/health", "/sessions", "/api/backend/health", "/api/backend/assist"]
+)
 def test_api_requires_login(private_api, path):
     assert private_api.get(path).status_code == 401
 

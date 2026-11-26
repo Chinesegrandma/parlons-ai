@@ -4,6 +4,7 @@ import { afterEach, beforeEach, vi } from "vitest";
 
 beforeEach(() => {
   localStorage.clear();
+  vi.stubGlobal("scrollTo", vi.fn());
   document.cookie = "parlons_language=; Path=/; Max-Age=0; Secure";
   document.cookie = "parlons_language=; Path=/; Max-Age=0";
   vi.stubGlobal(

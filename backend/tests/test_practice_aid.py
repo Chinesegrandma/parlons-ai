@@ -24,16 +24,25 @@ def test_assist_does_not_append_to_conversation(api, session):
     ).status_code == 404
 
 
-def test_every_roleplay_has_two_stable_fictional_events():
+def test_every_roleplay_has_eight_stable_fictional_events():
     assert len(EVENTS) == 20
     for topic, events in EVENTS.items():
-        assert len(set(events)) == 2
-        assert scenario_event_prompt(topic, "stable-session", 1) == ""
-        now = scenario_event_prompt(topic, "stable-session", 2)
-        later = scenario_event_prompt(topic, "stable-session", 3)
-        assert any(event in now and event in later for event in events)
-        assert "Ne le réintroduis pas" in later
-    assert scenario_event_prompt("daily", "stable-session", 2) == ""
+        assert len(set(events)) == 8
+        assert scenario_event_prompt(topic, "stable-session", 0) == ""
+        prompts = [scenario_event_prompt(topic, "stable-session", n) for n in range(1, 7)]
+        first = next(prompt for prompt in prompts if prompt)
+        assert any(event in first and event in prompts[-1] for event in events)
+        assert "introduis clairement" in first
+        assert "Ne le réintroduis pas" in prompts[-1]
+    assert scenario_event_prompt("daily", "stable-session", 6) == ""
+
+
+def test_keywords_are_not_sent_as_chat(api, session):
+    before = api.get(f"/sessions/{session}").json()["messages"]
+    result = api.post("/assist", json={"session_id": session, "mode": "keywords"})
+    assert result.status_code == 200
+    assert "·" in result.json()["expression"]
+    assert api.get(f"/sessions/{session}").json()["messages"] == before
 
 
 def test_category_is_retained_and_unknown_category_is_not_fatal(api, session, transport):

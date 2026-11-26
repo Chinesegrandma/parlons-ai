@@ -53,12 +53,12 @@ it("switches the entire demo interface to English and keeps French practice cont
     assistantOpening("Salut ! Comment s’est passée ta journée ?"),
   );
   const modeSettings = screen.getByRole("button", { name: "Practice mode settings" });
-  expect(modeSettings).toHaveTextContent("Guided practice");
+  expect(modeSettings).toHaveTextContent("Learning mode");
   expect(modeSettings).toHaveAttribute("aria-expanded", "false");
   await user.click(modeSettings);
-  expect(screen.getByRole("button", { name: "Guided practice" })).toHaveAttribute("aria-pressed", "true");
-  await user.click(screen.getByRole("button", { name: "Review at the end" }));
-  expect(modeSettings).toHaveTextContent("Review at the end");
+  expect(screen.getByRole("button", { name: /Learning mode/ })).toHaveAttribute("aria-pressed", "true");
+  await user.click(screen.getByRole("button", { name: /Immersion mode/ }));
+  expect(modeSettings).toHaveTextContent("Immersion mode");
   expect(modeSettings).toHaveAttribute("aria-expanded", "false");
   expect(
     screen.getByRole("heading", { name: "Free chat" }),

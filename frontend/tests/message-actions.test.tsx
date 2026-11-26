@@ -77,7 +77,7 @@ describe("inline learning", () => {
     ).toBeNull();
   });
   it("generates separate alternatives only on demand and caches them across closing", async () => {
-    const rewrite = vi.fn(async (_text: string, style: "polite" | "slang") => ({
+    const rewrite = vi.fn(async (_text: string, style: "polite" | "slang" | "natural") => ({
       expression:
         style === "polite"
           ? "Je souhaiterais un café, s’il vous plaît."
@@ -106,7 +106,7 @@ describe("inline learning", () => {
       explanation: string;
     }) => void;
     const rewrite = vi.fn(
-      (_text: string, style: "polite" | "slang", language: "en" | "zh") =>
+      (_text: string, style: "polite" | "slang" | "natural", language: "en" | "zh") =>
         style === "polite" && language === "zh"
           ? new Promise<{ expression: string; explanation: string }>(
               (resolve) => {
