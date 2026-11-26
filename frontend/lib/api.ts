@@ -60,7 +60,7 @@ export const api = {
     session_id: string,
     message: string,
     transcript_id?: string,
-    preferences?: { language: Language; practice_mode: PracticeMode },
+    preferences?: { language: Language; practice_mode: PracticeMode; surprise?: boolean },
   ) =>
     request<{ reply: string; correction: string; mode: string }>(
       "/chat",

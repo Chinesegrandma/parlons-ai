@@ -92,6 +92,7 @@ export function useConversation(
     transcriptId?: string | null;
     language?: Language;
     practice_mode?: PracticeMode;
+    surprise?: boolean;
   }): Promise<string | null> {
     if (
       !session ||
@@ -112,6 +113,7 @@ export function useConversation(
         ? {
             language: override.language,
             practice_mode: override.practice_mode || ("guided" as PracticeMode),
+            ...(override.surprise === undefined ? {} : {surprise: override.surprise}),
           }
         : undefined;
       const result = preferences

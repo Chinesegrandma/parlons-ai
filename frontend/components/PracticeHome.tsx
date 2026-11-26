@@ -97,7 +97,6 @@ export function PracticeHome({
   const [custom, setCustom] = useState("");
   const [category, setCategory] = useState("");
   const [group, setGroup] = useState("");
-  const [surprise, setSurprise] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const previousView = useRef("");
   useEffect(() => {
@@ -107,7 +106,6 @@ export function PracticeHome({
       mainRef.current?.focus({ preventScroll: true });
     }
     previousView.current = view;
-    setSurprise(false);
   }, [category, group, selected]);
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const history = book?.practiceHistory || [];
@@ -124,19 +122,6 @@ export function PracticeHome({
   const grouped = [
     ...new Set(available.map((scene) => scene.group).filter(Boolean)),
   ];
-  const visibleScenes = available.filter((scene) => group || !scene.group);
-  const eventScenes = new Set<string>([
-    "bank_card", "bank_transfer", "doctor", "symptoms", "renting", "post",
-    "customer_service", "restaurant", "cafe", "shopping", "transport", "travel",
-    "self_intro", "friends", "invite", "decline", "course", "teacher", "report",
-    "interview",
-  ]);
-  const showSurprise = visibleScenes.some((scene) => eventScenes.has(scene.id));
-  const startScene = (topic: Topic) => {
-    if (surprise && showSurprise && eventScenes.has(topic))
-      onStart(topic, { scenario_variant: "surprise" });
-    else onStart(topic);
-  };
   if (selected)
     return (
       <main ref={mainRef} tabIndex={-1} className="practice-home scene-selection">
@@ -210,12 +195,6 @@ export function PracticeHome({
                 : current?.[language === "en" ? "en" : "zh"]}
             </h2>
           </div>
-          {showSurprise && (
-            <label className="scenario-surprise scene-surprise-option">
-              <input type="checkbox" checked={surprise} onChange={(event) => setSurprise(event.target.checked)} />
-              {t("真实场景中加入随机意外", "Include an unexpected event in role-play")}
-            </label>
-          )}
           <div className="subscene-grid">
             {!group &&
               grouped.map((id) => (
@@ -247,7 +226,7 @@ export function PracticeHome({
                   onClick={() =>
                     scene.category === "challenge"
                       ? setSelected(scene.id)
-                      : startScene(scene.id)
+                      : onStart(scene.id)
                   }
                 >
                   <span>{scene[language]}</span>
@@ -255,8 +234,9 @@ export function PracticeHome({
                   <ArrowUpRight size={18} />
                 </button>
               ))}
+            {!group && sceneVariants.filter(v=>v.category===category).map(v=>(<button key={v.zh} className="subscene-card" disabled={disabled} onClick={()=>onStart(v.topic,{scene:v[language],situation:v.situation,opening:v.opening,goals:language==="zh"?v.goals:[]})}><span>{v[language]}</span><ArrowUpRight size={18}/></button>))}
           </div>
-          {!group && sceneVariants.some(v=>v.category===category) && <details className="more-scenes"><summary>{t("更多具体情境","More situations")}</summary><div className="subscene-grid">{sceneVariants.filter(v=>v.category===category).map(v=><button key={v.zh} className="subscene-card" disabled={disabled} onClick={()=>onStart(v.topic,{scene:v[language],situation:v.situation,opening:v.opening,goals:v.goals})}><span>{v[language]}</span><ArrowUpRight size={18}/></button>)}</div></details>}
+
         </>
       ) : (
         <div className="category-grid">

@@ -152,13 +152,11 @@ export function CorrectionCard({
       active = false;
     };
   }, [style, onRewrite, alternative, key, rewriteText, language, retry]);
-  const modes: {value:RewriteStyle;label:string;icon:typeof MessageCircle}[] = registerContext === "formal"
-    ? [{value:"natural",label:t("更自然","More natural"),icon:MessageCircle},{value:"polite",label:t("更礼貌 / 得体","More tactful"),icon:Users}]
-    : registerContext === "casual"
-      ? [{value:"natural",label:t("更口语化","More conversational"),icon:MessageCircle},{value:"slang",label:t("俚语","Slang"),icon:Users}]
-      : registerContext === "neutral"
-        ? [{value:"natural",label:t("更自然","More natural"),icon:MessageCircle},{value:"polite",label:t("更礼貌","More polite"),icon:Users}]
-        : [{value:"polite",label:t("更礼貌","More polite"),icon:MessageCircle},{value:"slang",label:t("俚语","Slang"),icon:Users}];
+  const modes = [
+    {value:"natural",label:t("更自然","More natural"),icon:MessageCircle},
+    {value:"polite",label:t("更礼貌","More polite"),icon:MessageCircle},
+    {value:"slang",label:t("俚语","Slang"),icon:Users},
+  ] as const;
   return (
     <aside
       className={`correction-card hierarchy-a${inline ? " compact-inline" : ""}`}

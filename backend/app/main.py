@@ -175,6 +175,7 @@ class MessageCreate(BaseModel):
     transcript_id: str | None = None
     language: Literal["zh", "en"] | None = None
     practice_mode: Literal["guided", "conversation"] = "guided"
+    surprise: bool | None = None
 
     @field_validator("message")
     @classmethod
@@ -384,7 +385,13 @@ async def chat(payload: MessageCreate):
             " Conversation libre : accepte tout sujet proposé par l’apprenant, "
             "sans le ramener systématiquement à sa journée. Suis ses intérêts."
         )
-    event_active = options.scenario_variant == "surprise" and not options.situation
+    if (payload.surprise is not None and session["event_status"] == "pending"
+            and session["topic"] != "daily" and session["topic"] not in BY_TOPIC
+            and not options.review_targets):
+        options = options.model_copy(update={
+            "scenario_variant": "surprise" if payload.surprise else "standard"
+        })
+    event_active = options.scenario_variant == "surprise" and not options.review_targets
     event_prompt = ""
     if event_active:
         with connect() as db:
@@ -499,6 +506,10 @@ async def chat(payload: MessageCreate):
         correction_details = []
     with connect() as db:
         require_session(db, payload.session_id)
+        if payload.surprise is not None:
+            db.execute("UPDATE sessions SET options=? WHERE id=?", (
+                options.model_dump_json(exclude_none=True), payload.session_id
+            ))
         if event_update:
             db.execute(
                 "UPDATE sessions SET event_status=? WHERE id=? AND event_status=?",

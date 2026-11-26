@@ -75,6 +75,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const [showReview, setShowReview] = useState(false);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState("");
+  const [surprise,setSurprise] = useState<boolean | undefined>(undefined);
   const [reviewCardId,setReviewCardId] = useState<string | null>(null);
   const reviewController = useRef<AbortController | null>(null);
   const running = useRef(false);
@@ -261,6 +262,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       transcriptId: value.id,
       language,
       practice_mode: feedbackMode,
+      surprise: surprise,
     });
     pending.current = request;
     const reply = await request;
@@ -292,6 +294,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     setReviewError("");
   }
   async function begin(topic?: Topic, extra?: Partial<PracticeOptions>, cardId?: string) {
+    setSurprise(undefined);
     setReviewCardId(cardId || null);
     pauseVoice();
     const current = epoch.current;
@@ -332,6 +335,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       transcriptId: suggestion === undefined ? conversation.transcript?.id : null,
       language,
       practice_mode: feedbackMode,
+      surprise: surprise,
     });
     pending.current = request;
     const reply = await request;
@@ -661,6 +665,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               <div id="chat-mode-options" className="chat-mode-options">
                 <button className="mode-preset" disabled={aidBusy} aria-pressed={mode==="guided"&&feedback==="each_turn"} onClick={()=>{switchMode("guided");learning.setOptions(old=>({...old,feedback:"each_turn"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("学习模式","Learning mode")}</strong><small>{t("逐句练习 · 即时纠错","Review each turn")}</small></button>
                 <button className="mode-preset" disabled={aidBusy} aria-pressed={mode==="conversation"&&feedback==="after_session"} onClick={()=>{switchMode("conversation");learning.setOptions(old=>({...old,feedback:"after_session"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("沉浸模式","Immersion mode")}</strong><small>{t("连续对话 · 结束后总结","Hands-free · feedback at the end")}</small></button>
+                {session && session.topic !== "daily" && !session.topic.startsWith("challenge_") && !session.options?.review_targets?.length && <label className="chat-surprise-toggle"><span>{t("随机意外","Unexpected events")}</span><input type="checkbox" checked={surprise ?? (session.options?.scenario_variant === "surprise")} disabled={busy || voiceActive || recorder.listening || session.event_status === "introduced" || session.event_status === "resolved"} onChange={e=>setSurprise(e.target.checked)}/></label>}
                 <details className="mode-advanced"><summary>{t("高级设置","Advanced settings")}</summary>
                 <span className="chat-mode-label">{t("对话方式", "Recording mode")}</span>
                 <div className="mode-switch" role="group" aria-label={t("录音方式", "Recording mode")}>

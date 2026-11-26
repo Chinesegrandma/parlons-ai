@@ -944,3 +944,5 @@ html.parlons-chat-open, html.parlons-chat-open body {
 .scene-role{font-size:10px;color:var(--sage-muted);white-space:nowrap}.hierarchy-a .expression-exploration>summary{cursor:pointer;color:var(--sage-muted);font-size:12px;padding:4px 0}.hierarchy-a .expression-exploration[open]>summary{margin-bottom:7px}.goal-outcomes>div{border-radius:12px;background:#ffffff75;padding:8px;margin:6px 0}.goal-outcomes p{margin:4px 0 0}.sage-conversation .practice-aid-body{gap:6px;padding:9px}.sage-conversation .composerarea .transcript-review{padding:7px 10px}.sage-conversation .composerarea .transcript-review p{margin:3px 0}.sage-conversation .composerarea .error details{font-size:11px;margin-top:5px}
 
 .sage-conversation .event-status{display:block;text-align:center;font-size:11px;color:#8b653e;margin:3px 0 0}.sage-conversation .event-status.resolved{color:var(--sage-muted)}
+
+.chat-surprise-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px;font-size:13px;border-top:1px solid var(--sage-border);color:var(--sage-ink)}.chat-surprise-toggle input{accent-color:var(--sage-deep);width:17px;height:17px;flex:none}

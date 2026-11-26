@@ -153,6 +153,9 @@ export const demoApi: typeof api = {
   chat: async (id, text, transcriptId, preferences) => {
     const session = sessions.get(id);
     if (!session) throw new Error("Demo session not found");
+    if (preferences?.surprise !== undefined && session.options) {
+      session.options.scenario_variant = preferences.surprise ? "surprise" : "standard";
+    }
     await new Promise((resolve) => setTimeout(resolve, 650));
     let correction = "";
     if (/une café/i.test(text))
