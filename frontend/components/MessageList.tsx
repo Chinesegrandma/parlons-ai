@@ -247,6 +247,7 @@ export function MessageList({
                     </button>
                     <button
                       className="speak"
+                      aria-label={expanded.includes(message.id) ? t("收起翻译", "Hide translation") : t("翻译", "Translate")}
                       aria-expanded={expanded.includes(message.id)}
                       onClick={() => void toggleTranslation(message)}
                     >
@@ -257,6 +258,7 @@ export function MessageList({
                     </button>
                     <button
                       className="speak"
+                      aria-label={copiedId === message.id ? t("已复制", "Copied") : t("复制", "Copy")}
                       onClick={() => void copyReply(message)}
                     >
                       {copiedId === message.id ? (
@@ -378,7 +380,8 @@ export function MessageList({
                       )}
                       <ChevronDown size={15} aria-hidden="true" />
                     </button>
-                    {messages[index + 1].corrected_text && (
+                    {messages[index + 1].corrected_text &&
+                      (wide || !showLearning || learningId !== message.id) && (
                       <TextActions
                         key={messages[index + 1].id}
                         text={messages[index + 1].corrected_text!}

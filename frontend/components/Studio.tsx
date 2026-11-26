@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, AudioLines, Mic, Pause, ChevronDown } from "lucide-react";
+import { ArrowLeft, AudioLines, Mic, Pause, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { StudioHeader, PracticeSettings } from "./AppChrome";
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { ChallengePanel } from "./ChallengePanel";
@@ -55,6 +55,11 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const [canResume, setCanResume] = useState(false);
   const [page, setPage] = useState<"home" | "chat" | "notebook">("home");
   const [mode, setMode] = useState<PracticeMode>("guided");
+  const [modeMenuOpen, setModeMenuOpen] = useState(false);
+  const modeMenuButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (page !== "chat") setModeMenuOpen(false);
+  }, [page]);
   const [settings, setSettings] = useState(false);
   const [health, setHealth] = useState<Health | null>(null);
   const [offline, setOffline] = useState(false);
@@ -598,41 +603,91 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             </button>
           </div>
           <div
-            className="mode-switch"
-            aria-label={t("录音方式", "Recording mode")}
+            className="chat-mode-picker"
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && modeMenuOpen) {
+                setModeMenuOpen(false);
+                modeMenuButton.current?.focus();
+              }
+            }}
           >
             <button
-              aria-pressed={mode === "guided"}
-              onClick={() => switchMode("guided")}
+              ref={modeMenuButton}
+              type="button"
+              className="chat-mode-summary"
+              aria-label={t("练习模式设置", "Practice mode settings")}
+              aria-expanded={modeMenuOpen}
+              aria-controls={modeMenuOpen ? "chat-mode-options" : undefined}
+              onClick={() => setModeMenuOpen((open) => !open)}
             >
-              {t("逐句练习", "Guided practice")}
+              <SlidersHorizontal size={14} aria-hidden="true" />
+              <span>
+                {mode === "guided"
+                  ? t("逐句练习", "Guided practice")
+                  : t("连续对话", "Conversation")}
+                {" · "}
+                {feedback === "each_turn"
+                  ? t("即时纠错", "Correct each turn")
+                  : t("结束后总结", "Review at the end")}
+              </span>
+              <ChevronDown size={14} aria-hidden="true" />
             </button>
-            <button
-              aria-pressed={mode === "conversation"}
-              onClick={() => switchMode("conversation")}
-            >
-              {t("连续对话", "Conversation")}
-            </button>
-          </div>
-          <div className="mode-switch" aria-label={t("纠错方式", "Feedback mode")}>
-            <button
-              aria-pressed={feedback === "each_turn"}
-              disabled={busy || voiceActive || recorder.listening}
-              onClick={() =>
-                learning.setOptions((old) => ({ ...old, feedback: "each_turn" }))
-              }
-            >
-              {t("即时纠错", "Correct each turn")}
-            </button>
-            <button
-              aria-pressed={feedback === "after_session"}
-              disabled={busy || voiceActive || recorder.listening}
-              onClick={() =>
-                learning.setOptions((old) => ({ ...old, feedback: "after_session" }))
-              }
-            >
-              {t("结束后总结", "Review at the end")}
-            </button>
+            {modeMenuOpen && (
+              <div id="chat-mode-options" className="chat-mode-options">
+                <span className="chat-mode-label">{t("对话方式", "Recording mode")}</span>
+                <div className="mode-switch" role="group" aria-label={t("录音方式", "Recording mode")}>
+                  <button
+                    type="button"
+                    aria-pressed={mode === "guided"}
+                    onClick={() => {
+                      if (mode !== "guided") switchMode("guided");
+                      setModeMenuOpen(false);
+                      modeMenuButton.current?.focus();
+                    }}
+                  >
+                    {t("逐句练习", "Guided practice")}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={mode === "conversation"}
+                    onClick={() => {
+                      if (mode !== "conversation") switchMode("conversation");
+                      setModeMenuOpen(false);
+                      modeMenuButton.current?.focus();
+                    }}
+                  >
+                    {t("连续对话", "Conversation")}
+                  </button>
+                </div>
+                <span className="chat-mode-label">{t("纠错方式", "Feedback mode")}</span>
+                <div className="mode-switch" role="group" aria-label={t("纠错方式", "Feedback mode")}>
+                  <button
+                    type="button"
+                    aria-pressed={feedback === "each_turn"}
+                    disabled={busy || voiceActive || recorder.listening}
+                    onClick={() => {
+                      learning.setOptions((old) => ({ ...old, feedback: "each_turn" }));
+                      setModeMenuOpen(false);
+                      modeMenuButton.current?.focus();
+                    }}
+                  >
+                    {t("即时纠错", "Correct each turn")}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={feedback === "after_session"}
+                    disabled={busy || voiceActive || recorder.listening}
+                    onClick={() => {
+                      learning.setOptions((old) => ({ ...old, feedback: "after_session" }));
+                      setModeMenuOpen(false);
+                      modeMenuButton.current?.focus();
+                    }}
+                  >
+                    {t("结束后总结", "Review at the end")}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           {session && challengeFor(session.topic) && (
             <ChallengePanel

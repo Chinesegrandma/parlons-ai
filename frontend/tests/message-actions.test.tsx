@@ -38,6 +38,8 @@ describe("inline learning", () => {
       container.querySelector(".message.assistant .correction-card"),
     ).toBeNull();
     expect(screen.getByText("café 是阳性名词。")).toBeVisible();
+    expect(screen.getAllByRole("button", { name: "朗读这条表达" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "复制这条表达" })).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "收起学习卡" }));
     expect(screen.queryByRole("complementary")).toBeNull();
   });

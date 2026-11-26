@@ -52,9 +52,14 @@ it("switches the entire demo interface to English and keeps French practice cont
   await screen.findByText(
     assistantOpening("Salut ! Comment s’est passée ta journée ?"),
   );
-  expect(
-    screen.getByRole("button", { name: "Guided practice" }),
-  ).toBeInTheDocument();
+  const modeSettings = screen.getByRole("button", { name: "Practice mode settings" });
+  expect(modeSettings).toHaveTextContent("Guided practice");
+  expect(modeSettings).toHaveAttribute("aria-expanded", "false");
+  await user.click(modeSettings);
+  expect(screen.getByRole("button", { name: "Guided practice" })).toHaveAttribute("aria-pressed", "true");
+  await user.click(screen.getByRole("button", { name: "Review at the end" }));
+  expect(modeSettings).toHaveTextContent("Review at the end");
+  expect(modeSettings).toHaveAttribute("aria-expanded", "false");
   expect(
     screen.getByRole("heading", { name: "Free chat" }),
   ).toBeInTheDocument();

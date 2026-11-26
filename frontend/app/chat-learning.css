@@ -651,3 +651,102 @@
 .mistake-question button[aria-pressed="true"] {
   outline: 2px solid #527c69;
 }
+
+/* Compact mobile conversation and learning card; keep the sage glass palette. */
+.sage-conversation .chat-mode-picker {
+  position: relative;
+  flex: none;
+  align-self: center;
+  max-width: 100%;
+  margin: 0 0 8px;
+  z-index: 6;
+}
+.chat-mode-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--sage-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--sage-ink);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+}
+.chat-mode-summary svg { flex: none; }
+.chat-mode-summary[aria-expanded="true"] > svg:last-child { transform: rotate(180deg); }
+.chat-mode-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--sage-border);
+  border-radius: 18px;
+  background: #f3f6ed;
+  box-shadow: var(--sage-shadow);
+}
+.chat-mode-label { font: 500 11px/1.5 var(--sage-ui); color: var(--sage-muted); }
+.sage-conversation .chat-mode-options .mode-switch { width: 100%; margin: 0; gap: 3px; padding: 3px; }
+.sage-conversation .chat-mode-options .mode-switch button { min-height: 44px; padding: 6px 8px; line-height: 1.3; }
+.sage-conversation .focused-chat .conversation { overflow-y: auto; overscroll-behavior: contain; scroll-padding-block: 8px 14px; }
+.sage-conversation .focused-chat .message { flex: 0 0 auto; }
+.sage-conversation .focused-chat .correction-card { padding: 12px 14px; }
+.sage-conversation .hierarchy-a .primary-feedback { padding: 4px 0 0; }
+.sage-conversation .hierarchy-a .primary-feedback p[lang="fr"] { margin: 5px 0 4px; font-size: 19px; line-height: 1.42; }
+.sage-conversation .hierarchy-a .correction-explanation { margin: 7px 0; line-height: 1.55; font-size: 13px; overflow-wrap: anywhere; }
+.sage-conversation .hierarchy-a .error-list { padding-left: 19px; }
+.sage-conversation .hierarchy-a .error-list li + li { margin-top: 5px; }
+.sage-conversation .correction-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 10px; }
+.sage-conversation .hierarchy-a .learning-original { margin: 0; min-width: 0; }
+.sage-conversation .hierarchy-a .learning-original[open] { flex: 1 0 100%; }
+.sage-conversation .hierarchy-a .learning-original summary { min-height: 38px; gap: 4px; font-size: 12px; list-style: none; }
+.learning-original summary::-webkit-details-marker { display: none; }
+.learning-original[open] summary svg { transform: rotate(90deg); }
+.sage-conversation .hierarchy-a .learning-original p[lang="fr"] { margin: 0 0 4px; font-size: 15px; }
+.sage-conversation .correction-tools .text-button { padding: 4px 0; font-size: 12px; min-height: 38px; margin: 0; }
+.sage-conversation .hierarchy-a .expression-exploration { margin-top: 5px; padding-top: 9px; }
+.sage-conversation .hierarchy-a .expression-exploration h3 { margin: 0 0 3px; }
+.sage-conversation .hierarchy-a .exploration-scope { margin: 0 0 6px; font-size: 11px; line-height: 1.45; }
+.sage-conversation .hierarchy-a .exploration-actions { gap: 6px; }
+.sage-conversation .hierarchy-a .exploration-actions > button { padding: 6px 8px; min-height: 44px; border-radius: 12px; }
+.sage-conversation .hierarchy-a .expression-alternative { padding: 9px; margin-top: 8px; }
+.sage-conversation .focused-chat .correction-card .text-actions { gap: 5px; margin: 0; }
+.sage-conversation .focused-chat .correction-card .text-actions .speak { margin: 0; padding: 4px 8px; min-height: 36px; font-size: 11px; }
+.sage-conversation .learning-card-heading > button { width: 36px; height: 36px; flex: none; }
+@media (max-width: 700px) {
+  .sage-conversation .conversation-page { padding: max(8px, env(safe-area-inset-top)) 12px 0; }
+  .sage-conversation .chat-heading { margin-bottom: 5px; gap: 7px; }
+  .sage-conversation .identity-menu strong { font-size: 20px; }
+  .sage-conversation .focused-chat .conversation { gap: 12px; padding: 5px 0 12px; }
+  .sage-conversation .focused-chat .message.assistant { max-width: 100%; gap: 5px; }
+  .sage-conversation .focused-chat .message.assistant > .avatar { width: 26px; height: 26px; margin: 7px 0 0; }
+  .sage-conversation .focused-chat .message.assistant > .avatar > * { max-width: 26px; }
+  .sage-conversation .focused-chat .bubblewrap { padding: 12px 13px 6px; border-radius: 20px; flex: 0 1 auto; }
+  .sage-conversation .focused-chat .user .bubblewrap { padding: 9px 13px; }
+  .sage-conversation .focused-chat .bubble { font-size: 18px; line-height: 1.43; }
+  .sage-conversation .focused-chat .user .bubble { font-size: 17px; }
+  .sage-conversation .focused-chat .reply-actions { display: flex; flex-wrap: wrap; gap: 0 2px; margin-top: 3px; }
+  .sage-conversation .focused-chat .reply-actions .speak { flex: 0 1 auto; gap: 3px; padding: 3px 4px; min-height: 38px; margin: 0; white-space: nowrap; font-size: 10px; }
+  .sage-conversation .focused-chat .reply-translation { margin-top: 3px; padding: 7px 9px; font-size: 13px; }
+  .sage-conversation .focused-chat .message.user { max-width: 100%; }
+  .sage-conversation .focused-chat .correction-card { border-radius: 18px; }
+  .sage-conversation .learner-feedback { margin-top: 4px; }
+  .sage-conversation .inline-learning { margin-top: 5px; }
+  .sage-conversation .learning-capsule { padding: 7px 10px; }
+  .sage-conversation .learning-capsule .correction-preview { font-size: 16px; }
+  .sage-conversation .practice-aid { flex: none; gap: 4px; padding: 3px 0; max-height: 42dvh; overflow-y: auto; }
+  .sage-conversation .practice-aid .notebook-actions { margin-top: 0; gap: 6px; }
+  .sage-conversation .practice-aid .notebook-actions > button { min-height: 36px; padding: 5px 10px; }
+  .sage-conversation .focused-chat .composerarea { padding: 5px 0 6px; }
+  .sage-conversation .focused-chat .composer { padding: 5px 7px 5px 13px; gap: 7px; }
+  .sage-conversation .voice-session { margin-bottom: 6px; }
+  .sage-conversation .chat-mode-options { max-height: 45dvh; overflow-y: auto; }
+}

@@ -283,7 +283,9 @@ it("supports opening autoplay opt-out", async () => {
 });
 it("hands-free mode sends after silence, waits for playback end, then listens again", async () => {
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "结束后总结" }));
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -302,6 +304,7 @@ it("hands-free mode sends after silence, waits for playback end, then listens ag
   expect(screen.queryByText("Example correction")).not.toBeInTheDocument();
   act(() => MockAudio.current.onended?.());
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "逐句练习" }));
   expect(Recorder.current.state).toBe("inactive");
   expect(api.transcribe).toHaveBeenCalledOnce();
@@ -319,6 +322,7 @@ it("explicit cancellation during a pending reply never restarts the microphone o
       }),
   );
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -334,9 +338,11 @@ it("explicit cancellation during a pending reply never restarts the microphone o
 });
 it("mode switching stops capture and does not submit partial audio", async () => {
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "逐句练习" }));
   expect(Recorder.current.state).toBe("inactive");
   expect(api.transcribe).not.toHaveBeenCalled();
@@ -361,6 +367,7 @@ it("ends with strengths and corrections together", async () => {
 
 it("hiding the page stops capture without submitting the unfinished turn", async () => {
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -372,6 +379,7 @@ it("hiding the page stops capture without submitting the unfinished turn", async
 
 it("silence timeout pauses without invoking paid provider operations", async () => {
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -384,6 +392,7 @@ it("silence timeout pauses without invoking paid provider operations", async () 
 it("a failed automated reply stops the loop and retains the transcript draft", async () => {
   vi.mocked(api.chat).mockRejectedValueOnce(new Error("failure"));
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));
@@ -399,6 +408,7 @@ it("a failed automated reply stops the loop and retains the transcript draft", a
 
 it("Pause submits the current spoken turn, responds and does not restart listening", async () => {
   const user = await enter();
+  await user.click(screen.getByRole("button", { name: "练习模式设置" }));
   await user.click(screen.getByRole("button", { name: "连续对话" }));
   await user.click(screen.getByRole("button", { name: "开启连续对话" }));
   await waitFor(() => expect(Recorder.current.state).toBe("recording"));

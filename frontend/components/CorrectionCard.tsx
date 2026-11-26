@@ -227,27 +227,34 @@ export function CorrectionCard({
                 }
               />
             )}
-            <details className="learning-original">
-              <summary>{t("你说的", "You said")}</summary>
-              <p
-                lang="fr"
-                data-lookup-text
-                tabIndex={0}
-                className="correction-source"
-              >
-                {words.original.map((word, index) =>
-                  word.changed ? <del key={index}>{word.text}</del> : word.text,
-                )}
-              </p>
-            </details>
-            {canSave && (
-              <button className="text-button" disabled={saved} onClick={onSave}>
-                {saved ? <Check size={15} /> : <BookOpen size={15} />}
-                {saved
-                  ? t("已收进笔记本", "Saved to notebook")
-                  : t("收进笔记本", "Save to notebook")}
-              </button>
-            )}
+            <div className="correction-tools">
+              {original.trim() && (
+                <details className="learning-original">
+                  <summary>
+                    <ChevronRight size={14} aria-hidden="true" />
+                    {t("你说的", "You said")}
+                  </summary>
+                  <p
+                    lang="fr"
+                    data-lookup-text
+                    tabIndex={0}
+                    className="correction-source"
+                  >
+                    {words.original.map((word, index) =>
+                      word.changed ? <del key={index}>{word.text}</del> : word.text,
+                    )}
+                  </p>
+                </details>
+              )}
+              {canSave && (
+                <button className="text-button" disabled={saved} onClick={onSave}>
+                  {saved ? <Check size={15} /> : <BookOpen size={15} />}
+                  {saved
+                    ? t("已收进笔记本", "Saved to notebook")
+                    : t("收进笔记本", "Save to notebook")}
+                </button>
+              )}
+            </div>
           </>
         ) : (
           <p className="correction-explanation">
