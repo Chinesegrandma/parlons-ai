@@ -882,3 +882,12 @@ html.parlons-chat-open, html.parlons-chat-open body {
 @media (max-width: 700px) {
   .parlons-app .home-quick.free-chat-entry { min-height: 70px; padding: 11px 14px; margin: 18px 0 20px; gap: 10px; }
 }
+
+/* Inline feedback builds on the original and corrected bubbles directly above it. */
+.sage-conversation .hierarchy-a.compact-inline .learning-card-heading { margin: 0; }
+.sage-conversation .hierarchy-a.compact-inline .primary-feedback { padding: 0; }
+.sage-conversation .hierarchy-a.compact-inline .correction-explanation { margin: 3px 0 5px; }
+.sage-conversation .hierarchy-a.compact-inline .correction-tools { justify-content: flex-end; }
+.sage-conversation .hierarchy-a.compact-inline .correction-tools:empty { display: none; }
+.sage-conversation .hierarchy-a.compact-inline .expression-exploration { margin-top: 3px; padding-top: 8px; }
+.sage-conversation .hierarchy-a.compact-inline .expression-exploration h3 { margin-bottom: 5px; }

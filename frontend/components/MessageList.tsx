@@ -85,6 +85,7 @@ export function MessageList({
     <CorrectionCard
       key={`${selectedUser.id}:${language}`}
       language={language}
+      inline={!wide}
       original={selectedUser.content}
       onSpeak={onSpeak}
       speechReady={speechReady}
@@ -379,8 +380,7 @@ export function MessageList({
                       )}
                       <ChevronDown size={15} aria-hidden="true" />
                     </button>
-                    {messages[index + 1].corrected_text &&
-                      (wide || !showLearning || learningId !== message.id) && (
+                    {messages[index + 1].corrected_text && (
                       <TextActions
                         key={messages[index + 1].id}
                         text={messages[index + 1].corrected_text!}

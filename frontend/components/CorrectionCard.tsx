@@ -59,7 +59,9 @@ export function CorrectionCard({
   onExplain,
   onSpeak,
   speechReady = false,
+  inline = false,
 }: {
+  inline?: boolean;
   onSpeak?: (text: string, rate?: 0.8 | 1) => void;
   speechReady?: boolean;
   language?: Language;
@@ -154,13 +156,15 @@ export function CorrectionCard({
   ] as const;
   return (
     <aside
-      className="correction-card hierarchy-a"
+      className={`correction-card hierarchy-a${inline ? " compact-inline" : ""}`}
       aria-label={t("本轮纠错", "Turn correction")}
     >
       <header className="learning-card-heading">
         <strong>
           {hasCorrection
-            ? t("更正后的表达", "Corrected expression")
+            ? inline
+              ? t("错误解释", "Correction notes")
+              : t("更正后的表达", "Corrected expression")
             : t("表达练习", "Expression practice")}
         </strong>
         {onClose && (
@@ -179,7 +183,7 @@ export function CorrectionCard({
       >
         {hasCorrection ? (
           <>
-            {corrected && (
+            {corrected && !inline && (
               <div>
                 <span className="sr-only">
                   {t("更自然的说法", "A more natural expression")}
@@ -228,7 +232,7 @@ export function CorrectionCard({
               />
             )}
             <div className="correction-tools">
-              {original.trim() && (
+              {!inline && original.trim() && (
                 <details className="learning-original">
                   <summary>
                     <ChevronRight size={14} aria-hidden="true" />
@@ -270,12 +274,6 @@ export function CorrectionCard({
         aria-label={t("换一种表达", "Explore another expression")}
       >
         <h3>{t("换一种表达", "Explore another expression")}</h3>
-        <p className="exploration-scope">
-          {t(
-            "改写你的完整发言，保留原意。",
-            "Rewrite your entire message, keeping its meaning.",
-          )}
-        </p>
         <div className="exploration-actions">
           {modes.map((mode) => (
             <button

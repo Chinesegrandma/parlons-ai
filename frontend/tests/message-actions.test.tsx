@@ -24,7 +24,8 @@ const defaults = {
 
 describe("inline learning", () => {
   it("starts collapsed and attaches the learning card below the learner, not the assistant", () => {
-    const { container } = render(<MessageList {...defaults} />);
+    const save = vi.fn();
+    const { container } = render(<MessageList {...defaults} onSaveCorrection={save} />);
     expect(screen.queryByRole("complementary")).toBeNull();
     const preview = screen.getByRole("button", { name: /查看解释和其他表达/ });
     expect(preview).toHaveTextContent("Je voudrais un café.");
@@ -38,6 +39,14 @@ describe("inline learning", () => {
       container.querySelector(".message.assistant .correction-card"),
     ).toBeNull();
     expect(screen.getByText("café 是阳性名词。")).toBeVisible();
+    const card = screen.getByRole("complementary", { name: "本轮纠错" });
+    expect(card).not.toHaveTextContent("Je voudrais un café.");
+    expect(card).not.toHaveTextContent("你说的");
+    expect(card).not.toHaveTextContent("改写你的完整发言，保留原意。");
+    expect(preview).toHaveTextContent("Je voudrais un café.");
+    expect(screen.getByText("Je voudrais une café.")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "收进笔记本" }));
+    expect(save).toHaveBeenCalledWith(2);
     expect(screen.getAllByRole("button", { name: "朗读这条表达" })).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "复制这条表达" })).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "收起学习卡" }));
