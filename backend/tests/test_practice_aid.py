@@ -101,3 +101,13 @@ def test_surprise_state_requires_grounded_evidence_and_persists(api, transport):
         "session_id": session, "message": "Je prends un thé."
     }).status_code == 200
     assert api.get(f"/sessions/{session}").json()["event_status"] == "resolved"
+
+
+def test_chat_can_enable_and_disable_surprise_without_restarting(api, session):
+    for enabled in (True, False):
+        response = api.post("/chat", json={
+            "session_id": session, "message": "Bonjour", "surprise": enabled
+        })
+        assert response.status_code == 200
+        history = api.get(f"/sessions/{session}").json()
+        assert history["options"]["scenario_variant"] == ("surprise" if enabled else "standard")

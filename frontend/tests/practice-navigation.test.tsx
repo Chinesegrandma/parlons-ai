@@ -19,14 +19,14 @@ it("keeps landing content and surprise settings at their intended navigation lev
   expect(screen.queryByText("从学会法语，到用法语生活。")).toBeNull();
   expect(screen.queryByRole("button", { name: "自由聊天" })).toBeNull();
   // Life admin also contains directly startable scenarios (renting, post, support).
-  expect(screen.getByLabelText(surprise)).toBeVisible();
+  expect(screen.queryByLabelText(surprise)).toBeNull();
+  expect(screen.getByRole("button", {name:"联系房东"})).toBeVisible();
   await user.click(screen.getByRole("button", { name: /银行.*查看具体事项/ }));
-  expect(screen.getByLabelText(surprise)).not.toBeChecked();
-  await user.click(screen.getByLabelText(surprise));
+  expect(screen.queryByLabelText(surprise)).toBeNull();
   await user.click(screen.getByRole("button", { name: /办理银行卡.*进入对话/ }));
-  expect(start).toHaveBeenLastCalledWith("bank_card", { scenario_variant: "surprise" });
+  expect(start).toHaveBeenLastCalledWith("bank_card");
   await user.click(screen.getByRole("button", { name: "返回" }));
-  expect(screen.getByLabelText(surprise)).not.toBeChecked();
+  expect(screen.queryByLabelText(surprise)).toBeNull();
   await user.click(screen.getByRole("button", { name: "返回" }));
   await user.click(screen.getByRole("button", { name: "表达挑战" }));
   expect(screen.queryByLabelText(surprise)).toBeNull();
