@@ -40,7 +40,7 @@ import { catalog } from "../lib/catalog";
 import { sceneVariants } from "../lib/scene-variants";
 it("assigns every ordinary scenario and variant exactly once to a nonempty subgroup",()=>{
   const topics=practiceGroups.flatMap(g=>groupContent(g).scenes.map(s=>s.id));
-  expect(topics.sort()).toEqual(catalog.filter(s=>s.id!=="daily" && s.category!=="challenge").map(s=>s.id).sort());
+  expect(topics.sort()).toEqual(catalog.filter(s=>s.id!=="daily" && s.id!=="interview" && s.category!=="challenge").map(s=>s.id).sort());
   const variants=practiceGroups.flatMap(g=>groupContent(g).variants.map(v=>v.zh));
   expect(variants.sort()).toEqual(sceneVariants.map(v=>v.zh).sort());
   for(const g of practiceGroups) expect(g.topics.length+g.variants.length).toBeGreaterThan(0);
@@ -55,4 +55,13 @@ it("separates school and work before showing their individual situations",async(
   expect(screen.queryByRole("button",{name:/选课.*进入对话/})).toBeNull();
   await user.click(screen.getByRole("button",{name:"同事闲聊"}));
   expect(start).toHaveBeenLastCalledWith("report",expect.objectContaining({scene:"同事闲聊"}));
+});
+
+it("starts interview directly from its dedicated home card",async()=>{
+  const user=userEvent.setup(); const start=vi.fn();
+  render(<PracticeHome language="zh" onStart={start} onResume={vi.fn()} disabled={false}/>);
+  await user.click(screen.getByRole("button",{name:"面试"}));
+  expect(start).toHaveBeenLastCalledWith("interview");
+  expect(screen.queryByText("技术面试")).toBeNull();
+  expect(screen.queryByText("录用与薪资")).toBeNull();
 });

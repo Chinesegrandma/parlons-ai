@@ -52,8 +52,8 @@ const sections = [
     id: "interview",
     zh: "面试",
     en: "Interviews",
-    subZh: "求职面试、录用与薪资",
-    subEn: "Talk about your experience with confidence",
+    subZh: "自我介绍、工作经历与求职动机",
+    subEn: "Introduce yourself, your experience and motivation",
     icon: BriefcaseBusiness,
   },
   {
@@ -211,7 +211,7 @@ export function PracticeHome({
               className={`category-card category-${section.id}`}
               key={section.id}
               disabled={disabled}
-              onClick={() => setCategory(section.id)}
+              onClick={() => section.id === "interview" ? onStart("interview") : setCategory(section.id)}
             >
               <div>
                 <span className="category-icon">

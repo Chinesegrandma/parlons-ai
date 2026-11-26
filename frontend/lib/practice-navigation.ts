@@ -176,34 +176,12 @@ export const practiceGroups: Group[] = [
     "variants": [
       "同事闲聊",
       "开会与不同意见",
-      "工作电话"
-    ]
-  },
-  {
-    "category": "interview",
-    "id": "recruitment",
-    "zh": "求职面试",
-    "en": "Job interviews",
-    "topics": [
-      "interview"
-    ],
-    "variants": [
-      "HR 面试",
-      "技术面试"
-    ]
-  },
-  {
-    "category": "interview",
-    "id": "negotiation",
-    "zh": "录用与薪资",
-    "en": "Offers & salary",
-    "topics": [],
-    "variants": [
-      "薪资谈判"
+      "工作电话",
+      "薪资沟通"
     ]
   }
 ];
-export const sceneTitle = (topic:Topic, language:"zh"|"en") => topic === "interview" ? (language==="zh"?"综合模拟面试":"Full mock interview") : catalog.find(s=>s.id===topic)?.[language] || topic;
+export const sceneTitle = (topic:Topic, language:"zh"|"en") => catalog.find(s=>s.id===topic)?.[language] || topic;
 export function groupContent(group:Group) {
   return {scenes: group.topics.map(id=>catalog.find(s=>s.id===id)!).filter(Boolean), variants:group.variants.map(name=>sceneVariants.find(v=>v.zh===name)!).filter(Boolean)};
 }

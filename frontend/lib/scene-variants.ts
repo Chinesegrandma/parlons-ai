@@ -169,39 +169,15 @@ export const sceneVariants: { category:string; topic:Topic; zh:string; en:string
     ]
   },
   {
-    "category": "interview",
-    "topic": "interview",
-    "zh": "HR 面试",
-    "en": "HR interview",
-    "situation": "Tu es recruteur RH, pose une question à la fois sur les motivations et expériences.",
-    "opening": "Bonjour, qu'est-ce qui vous motive pour ce poste ?",
+    "category": "study",
+    "topic": "report",
+    "zh": "薪资沟通",
+    "en": "Discuss salary",
+    "situation": "Tu es responsable hiérarchique dans une entreprise fictive. L’employé souhaite discuter de sa rémunération, écoute ses arguments et pose des questions sur ses contributions. N’invente pas de promesse réelle.",
+    "opening": "Bonjour, tu souhaitais faire un point sur ta rémunération ?",
     "goals": [
-      "介绍经历",
-      "说明动机"
-    ]
-  },
-  {
-    "category": "interview",
-    "topic": "interview",
-    "zh": "技术面试",
-    "en": "Technical interview",
-    "situation": "Tu es recruteur technique, demande d'expliquer un projet technique de manière compréhensible.",
-    "opening": "Pouvez-vous me parler d'un projet technique dont vous êtes fier ?",
-    "goals": [
-      "解释项目",
-      "回答追问"
-    ]
-  },
-  {
-    "category": "interview",
-    "topic": "interview",
-    "zh": "薪资谈判",
-    "en": "Salary negotiation",
-    "situation": "Tu es recruteur fictif. Discute des attentes salariales et des conditions sans prétendre fournir une offre réelle.",
-    "opening": "Quelles sont vos attentes salariales ?",
-    "goals": [
-      "表达期望",
-      "协商条件"
+      "说明工作贡献",
+      "表达薪资期望"
     ]
   }
 ];
