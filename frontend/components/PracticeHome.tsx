@@ -148,17 +148,11 @@ export function PracticeHome({
       {!category && (
         <>
           <div className="home-intro">
-            <span className="eyebrow">UN PEU, CHAQUE JOUR</span>
-            <h1>
-              {t(
-                "让法语，走进你的生活。",
-                "A little French. A little more life.",
-              )}
-            </h1>
+            <h1 lang="fr">On parle ?</h1>
             <p>
               {t(
-                "选一个真实情境，剩下的对话，让我们一起展开。",
-                "Choose a real-life situation. We’ll take the conversation from there.",
+                "从学会法语，到用法语生活。",
+                "From learning French to living in French.",
               )}
             </p>
           </div>

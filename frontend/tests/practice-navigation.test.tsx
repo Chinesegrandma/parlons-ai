@@ -7,11 +7,13 @@ it("keeps landing content and surprise settings at their intended navigation lev
   const start = vi.fn();
   render(<PracticeHome language="zh" onStart={start} onResume={vi.fn()} disabled={false} />);
   const surprise = "真实场景中加入随机意外";
-  expect(screen.getByText("让法语，走进你的生活。")).toBeVisible();
+  expect(screen.getByRole("heading", { name: "On parle ?" })).toBeVisible();
+  expect(screen.getByText("从学会法语，到用法语生活。")).toBeVisible();
+  expect(screen.queryByText("UN PEU, CHAQUE JOUR")).toBeNull();
   expect(screen.queryByLabelText(surprise)).toBeNull();
   expect(screen.queryByText("即时纠错")).toBeNull();
   await user.click(screen.getByRole("button", { name: "办事" }));
-  expect(screen.queryByText("让法语，走进你的生活。")).toBeNull();
+  expect(screen.queryByText("从学会法语，到用法语生活。")).toBeNull();
   expect(screen.queryByText("直接开始聊天")).toBeNull();
   // Life admin also contains directly startable scenarios (renting, post, support).
   expect(screen.getByLabelText(surprise)).toBeVisible();
