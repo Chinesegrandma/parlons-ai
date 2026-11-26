@@ -316,15 +316,15 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     setDemoListening(false);
     setMode(value);
   }
-  async function send() {
+  async function send(suggestion?: string) {
     if (busy || recorder.listening || demoListening || voiceActive || aidBusy) return;
     cancelReview();
     speech.unlock();
     speech.stop();
     const current = epoch.current;
     const request = conversation.send({
-      text: conversation.input,
-      transcriptId: conversation.transcript?.id,
+      text: suggestion ?? conversation.input,
+      transcriptId: suggestion === undefined ? conversation.transcript?.id : null,
       language,
       practice_mode: feedbackMode,
     });
@@ -865,7 +865,9 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                 onUse={(text) => {
                   conversation.discard();
                   conversation.setInput(text);
+                  document.querySelector<HTMLTextAreaElement>(".focused-chat .composer textarea")?.focus();
                 }}
+                onSend={(text) => void send(text)}
               />
             )}
             {!voiceActive && (

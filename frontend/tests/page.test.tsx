@@ -436,3 +436,41 @@ it("shows Camille’s female assistant avatar and plays her opening introduction
     expect.any(AbortSignal),
   );
 });
+
+
+it("edits a hint without sending and sends a fresh suggestion directly once", async () => {
+  const suggestion = "Je voudrais un aller-retour, s’il vous plaît.";
+  vi.spyOn(api, "assist").mockResolvedValue({
+    expression: suggestion,
+    explanation: "This explanation should not be displayed.",
+  });
+  const user = await enter();
+  await user.click(screen.getByRole("button", { name: /给我提示/ }));
+  await screen.findByText(suggestion);
+  expect(screen.queryByText("建议回答（尚未发送）")).toBeNull();
+  expect(screen.queryByText("This explanation should not be displayed.")).toBeNull();
+  await user.click(screen.getByRole("button", { name: "编辑" }));
+  expect(screen.getByRole("textbox", { name: "输入内容" })).toHaveValue(suggestion);
+  expect(api.chat).not.toHaveBeenCalled();
+  await user.clear(screen.getByRole("textbox", { name: "输入内容" }));
+  await user.click(screen.getByRole("button", { name: /给我提示/ }));
+  await screen.findByText(suggestion);
+  await user.click(screen.getByRole("button", { name: "发送" }));
+  await screen.findByText("Avec plaisir ! Et ensuite ?");
+  expect(api.chat).toHaveBeenCalledExactlyOnceWith(
+    expect.any(String), suggestion, undefined,
+    { language: "zh", practice_mode: "guided" },
+  );
+  expect(screen.getByRole("textbox", { name: "输入内容" })).toHaveValue("");
+});
+
+it("retains a directly sent suggestion as an editable draft if the API fails", async () => {
+  vi.spyOn(api, "assist").mockResolvedValue({ expression: "Un café, merci.", explanation: "" });
+  vi.mocked(api.chat).mockRejectedValueOnce(new Error("offline"));
+  const user = await enter();
+  await user.click(screen.getByRole("button", { name: /给我提示/ }));
+  await screen.findByText("Un café, merci.");
+  await user.click(screen.getByRole("button", { name: "发送" }));
+  await waitFor(() => expect(screen.getByRole("textbox", { name: "输入内容" })).toHaveValue("Un café, merci."));
+  expect(api.chat).toHaveBeenCalledOnce();
+});

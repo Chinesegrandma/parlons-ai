@@ -89,7 +89,7 @@ export function useConversation(
 
   async function send(override?: {
     text: string;
-    transcriptId?: string;
+    transcriptId?: string | null;
     language?: Language;
     practice_mode?: PracticeMode;
   }): Promise<string | null> {
@@ -103,6 +103,8 @@ export function useConversation(
     sending.current = true;
     const current = generation.current;
     const value = override?.text ?? input; // Keep edited text separately from the immutable transcript.
+    // null explicitly detaches an AI suggestion from an unrelated voice transcript.
+    const transcriptId = override?.transcriptId === null ? undefined : override?.transcriptId ?? transcript?.id;
     setBusy(true);
     setError("");
     try {
@@ -116,13 +118,13 @@ export function useConversation(
         ? await client.chat(
             session.id,
             value,
-            override?.transcriptId ?? transcript?.id,
+            transcriptId,
             preferences,
           )
         : await client.chat(
             session.id,
             value,
-            override?.transcriptId ?? transcript?.id,
+            transcriptId,
           );
       const updated = await client.history(session.id);
       if (current !== generation.current) return null;
@@ -131,11 +133,16 @@ export function useConversation(
       setTranscript(null);
       return result.reply;
     } catch (error) {
-      if (current === generation.current)
+      if (current === generation.current) {
+        if (override?.transcriptId === null) {
+          setInput(value);
+          setTranscript(null);
+        }
         setError(
           (error instanceof ApiError ? `${error.message} ` : "") +
             "回复失败，草稿已保留。请检查会话记录后再重试。 / Reply failed; draft retained.",
         );
+      }
       return null;
     } finally {
       sending.current = false;

@@ -4,7 +4,7 @@ import type { api } from "../lib/api";
 import type { Language, RewriteSuggestion } from "../lib/types";
 
 export function PracticeAid({
-  language, sessionId, client, disabled, demo, sttReady, onUse,
+  language, sessionId, client, disabled, demo, sttReady, onUse, onSend,
   onActivity, onPrepareRecording,
 }: {
   language: Language;
@@ -14,6 +14,7 @@ export function PracticeAid({
   demo: boolean;
   sttReady: boolean;
   onUse: (text: string) => void;
+  onSend: (text: string) => void;
   onActivity: (busy: boolean) => void;
   onPrepareRecording: () => void;
 }) {
@@ -100,17 +101,24 @@ export function PracticeAid({
             setResult(null);
           }}>{t("关闭帮助", "Close help")}</button>
           {result && (
-            <article className="notebook-entry">
-              <small>{t("建议回答（尚未发送）", "Suggested answer (not sent)")}</small>
-              <h3 lang="fr">{result.expression}</h3>
-              <p>{result.explanation}</p>
-              <button className="end-review" disabled={disabled || working || recorder.listening || recorder.transcribing} onClick={() => {
-                onUse(result.expression.slice(0, 2000));
-                setPanel(null);
-                setResult(null);
-              }}>
-                {t("使用建议，替换输入草稿", "Use suggestion, replace draft")}
-              </button>
+            <article className="aid-suggestion">
+              <p lang="fr">{result.expression}</p>
+              <div className="aid-suggestion-actions">
+                <button type="button" className="end-review" disabled={disabled || preparing || working || recorder.listening || recorder.transcribing} onClick={() => {
+                  onUse(result.expression.slice(0, 2000));
+                  setPanel(null);
+                  setResult(null);
+                }}>
+                  {t("编辑", "Edit")}
+                </button>
+                <button type="button" className="end-review aid-send" disabled={disabled || preparing || working || recorder.listening || recorder.transcribing} onClick={() => {
+                  onSend(result.expression.slice(0, 2000));
+                  setPanel(null);
+                  setResult(null);
+                }}>
+                  {t("发送", "Send")}
+                </button>
+              </div>
             </article>
           )}
         </div>
