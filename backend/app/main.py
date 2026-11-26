@@ -18,8 +18,8 @@ from app.challenges import BY_TOPIC, challenge_opening, challenge_prompt, review
 from app.feedback import FEEDBACK_CONTRACT, numbered_feedback, validate_feedback
 from app.learning import PracticeOptions, load_options
 from app.persona import introduce
-from app.social import SOCIAL_CONVERSATION
 from app.scenario_events import scenario_event_prompt
+from app.social import SOCIAL_CONVERSATION
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 DB_PATH = Path(
@@ -446,7 +446,9 @@ async def chat(payload: MessageCreate):
                 ) from exc
         corrected_text, review_prompt = result.corrected_text, result.review_prompt
         reply, correction = result.reply, numbered_feedback(result)
-        correction_details = [item.model_dump(exclude_none=True) for item in result.correction_details]
+        correction_details = [
+            item.model_dump(exclude_none=True) for item in result.correction_details
+        ]
         if payload.practice_mode == "conversation":
             correction = corrected_text = review_prompt = ""
             correction_details = []

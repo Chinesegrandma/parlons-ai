@@ -59,6 +59,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const [health, setHealth] = useState<Health | null>(null);
   const [offline, setOffline] = useState(false);
   const [voiceActive, setVoiceActive] = useState(false);
+  const [aidBusy, setAidBusy] = useState(false);
   const [pausing, setPausing] = useState(false);
   const pauseAfterTurn = useRef(false);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -311,7 +312,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     setMode(value);
   }
   async function send() {
-    if (busy || recorder.listening || demoListening || voiceActive) return;
+    if (busy || recorder.listening || demoListening || voiceActive || aidBusy) return;
     cancelReview();
     speech.unlock();
     speech.stop();
@@ -328,6 +329,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       await speech.playResponse(reply, speechReady);
   }
   function record() {
+    if (aidBusy) return;
     cancelReview();
     speech.unlock();
     speech.stop();
@@ -341,6 +343,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     } else if (session) void recorder.toggle(session.id);
   }
   function startVoice() {
+    if (aidBusy) return;
     if (
       demo ||
       !session ||
@@ -698,6 +701,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                   (!voiceActive &&
                     (busy ||
                       !!conversation.input.trim() ||
+                      aidBusy ||
                       speech.working ||
                       speech.blocked))
                 }
@@ -781,6 +785,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                 disabled={busy || recorder.listening || demoListening}
                 demo={demo}
                 sttReady={health?.stt_ready ?? false}
+                onActivity={setAidBusy}
+                onPrepareRecording={() => speech.stop()}
                 onUse={(text) => {
                   conversation.discard();
                   conversation.setInput(text);
@@ -794,7 +800,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                 transcribing={recorder.transcribing}
                 input={conversation.input}
                 transcript={conversation.transcript}
-                disabled={busy || !session}
+                disabled={busy || aidBusy || !session}
                 listening={demo ? demoListening : recorder.listening}
                 sttReady={health?.stt_ready ?? false}
                 error={localizedError(conversation.error)}

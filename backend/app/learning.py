@@ -17,7 +17,7 @@ class ChallengeOptions(BaseModel):
 class PracticeOptions(BaseModel):
     model_config = ConfigDict(extra="forbid")
     challenge: ChallengeOptions | None = None
-    scenario_variant: Literal["standard", "surprise"] = "standard"
+    scenario_variant: Literal["standard", "surprise"] | None = None
     scene: str = Field(default="", max_length=100)
     situation: str = Field(default="", max_length=1000)
     goals: list[Annotated[str, Field(max_length=200)]] = Field(default_factory=list, max_length=3)

@@ -81,6 +81,11 @@ def test_users_cannot_read_or_claim_each_others_sessions(cloud_api):
         == 404
     )
     assert new_session(cloud_api, "bob", session_id).status_code == 404
+    aid = {"session_id": session_id, "mode": "hint"}
+    assert cloud_api.post("/api/backend/assist", json=aid).status_code == 401
+    assert cloud_api.post(
+        "/api/backend/assist", json=aid, headers=auth("bob")
+    ).status_code == 404
     assert cloud_api.post(
         "/api/backend/chat",
         json={"session_id": session_id, "message": "Bonjour"},

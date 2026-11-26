@@ -10,7 +10,7 @@ FEEDBACK_CONTRACT = (
     "jamais un message précédent ni une réplique de l’IA. corrected_text doit être la "
     "version corrigée de TOUT ce message, en conservant les phrases déjà correctes. "
     "Explique CHAQUE erreur que tu modifies, pas seulement la première. Retourne "
-    "correction_details:[{original,suggestion,explanation}], une entrée par erreur ; "
+    "correction_details:[{original,suggestion,explanation,category}], une entrée par erreur ; "
     "original cite exactement le fragment du dernier message, suggestion figure exactement "
     "dans corrected_text ; explanation est dans la langue d’interface. N’invente pas "
     "d’erreur ni de correction stylistique nécessaire. correction_source recopie exactement "

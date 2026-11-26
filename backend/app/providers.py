@@ -11,7 +11,7 @@ from typing import Literal
 
 import httpx
 from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .slang import SLANG_REGISTER, mock_slang
 
@@ -232,6 +232,16 @@ MISTAKE_CATEGORY_GUIDANCE = (
 class CategorizedMistake(BaseModel):
     category: MistakeCategory | None = None
 
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, value):
+        if isinstance(value, str) and value in {
+            "tense", "conjugation", "agreement", "article", "preposition", "pronoun",
+            "syntax", "vocabulary", "spelling", "other",
+        }:
+            return value
+        return None
+
 
 class CorrectionDetail(CategorizedMistake):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -434,7 +444,7 @@ async def review_session(
         "Ce sont des transcriptions, pas une évaluation de l’audio. Si aucun point fort ou erreur "
         "n’est démontré, laisse la liste correspondante vide. Réponds en JSON : "
         "summary:string, strengths:[{quote:string,reason:string}], "
-        "corrections:[{original:string,suggestion:string,explanation:string}]. "
+        "corrections:[{original:string,suggestion:string,explanation:string,category:string}]. "
         "quote et original doivent être des extraits exacts de messages user ; "
         "suggestion reste en français. Les autres champs sont en "
         + ("anglais." if language == "en" else "chinois.")
@@ -579,7 +589,8 @@ async def ensure_english_feedback(app, reply: TutorReply) -> TutorReply:
                             "correction": reply.correction,
                             "review_prompt": reply.review_prompt,
                             "correction_details": [
-                                item.model_dump(exclude_none=True) for item in reply.correction_details
+                                item.model_dump(exclude_none=True)
+                                for item in reply.correction_details
                             ],
                         },
                         ensure_ascii=False,
