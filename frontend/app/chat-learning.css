@@ -785,8 +785,36 @@ html.parlons-chat-open, html.parlons-chat-open body {
 }
 .sage-conversation .conversation-page { height: 100%; max-height: 100%; overflow: hidden; }
 .sage-conversation .focused-chat { flex: 1 1 0; min-height: 0; }
-.sage-conversation .lookup-surface, .sage-conversation .conversation-layout { flex: 1 1 0; min-height: 0; overflow: hidden; }
-.sage-conversation .focused-chat .conversation { flex: 1 1 0; min-height: 0; height: 0; overflow-y: auto; }
+/* History wrappers must allocate height on the block axis. A height:0
+   flex item in a row only grows horizontally and hides all messages. */
+.sage-conversation .lookup-surface {
+  flex: 1 1 0;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.sage-conversation .conversation-layout {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.sage-conversation .focused-chat .conversation {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  min-width: 0;
+  align-self: stretch;
+  overflow-y: auto;
+}
+@media (min-width: 1024px) {
+  .sage-conversation .conversation-layout.has-learning {
+    grid-template-columns: minmax(0, 1fr) 350px;
+  }
+}
 .sage-conversation .focused-chat .composerarea { flex: 0 0 auto; min-height: 0; max-height: 48%; overflow-y: auto; overscroll-behavior: contain; }
 .sage-conversation .focused-chat .composer textarea {
   display: block;
