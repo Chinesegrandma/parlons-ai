@@ -20,7 +20,6 @@ it("runs a categorized offline practice and review without network access", asyn
   const user = userEvent.setup();
   render(<Studio demo />);
   await user.click(screen.getByRole("button", { name: "日常" }));
-  await user.click(screen.getByRole("button", { name: /餐饮.*查看具体事项/ }));
   await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
   await screen.findByText(
     assistantOpening("Bonjour ! Qu’est-ce que je vous sers ?"),

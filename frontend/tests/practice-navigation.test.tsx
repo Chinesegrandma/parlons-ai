@@ -20,17 +20,12 @@ it("keeps landing content and surprise settings at their intended navigation lev
   expect(screen.queryByRole("button", { name: "自由聊天" })).toBeNull();
   // Life admin also contains directly startable scenarios (renting, post, support).
   expect(screen.queryByLabelText(surprise)).toBeNull();
-  await user.click(screen.getByRole("button", {name:/住房.*查看具体事项/}));
   expect(screen.getByRole("button", {name:"联系房东"})).toBeVisible();
-  await user.click(screen.getByRole("button", {name:"返回"}));
-  await user.click(screen.getByRole("button", { name: /银行.*查看具体事项/ }));
   expect(screen.queryByLabelText(surprise)).toBeNull();
   await user.click(screen.getByRole("button", { name: /办理银行卡.*进入对话/ }));
   expect(start).toHaveBeenLastCalledWith("bank_card");
-  await user.click(screen.getByRole("button", { name: "返回" }));
-  expect(screen.queryByLabelText(surprise)).toBeNull();
-  await user.click(screen.getByRole("button", { name: "返回" }));
   await user.click(screen.getByRole("button", { name: "表达挑战" }));
+  expect(screen.getByRole("button", { name: "表达挑战" })).toHaveAttribute("aria-pressed", "true");
   expect(screen.queryByLabelText(surprise)).toBeNull();
   expect(screen.queryByRole("button", { name: "自由聊天" })).toBeNull();
 });
@@ -45,14 +40,14 @@ it("assigns every ordinary scenario and variant exactly once to a nonempty subgr
   expect(variants.sort()).toEqual(sceneVariants.map(v=>v.zh).sort());
   for(const g of practiceGroups) expect(g.topics.length+g.variants.length).toBeGreaterThan(0);
 });
-it("separates school and work before showing their individual situations",async()=>{
+it("shows school and work as separate groups without extra navigation",async()=>{
   const user=userEvent.setup(); const start=vi.fn();
   render(<PracticeHome language="zh" onStart={start} onResume={vi.fn()} disabled={false}/>);
   await user.click(screen.getByRole("button",{name:"学业与工作"}));
-  expect(screen.getByRole("button",{name:/学校.*查看具体事项/})).toBeVisible();
-  await user.click(screen.getByRole("button",{name:/工作.*查看具体事项/}));
+  expect(screen.getByRole("heading",{name:"学校"})).toBeVisible();
+  expect(screen.getByRole("heading",{name:"工作"})).toBeVisible();
   expect(screen.getByRole("button",{name:"同事闲聊"})).toBeVisible();
-  expect(screen.queryByRole("button",{name:/选课.*进入对话/})).toBeNull();
+  expect(screen.getByRole("button",{name:/选课.*进入对话/})).toBeVisible();
   await user.click(screen.getByRole("button",{name:"同事闲聊"}));
   expect(start).toHaveBeenLastCalledWith("report",expect.objectContaining({scene:"同事闲聊"}));
 });
@@ -64,4 +59,20 @@ it("starts interview directly from its dedicated home card",async()=>{
   expect(start).toHaveBeenLastCalledWith("interview");
   expect(screen.queryByText("技术面试")).toBeNull();
   expect(screen.queryByText("录用与薪资")).toBeNull();
+});
+
+it("switches categories in place and returns home in one step", async () => {
+  const user = userEvent.setup(); const start = vi.fn();
+  render(<PracticeHome language="zh" onStart={start} onResume={vi.fn()} disabled={false}/>);
+  await user.click(screen.getByRole("button",{name:"日常"}));
+  expect(screen.getByRole("heading",{name:"餐饮"})).toBeVisible();
+  expect(screen.getByRole("button",{name:/咖啡馆.*进入对话/})).toBeVisible();
+  expect(screen.queryByRole("button",{name:"面试"})).toBeNull();
+  await user.click(screen.getByRole("button",{name:"社交"}));
+  expect(screen.getByRole("button",{name:"社交"})).toHaveAttribute("aria-pressed","true");
+  expect(screen.queryByRole("heading",{name:"餐饮"})).toBeNull();
+  expect(screen.getByRole("button",{name:/朋友闲聊.*进入对话/})).toBeVisible();
+  expect(start).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("button",{name:"返回"}));
+  expect(screen.getByRole("heading",{name:"On parle ?"})).toBeVisible();
 });

@@ -167,7 +167,6 @@ it("opens category, group, then the leaf enters chat without an extra start butt
   const user = userEvent.setup();
   render(<Home />);
   await user.click(screen.getByRole("button", { name: "办事" }));
-  await user.click(screen.getByRole("button", { name: /银行.*查看具体事项/ }));
   expect(api.session).not.toHaveBeenCalled();
   await user.click(
     screen.getByRole("button", { name: /办理银行卡.*进入对话/ }),

@@ -91,17 +91,17 @@ export function PracticeHome({
   const [selected, setSelected] = useState<Topic | null>(null);
   const [custom, setCustom] = useState("");
   const [category, setCategory] = useState("");
-  const [group, setGroup] = useState("");
+  const tabsRef = useRef<HTMLElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const previousView = useRef("");
   useEffect(() => {
-    const view = `${category}:${group}:${selected ?? ""}`;
+    const view = `${category}:${selected ?? ""}`;
     if (previousView.current && previousView.current !== view) {
       window.scrollTo?.(0, 0);
       mainRef.current?.focus({ preventScroll: true });
     }
     previousView.current = view;
-  }, [category, group, selected]);
+  }, [category, selected]);
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
   const history = book?.practiceHistory || [];
   const today = history.some(r => r.day === localDay());
@@ -109,8 +109,15 @@ export function PracticeHome({
   const due = (book?.cards || []).filter(c => c.due <= Date.now() && (c.corrected || c.sent));
   const current = sections.find((section) => section.id === category);
   const subgroups = practiceGroups.filter(g=>g.category===category);
-  const activeGroup = subgroups.find(g=>g.id===group);
-  const content = activeGroup ? groupContent(activeGroup) : {scenes:catalog.filter(s=>s.category==="challenge" && category==="challenge"),variants:[]};
+  useEffect(() => {
+    const strip = tabsRef.current;
+    const active = strip?.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+    if (!strip || !active) return;
+    if (active.offsetLeft < strip.scrollLeft || active.offsetLeft + active.offsetWidth > strip.scrollLeft + strip.clientWidth) {
+      strip.scrollLeft = Math.max(0, active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2);
+    }
+  }, [category, selected, language]);
+  const challenges = catalog.filter(scene => scene.category === "challenge");
   if (selected)
     return (
       <main ref={mainRef} tabIndex={-1} className="practice-home scene-selection">
@@ -172,34 +179,52 @@ export function PracticeHome({
       {category ? (
         <>
           <div className="category-heading">
-            <button onClick={() => (group ? setGroup("") : setCategory(""))}>
+            <button type="button" onClick={() => setCategory("")}>
               <ArrowLeft size={16} />
               {t("返回", "Back")}
             </button>
-            <div className="scene-path">
-              {activeGroup && <small>{current?.[language]}</small>}
-              <h2>{activeGroup?.[language] || current?.[language]}</h2>
-            </div>
+            <h2>{current?.[language]}</h2>
           </div>
-          <div className="subscene-grid">
-            {!activeGroup && subgroups.map(g=>{
-              const items=groupContent(g);
-              const names=[...items.scenes.map(s=>sceneTitle(s.id,language)),...items.variants.map(v=>v[language])];
-              return <button className="subscene-card navigation-group" key={g.id} aria-label={g[language]+" "+t("查看具体事项","Choose a situation")} onClick={()=>setGroup(g.id)}>
-                <span>{g[language]}</span><small>{names.join(" · ")}</small><ArrowUpRight size={18}/>
-              </button>;
-            })}
-            {content.scenes.map(scene=>(
-              <button className="subscene-card" key={scene.id}
-                aria-label={scene.category==="challenge"?undefined:sceneTitle(scene.id,language)+" "+t("进入对话","Enter conversation")}
-                disabled={disabled}
-                onClick={()=>scene.category==="challenge"?setSelected(scene.id):scene.id==="interview"?onStart(scene.id,{scene:sceneTitle(scene.id,language)}):onStart(scene.id)}>
-                <span>{sceneTitle(scene.id,language)}</span>
-                {scene.category==="challenge" && <small>{language==="en"?challengeFor(scene.id)?.descriptionEn:challengeFor(scene.id)?.descriptionZh}</small>}
-                <ArrowUpRight size={18}/>
+          <nav ref={tabsRef} className="scene-category-tabs" aria-label={t("练习分类", "Practice categories")}>
+            {sections.filter(section => section.id !== "interview").map(section => (
+              <button type="button" key={section.id} aria-pressed={category === section.id}
+                disabled={disabled} onClick={() => setCategory(section.id)}>
+                {section[language]}
               </button>
             ))}
-            {content.variants.map(v=><button key={v.zh} className="subscene-card" disabled={disabled} onClick={()=>onStart(v.topic,{scene:v[language],situation:v.situation,opening:v.opening,goals:language==="zh"?v.goals:[]})}><span>{v[language]}</span><ArrowUpRight size={18}/></button>)}
+          </nav>
+          <div className="scene-menu">
+            {subgroups.map(group => {
+              const { scenes, variants } = groupContent(group);
+              return (
+                <section key={group.id} className="scene-menu-group" aria-labelledby={"group-" + group.id}>
+                  <h3 id={"group-" + group.id}>{group[language]}</h3>
+                  <div className="scene-menu-card">
+                    {scenes.map(scene => (
+                      <button type="button" className="scene-menu-item" key={scene.id}
+                        aria-label={sceneTitle(scene.id, language) + " " + t("进入对话", "Enter conversation")}
+                        disabled={disabled} onClick={() => onStart(scene.id)}>
+                        <span>{sceneTitle(scene.id, language)}</span><ArrowUpRight size={17} aria-hidden="true"/>
+                      </button>
+                    ))}
+                    {variants.map(v => (
+                      <button type="button" className="scene-menu-item" key={v.zh} disabled={disabled}
+                        onClick={() => onStart(v.topic, {scene:v[language], situation:v.situation, opening:v.opening, goals:language==="zh"?v.goals:[]})}>
+                        <span>{v[language]}</span><ArrowUpRight size={17} aria-hidden="true"/>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+            {category === "challenge" && <div className="scene-menu-card">
+              {challenges.map(scene => (
+                <button type="button" key={scene.id} className="scene-menu-item" disabled={disabled} onClick={() => setSelected(scene.id)}>
+                  <span>{scene[language]}<small>{language === "en" ? challengeFor(scene.id)?.descriptionEn : challengeFor(scene.id)?.descriptionZh}</small></span>
+                  <ArrowUpRight size={17} aria-hidden="true"/>
+                </button>
+              ))}
+            </div>}
           </div>
 
         </>
