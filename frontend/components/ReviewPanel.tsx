@@ -1,4 +1,5 @@
 import { CheckCircle2, Sparkles, X } from "lucide-react";
+import { useState } from "react";
 import type { Language, Review } from "../lib/types";
 export function ReviewPanel({
   review,
@@ -6,7 +7,19 @@ export function ReviewPanel({
   loading,
   error,
   onClose,
+  onHome,
+  onRetry,
+  onPractice,
+  turns = 0,
+  spokenTurns = 0,
+  onRecall,
 }: {
+  onRecall?: (remembered:boolean)=>void;
+  onHome?: () => void;
+  onRetry?: () => void;
+  onPractice?: () => void;
+  turns?: number;
+  spokenTurns?: number;
   review: Review | null;
   language: Language;
   loading: boolean;
@@ -14,6 +27,7 @@ export function ReviewPanel({
   onClose: () => void;
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
+  const [showAll,setShowAll] = useState(false);
   return (
     <section
       className="session-review"
@@ -21,13 +35,7 @@ export function ReviewPanel({
     >
       <header>
         <div>
-          <span className="eyebrow">UN PAS DE PLUS</span>
-          <h2>
-            {t(
-              "每一次开口，都值得回看。",
-              "Every conversation is a step forward.",
-            )}
-          </h2>
+          <h2>{review ? "Bravo !" : t("对话总结","Conversation review")}</h2>
         </div>
         <button onClick={onClose} aria-label={t("关闭总结", "Close review")}>
           <X size={18} />
@@ -41,23 +49,17 @@ export function ReviewPanel({
           )}
         </p>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <div role="alert">{error}{onRetry && <button className="end-review" onClick={onRetry}>{t("重试","Retry")}</button>}</div>}
       {review && (
         <>
+          <div className="study-stats"><div><strong>{turns}</strong><small>{t("表达次数","Turns")}</small></div><div><strong>{spokenTurns}</strong><small>{t("语音表达","Spoken turns")}</small></div><div><strong>{review.corrections.length}</strong><small>{t("待复习","Corrections")}</small></div></div>
           <p className="review-intro">{review.summary}</p>
           <h3>
             <CheckCircle2 size={18} />
             {t("你做得好的地方", "What you did well")}
           </h3>
-          {!review.strengths.length && (
-            <p>
-              {t(
-                "目前还没有足够证据给出具体优点，继续练习会让反馈更有依据。",
-                "There is not enough evidence for specific strengths yet.",
-              )}
-            </p>
-          )}
-          {review.strengths.map((item, i) => (
+          {!review.strengths.length && <p>{t("暂无具体反馈。","No specific feedback yet.")}</p>}
+          {review.strengths.slice(0, showAll ? undefined : 2).map((item, i) => (
             <article className="review-strength" key={i}>
               <blockquote lang="fr">{item.quote}</blockquote>
               <p>{item.reason}</p>
@@ -75,7 +77,7 @@ export function ReviewPanel({
               )}
             </p>
           )}
-          {review.corrections.map((item, i) => (
+          {review.corrections.slice(0, showAll ? undefined : 3).map((item, i) => (
             <article className="review-correction" key={i}>
               <div>
                 <span>{t("你说的", "You said")}</span>
@@ -88,11 +90,17 @@ export function ReviewPanel({
               <p>{item.explanation}</p>
             </article>
           ))}
+          {(review.corrections.length>3 || review.strengths.length>2) && <button className="text-button" onClick={()=>setShowAll(!showAll)}>{showAll?t("收起","Show less"):t("查看完整反馈","Full feedback")}</button>}
+          {onRecall && <div className="review-next-actions"><h3>{t("这次能独立说出来吗？","Could you say it independently?")}</h3><div className="notebook-actions"><button onClick={()=>onRecall(false)}>{t("还需练习","Keep practicing")}</button><button onClick={()=>onRecall(true)}>{t("记住了","Remembered")}</button></div></div>}
+          <div className="review-next-actions">
+            {onPractice && <button className="daily-main" onClick={onPractice}>{t("再练一次","Practice again")} →</button>}
+            {onHome && <button className="text-button" onClick={onHome}>{t("返回首页","Home")}</button>}
+          </div>
         </>
       )}
       <small>
         {t(
-          "总结依据文字与转写内容，可能有遗漏，不包含发音评分。",
+          "基于文字与转写，不含发音评分。",
           "Based on text and transcripts; may miss issues and does not assess pronunciation.",
         )}
       </small>

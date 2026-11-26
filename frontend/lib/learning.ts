@@ -175,6 +175,7 @@ export type Notebook = {
   mistakes?: import("./mistakes").Mistake[];
   ignoredMistakes?: string[];
   practiceHistory?: PracticeRecord[];
+  reviewQueue?: Memory[];
 };
 /** Preserve dismissed event IDs: navigating back to a session must not resurrect a deleted card. */
 export function collectMemories(

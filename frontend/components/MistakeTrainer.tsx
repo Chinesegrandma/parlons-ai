@@ -25,9 +25,9 @@ export function MistakeTrainer({ language, mistakes, onRemove }: {
   if (!category) return (
     <section className="mistake-trainer">
       <h2>{t("我的法语弱点", "My French mistakes")}</h2>
-      <p>{t("每个纠错建议单独归类。选择一类开始专项练习。", "Each correction is grouped separately. Choose a category to practice.")}</p>
+
       <div className="mistake-grid">
-        {categories.map((entry) => (
+        {[...categories].sort((a,b)=>mistakes.filter(m=>m.category===b.id).length-mistakes.filter(m=>m.category===a.id).length).map((entry) => (
           <button className="notebook-entry" key={entry.id} onClick={() => select(entry.id)}>
             <strong>{entry[language]}</strong>
             <small>{mistakes.filter((item) => item.category === entry.id).length} {t("条记录", "mistakes")}</small>
@@ -79,7 +79,7 @@ export function MistakeTrainer({ language, mistakes, onRemove }: {
           <button onClick={() => select(category)}>{t("返回分类", "Back to category")}</button>
         </article>
       )}
-      <small>{t("AI 纠错可能有误；选择题不是正式能力评估。", "AI suggestions may be wrong; quizzes are not a formal assessment.")}</small>
+      <small>{t("AI 纠错仅供参考。", "AI feedback may be imperfect.")}</small>
     </section>
   );
 }

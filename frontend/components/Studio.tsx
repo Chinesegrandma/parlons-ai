@@ -74,6 +74,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const [showReview, setShowReview] = useState(false);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState("");
+  const [reviewCardId,setReviewCardId] = useState<string | null>(null);
   const reviewController = useRef<AbortController | null>(null);
   const running = useRef(false);
   const epoch = useRef(0);
@@ -287,7 +288,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     setReview(null);
     setReviewError("");
   }
-  async function begin(topic?: Topic, extra?: Partial<PracticeOptions>) {
+  async function begin(topic?: Topic, extra?: Partial<PracticeOptions>, cardId?: string) {
+    setReviewCardId(cardId || null);
     pauseVoice();
     const current = epoch.current;
     speech.unlock();
@@ -550,7 +552,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               situation:
                 "Propose une nouvelle situation pour pratiquer une expression déjà apprise.",
               review_targets: [card.corrected || card.sent],
-            })
+            }, card.id)
           }
         />
       ) : page === "home" ? (
@@ -563,7 +565,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           }
           book={learning.book}
           onStudy={() => setPage("notebook")}
-          onReview={(card) => void begin(card.topic.startsWith("challenge_") ? "daily" : card.topic, {scene: t("复习表达", "Review an expression"), situation: "Propose une situation nouvelle qui invite à employer la structure cible sans donner la réponse.", review_targets: [card.corrected || card.sent]})}
+          onReview={(card) => void begin(card.topic.startsWith("challenge_") ? "daily" : card.topic, {scene: t("复习表达", "Review an expression"), situation: "Propose une situation nouvelle qui invite à employer la structure cible sans donner la réponse.", review_targets: [card.corrected || card.sent]}, card.id)}
           canResume={canResume}
           language={language}
           disabled={busy}
@@ -901,6 +903,12 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               language={language}
               loading={reviewLoading}
               error={reviewError}
+              turns={turns}
+              spokenTurns={session?.messages.filter(m=>m.role==="user" && m.original_transcript!=null).length || 0}
+              onHome={()=>{cancelReview();setPage("home");}}
+              onRetry={()=>void finishReview()}
+              onRecall={reviewCardId && turns>0 ? (remembered)=>{learning.review(reviewCardId,remembered);setReviewCardId(null);} : undefined}
+              onPractice={session ? ()=>void begin(session.topic, session.options, reviewCardId || undefined) : undefined}
               onClose={() => {
                 reviewController.current?.abort();
                 setReviewLoading(false);

@@ -129,7 +129,18 @@ export function useLearning(
     });
   };
   const saveReviewMistakes = (source: Session, result: Review) =>
-    setBook((previous) => collectMistakes(previous, source, result));
+    setBook((previous) => {
+      const updated = collectMistakes(previous, source, result);
+      const cards = [...updated.cards];
+      for (const item of result.corrections) {
+        const user = source.messages.find(m => m.role === "user" && m.content.includes(item.original));
+        if (!user || !item.suggestion || item.suggestion === item.original) continue;
+        if (cards.some(c => c.corrected === item.suggestion && c.sent === item.original)) continue;
+        if (cards.some(c => c.sent === user.content && c.corrected.includes(item.suggestion))) continue;
+        cards.unshift({ id: JSON.stringify(["review",source.id,item.original,item.suggestion]), kind:"correction", original:item.original, sent:item.original, corrected:item.suggestion, explanation:item.explanation, prompt:language==="zh"?"换个情境，试着说出正确的表达。":"Use the corrected expression in a new situation.", topic:source.topic, scene:source.options?.scene || source.topic, occurrences:1, accepted:false, reviews:0, due:Date.now(), created:Date.now() });
+      }
+      return {...updated,cards};
+    });
   const removeMistake = (id: string) =>
     setBook((previous) => ({
       ...previous,

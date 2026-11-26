@@ -3,7 +3,6 @@ import { MistakeTrainer } from "./MistakeTrainer";
 import {
   ArrowLeft,
   BookOpen,
-  Check,
   Download,
   Pencil,
   Plus,
@@ -12,7 +11,8 @@ import {
 } from "lucide-react";
 import type { useLearning } from "../hooks/useLearning";
 import type { Language } from "../lib/types";
-import type { Memory } from "../lib/learning";
+import { practiceStreak, type Memory } from "../lib/learning";
+import { catalog } from "../lib/catalog";
 
 export function NotebookPanel({
   language,
@@ -30,18 +30,18 @@ export function NotebookPanel({
   speechReady: boolean;
 }) {
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
-  const [view, setView] = useState<"notes" | "mistakes">("notes");
+  const [view, setView] = useState<"notes" | "mistakes" | "history">("notes");
   const [expression, setExpression] = useState("");
   const [filter, setFilter] = useState("all");
+  const history = learning.book.practiceHistory || [];
+  const due = learning.book.cards.filter(c => c.due <= Date.now() && (c.corrected || c.sent));
+  const [openedHistory, setOpenedHistory] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [edited, setEdited] = useState("");
   const [revealed, setRevealed] = useState<string | null>(null);
   const cards = learning.book.cards.filter(
     (card) =>
-      filter === "all" ||
-      (filter === "pending"
-        ? !card.accepted
-        : card.accepted && card.due <= Date.now()),
+      filter === "all" ? card.accepted : card.due <= Date.now(),
   );
   function exportNotes() {
     const url = URL.createObjectURL(
@@ -63,8 +63,7 @@ export function NotebookPanel({
       </button>
       <div className="notebook-heading">
         <div>
-          <span className="eyebrow">LES PETITS PROGRÈS</span>
-          <h1>{t("笔记本", "Notebook")}</h1>
+          <h1>{t("我的学习", "My learning")}</h1>
         </div>
         <button
           className="end-review"
@@ -74,12 +73,13 @@ export function NotebookPanel({
           <Download size={15} /> {t("导出", "Export")}
         </button>
       </div>
-      <p className="mode-description">
-        {t(
-          "保存在当前设备。先确认建议，再加入复习；复习记录不是能力评分。",
-          "Saved on this device. Confirm suggestions before reviewing; review records are not proficiency scores.",
-        )}
-      </p>
+      <div className="study-stats">
+        <div><strong>{new Set(history.map(r=>r.id)).size}</strong><small>{t("练习对话","Conversations")}</small></div>
+        <div><strong>{history.filter((r,i)=>history.findIndex(x=>x.id===r.id)===i).reduce((n,r)=>n+r.spokenTurns,0)}</strong><small>{t("语音表达","Spoken turns")}</small></div>
+        <div><strong>{practiceStreak(history)}</strong><small>{t("连续天数","Day streak")}</small></div>
+      </div>
+      <button className="daily-main" onClick={()=>{setView("notes");setFilter("due")}}><span>{t("今日复习","Review today")} · {due.length}</span> →</button>
+      <small className="study-storage">{t("学习记录保存在当前浏览器。","Learning history is stored in this browser.")}</small>
       {learning.storageError && (
         <p role="alert">
           {t(
@@ -89,17 +89,26 @@ export function NotebookPanel({
         </p>
       )}
       <div className="mode-switch notebook-filter">
-        <button aria-pressed={view === "notes"} onClick={() => setView("notes")}>
-          {t("收藏笔记", "Saved notes")}
+        <button aria-pressed={view === "notes"} onClick={() => {setView("notes");setFilter("all");}}>
+          {t("收藏表达", "Saved expressions")}
         </button>
         <button aria-pressed={view === "mistakes"} onClick={() => setView("mistakes")}>
-          {t("分类错题", "Mistake categories")} ({learning.book.mistakes?.length || 0})
+          {t("我的弱点", "My mistakes")} ({learning.book.mistakes?.length || 0})
         </button>
+        <button aria-pressed={view === "history"} onClick={()=>setView("history")}>{t("练习历史","History")}</button>
       </div>
-      {view === "mistakes" ? (
+      {view === "history" ? (
+        <section className="notebook-cards">
+          {!history.length && <p>{t("还没有练习记录。","No practice yet.")}</p>}
+          {history.filter((r,i)=>history.findIndex(x=>x.id===r.id)===i).map(r=><article className="notebook-entry" key={r.id}>
+            <button className="history-entry" aria-expanded={openedHistory===r.id} onClick={()=>setOpenedHistory(openedHistory===r.id?null:r.id)}><span><strong>{r.scene || catalog.find(s=>s.id===r.topic)?.[language] || r.topic}</strong><small>{r.day} · {r.turns} {t("次表达","turns")}</small></span><span>{openedHistory===r.id?"−":"+"}</span></button>
+            {openedHistory===r.id && <div className="history-transcript">{r.messages.map(m=><p key={m.id} lang="fr"><small>{m.role==="user"?t("我","Me"):"Camille"}</small>{m.content}</p>)}</div>}
+          </article>)}
+        </section>
+      ) : view === "mistakes" ? (
         <MistakeTrainer language={language} mistakes={learning.book.mistakes || []} onRemove={learning.removeMistake} />
       ) : (<>
-      <form
+      {filter === "all" && <form
         className="notebook-add"
         onSubmit={(event) => {
           event.preventDefault();
@@ -123,11 +132,10 @@ export function NotebookPanel({
           <Plus size={18} />
           {t("收藏", "Save")}
         </button>
-      </form>
+      </form>}
       <div className="mode-switch notebook-filter">
         {[
           ["all", t("全部", "All")],
-          ["pending", t("待确认", "To confirm")],
           ["due", t("待复习", "Due for review")],
         ].map(([id, label]) => (
           <button
@@ -143,11 +151,11 @@ export function NotebookPanel({
         <div className="notebook-empty">
           <BookOpen size={30} />
           <h2>
-            {t("把有用的表达，留在这里。", "Keep useful expressions here.")}
+            {filter === "due" ? t("今天的复习已完成。","You’re caught up.") : t("还没有收藏表达。","No saved expressions yet.")}
           </h2>
           <p>
             {t(
-              "聊天时收藏纠错，或者在上方手动添加。",
+              "在对话中收藏，或手动添加。",
               "Save a correction from chat or add an expression above.",
             )}
           </p>
@@ -160,7 +168,7 @@ export function NotebookPanel({
               <span>
                 {card.accepted
                   ? t("已收藏", "Saved")
-                  : t("待确认建议", "Suggestion to confirm")}
+                  : t("自动复习", "Review")}
               </span>
               <button
                 aria-label={t("删除笔记", "Delete note")}
@@ -178,6 +186,7 @@ export function NotebookPanel({
                   )}
                 </p>
                 <p>{card.prompt}</p>
+                <button className="end-review" onClick={()=>onPractice(card)}>{t("开口练习","Speak it")}</button>
                 <button
                   className="end-review"
                   onClick={() => setRevealed(card.id)}
@@ -234,8 +243,7 @@ export function NotebookPanel({
                         learning.update(card.id, { accepted: true })
                       }
                     >
-                      <Check size={15} />
-                      {t("确认收藏", "Confirm")}
+                      {t("收藏表达", "Save expression")}
                     </button>
                   )}
                   <button onClick={() => onPractice(card)}>
