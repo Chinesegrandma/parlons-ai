@@ -647,18 +647,15 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             >
               <SlidersHorizontal size={14} aria-hidden="true" />
               <span>
-                {mode === "guided"
-                  ? t("逐句练习", "Guided practice")
-                  : t("连续对话", "Conversation")}
-                {" · "}
-                {feedback === "each_turn"
-                  ? t("即时纠错", "Correct each turn")
-                  : t("结束后总结", "Review at the end")}
+                {mode==="guided" && feedback==="each_turn" ? t("学习模式","Learning mode") : mode==="conversation" && feedback==="after_session" ? t("沉浸模式","Immersion mode") : t("自定义模式","Custom mode")}
               </span>
               <ChevronDown size={14} aria-hidden="true" />
             </button>
             {modeMenuOpen && (
               <div id="chat-mode-options" className="chat-mode-options">
+                <button className="mode-preset" disabled={busy || recorder.listening || voiceActive || aidBusy} aria-pressed={mode==="guided"&&feedback==="each_turn"} onClick={()=>{switchMode("guided");learning.setOptions(old=>({...old,feedback:"each_turn"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("学习模式","Learning mode")}</strong><small>{t("逐句练习 · 即时纠错","Review each turn")}</small></button>
+                <button className="mode-preset" disabled={busy || recorder.listening || voiceActive || aidBusy} aria-pressed={mode==="conversation"&&feedback==="after_session"} onClick={()=>{switchMode("conversation");learning.setOptions(old=>({...old,feedback:"after_session"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("沉浸模式","Immersion mode")}</strong><small>{t("连续对话 · 结束后总结","Hands-free · feedback at the end")}</small></button>
+                <details className="mode-advanced"><summary>{t("高级设置","Advanced settings")}</summary>
                 <span className="chat-mode-label">{t("对话方式", "Recording mode")}</span>
                 <div className="mode-switch" role="group" aria-label={t("录音方式", "Recording mode")}>
                   <button
@@ -711,6 +708,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                     {t("结束后总结", "Review at the end")}
                   </button>
                 </div>
+                </details>
               </div>
             )}
           </div>
@@ -867,6 +865,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                 sttReady={health?.stt_ready ?? false}
                 onActivity={setAidBusy}
                 onPrepareRecording={() => speech.stop()}
+                speechReady={speechReady}
+                onSpeak={(text)=>{speech.unlock();void speech.speak(text);}}
                 onUse={(text) => {
                   conversation.discard();
                   conversation.setInput(text);

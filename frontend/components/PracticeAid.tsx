@@ -5,7 +5,7 @@ import type { Language, RewriteSuggestion } from "../lib/types";
 
 export function PracticeAid({
   language, sessionId, client, disabled, demo, sttReady, onUse, onSend,
-  onActivity, onPrepareRecording,
+  onActivity, onPrepareRecording, onSpeak, speechReady,
 }: {
   language: Language;
   sessionId: string;
@@ -17,9 +17,11 @@ export function PracticeAid({
   onSend: (text: string) => void;
   onActivity: (busy: boolean) => void;
   onPrepareRecording: () => void;
+  onSpeak?: (text:string)=>void;
+  speechReady?: boolean;
 }) {
   const t = (zh: string, en: string) => language === "en" ? en : zh;
-  const [panel, setPanel] = useState<"hint" | "express" | null>(null);
+  const [panel, setPanel] = useState<"hint" | "express" | "keywords" | null>(null);
   const open = panel !== null;
   const [preparing, setPreparing] = useState(false);
   const [native, setNative] = useState("");
@@ -43,7 +45,7 @@ export function PracticeAid({
       setPreparing(false);
     }
   }
-  async function generate(mode: "hint" | "express") {
+  async function generate(mode: "hint" | "express" | "keywords") {
     if (disabled || working || recorder.listening || recorder.transcribing) return;
     if (mode === "express" && !native.trim()) return;
     setPanel(mode);
@@ -61,7 +63,7 @@ export function PracticeAid({
   return (
     <section className="practice-aid" aria-label={t("表达帮助", "Speaking help")}>
       <div className="notebook-actions">
-        <button disabled={disabled || working || recorder.listening || recorder.transcribing} onClick={() => void generate("hint")}>
+        <button disabled={disabled || working || recorder.listening || recorder.transcribing} onClick={() => {setPanel(panel === "hint" || panel === "keywords" ? null : "keywords");setResult(null);setError("");}}>
           ✦ {t("给我提示", "Hint")}
         </button>
         <button disabled={disabled || working} aria-expanded={panel === "express"} onClick={() => {
@@ -78,6 +80,7 @@ export function PracticeAid({
       </div>
       {open && (
         <div className="practice-aid-body">
+          {(panel === "hint" || panel === "keywords") && !result && !working && <div className="notebook-actions"><button disabled={disabled} onClick={()=>void generate("keywords")}>{t("几个关键词","Keywords")}</button><button disabled={disabled} onClick={()=>void generate("hint")}>{t("完整回答","Full answer")}</button></div>}
           {panel === "express" && <>
           <label>
             {t("你真正想说什么？", "What do you want to say?")}
@@ -103,7 +106,8 @@ export function PracticeAid({
           {result && (
             <article className="aid-suggestion">
               <p lang="fr">{result.expression}</p>
-              <div className="aid-suggestion-actions">
+              {panel === "keywords" ? <div className="aid-suggestion-actions"><button className="end-review" disabled={disabled} onClick={()=>void generate("hint")}>{t("完整回答","Full answer")}</button></div> : <div className="aid-suggestion-actions">
+                {onSpeak && <button className="text-button" disabled={!speechReady || disabled} onClick={()=>onSpeak(result.expression)}>{t("朗读","Listen")}</button>}
                 <button type="button" className="end-review" disabled={disabled || preparing || working || recorder.listening || recorder.transcribing} onClick={() => {
                   onUse(result.expression.slice(0, 2000));
                   setPanel(null);
@@ -118,7 +122,7 @@ export function PracticeAid({
                 }}>
                   {t("发送", "Send")}
                 </button>
-              </div>
+              </div>}
             </article>
           )}
         </div>

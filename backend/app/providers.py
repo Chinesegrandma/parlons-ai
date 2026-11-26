@@ -806,7 +806,7 @@ async def suggest_answer(app, context, mode, text, language, level) -> Expressio
     """Suggest a learner-side draft, without saving it as a conversation turn."""
     if mock_enabled():
         return ExpressionRewrite(
-            expression="Pourriez-vous m’en dire un peu plus ?",
+            expression="préciser · demander · comprendre" if mode == "keywords" else "Pourriez-vous m’en dire un peu plus ?",
             explanation=(
                 "模拟提示：不是真实翻译或上下文建议。"
                 if language == "zh"
@@ -821,7 +821,8 @@ async def suggest_answer(app, context, mode, text, language, level) -> Expressio
         "If mode is express, convey the learner’s intended meaning faithfully in French, "
         "without adding personal facts. If mode is hint, offer a possible reply or "
         "a question that keeps the conversation going, without inventing personal facts. "
-        "Never answer as the tutor. Match the learner level: "
+        "If mode is keywords, expression MUST contain 3 to 5 short French words or fragments "
+        "separated by ·, not a complete answer. Never answer as the tutor. Match the learner level: "
         + level
         + ". Explain in "
         + ("Simplified Chinese." if language == "zh" else "English.")

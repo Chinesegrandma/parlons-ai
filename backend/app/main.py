@@ -346,13 +346,14 @@ async def chat(payload: MessageCreate):
             original = transcript["original_text"]
     options = load_options(session["options"])
     instructions = (
-        "Tu t’appelles Camille, une assistante IA de français. Ta présentation est déjà dans "
-        "le message initial ; ne la répète pas à chaque réponse. "
+        "Tu t’appelles Camille. Dans un jeu de rôle, incarne le personnage de la situation, "
+        "pas une professeure de français. Ne te présente pas comme une IA à chaque échange. "
         "Tu es un partenaire de français chaleureux. Adapte le vocabulaire au niveau observé "
         "et utilise des phrases courtes et accessibles. "
         f"Le sujet est {TOPICS[session['topic']]}. Réponds en français en 1 à 3 phrases "
         "Prends l’initiative : réponds à ce qui vient d’être dit puis pose UNE question "
-        "concrète qui fait avancer la situation. Si la réponse est courte, propose deux choix. "
+        "concrète qui fait avancer la situation quand cela est naturel. Ne termine pas chaque "
+        "réplique par une question mécanique; laisse aussi de la place à des réactions naturelles. "
         "N’attends pas que l’apprenant invente tous les sujets. "
         "Corrige toutes les erreurs identifiées dans le dernier message, sans inventer de faute. "
         "Ne corrige pas une phrase correcte. Retourne uniquement un objet JSON "
@@ -366,7 +367,7 @@ async def chat(payload: MessageCreate):
             update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
         )
     instructions += options.prompt()
-    if session["topic"] == "daily":
+    if session["topic"] == "daily" and not options.situation and not options.review_targets:
         instructions += (
             " Conversation libre : accepte tout sujet proposé par l’apprenant, "
             "sans le ramener systématiquement à sa journée. Suis ses intérêts."
@@ -392,6 +393,10 @@ async def chat(payload: MessageCreate):
         "Sans erreur, correction, corrected_text et review_prompt doivent être vides."
     )
     instructions += FEEDBACK_CONTRACT
+    if original is not None:
+        instructions += (" L’utilisateur a dicté son message. Ne traite pas la ponctuation, "
+                         "les majuscules, l’orthographe des homophones ou un probable artefact "
+                         "de transcription comme une faute orale; demande une clarification si nécessaire.")
     language_name = options.explanation_language
     instructions += f" Écris toute explication de correction en {language_name}."
     if language_name == "English":
@@ -500,7 +505,7 @@ async def chat(payload: MessageCreate):
 
 class AssistRequest(BaseModel):
     session_id: str
-    mode: Literal["hint", "express"]
+    mode: Literal["hint", "express", "keywords"]
     text: str = Field(default="", max_length=2000)
     language: Literal["zh", "en"] = "zh"
 

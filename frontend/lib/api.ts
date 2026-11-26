@@ -66,7 +66,7 @@ export const api = {
       "/chat",
       json({ session_id, message, transcript_id, ...preferences }),
     ),
-  assist: (session_id: string, mode: "hint" | "express", text: string, language: Language) =>
+  assist: (session_id: string, mode: "hint" | "express" | "keywords", text: string, language: Language) =>
     request<RewriteSuggestion>("/assist", json({ session_id, mode, text, language })),
   lookup: (text: string, context: string, language: Language) =>
     request<LookupResult>("/lookup", json({ text, context, language })),
