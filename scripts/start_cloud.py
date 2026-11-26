@@ -13,8 +13,15 @@ BACKEND = ROOT / "backend"
 
 
 def main():
-    if os.getenv("PARLONS_CLOUD_SITE") != "true":
-        raise SystemExit("Refusing cloud startup without PARLONS_CLOUD_SITE=true")
+    cloud = os.getenv("PARLONS_CLOUD_SITE", "false").lower() == "true"
+    private = os.getenv("PARLONS_PUBLIC_SITE", "false").lower() == "true"
+    if cloud == private:
+        raise SystemExit("Enable exactly one of cloud auth or private password protection")
+    if private and os.getenv("MOCK_AI", "true").lower() == "false":
+        if not (os.getenv("PARLONS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")):
+            raise SystemExit("Missing OpenAI key")
+        if not (os.getenv("ELEVENLABS_API_KEY") and os.getenv("ELEVENLABS_VOICE_ID")):
+            raise SystemExit("Missing ElevenLabs key or voice ID")
     port = int(os.getenv("PORT", "10000"))
     frontend_port = int(os.getenv("FRONTEND_PORT", "3000"))
     if not 1024 <= port <= 65535 or not 1024 <= frontend_port <= 65535 or port == frontend_port:

@@ -1,4 +1,4 @@
-# Public beta: one web endpoint for Next.js + FastAPI, backed by a Render persistent disk.
+# One web endpoint for Next.js + FastAPI: cloud beta or password-protected test.
 FROM node:22-bookworm-slim AS webbuild
 WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./

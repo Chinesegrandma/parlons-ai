@@ -250,6 +250,7 @@ class PublicSiteMiddleware:
                         "/lookup",
                         "/translate",
                         "/rewrite",
+                        "/assist",
                     )
                 )
                 else RedirectResponse("/auth/login", status_code=303)
