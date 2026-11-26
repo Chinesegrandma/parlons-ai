@@ -650,7 +650,9 @@ async def review(session_id: str, payload: ReviewRequest):
             options = load_options(session["options"])
             goals = list(options.goals)
             if options.scenario_variant == "surprise" and session["event_status"] == "resolved":
-                event_goal = "解决突发状况" if payload.language == "zh" else "Handle the unexpected event"
+                event_goal = (
+                    "解决突发状况" if payload.language == "zh" else "Handle the unexpected event"
+                )
                 goals = goals[:2] + [event_goal]
             if goals:
                 result = await providers.review_session(
