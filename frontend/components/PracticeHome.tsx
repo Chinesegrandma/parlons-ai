@@ -12,6 +12,7 @@ import {
 import { ChallengeSetup } from "./ChallengeSetup";
 import { challengeFor } from "../lib/challenges";
 import { catalog } from "../lib/catalog";
+import { dailyLesson, localDay, practiceStreak, type Notebook, type Memory } from "../lib/learning";
 import type { Language, Topic, PracticeOptions } from "../lib/types";
 const sections = [
   {
@@ -76,6 +77,9 @@ export function PracticeHome({
   canResume = true,
   onCustom,
   level = "B1-B2",
+  book,
+  onReview,
+  onStudy,
 }: {
   language: Language;
   onStart: (topic: Topic, options?: Partial<PracticeOptions>) => void;
@@ -84,6 +88,9 @@ export function PracticeHome({
   onResume: () => void;
   canResume?: boolean;
   onCustom?: (text: string) => void;
+  book?: Notebook;
+  onReview?: (card: Memory) => void;
+  onStudy?: () => void;
 }) {
   const [selected, setSelected] = useState<Topic | null>(null);
   const [custom, setCustom] = useState("");
@@ -102,6 +109,10 @@ export function PracticeHome({
     setSurprise(false);
   }, [category, group, selected]);
   const t = (zh: string, en: string) => (language === "en" ? en : zh);
+  const history = book?.practiceHistory || [];
+  const today = history.some(r => r.day === localDay());
+  const lesson = dailyLesson(history);
+  const due = (book?.cards || []).filter(c => c.due <= Date.now() && (c.corrected || c.sent));
   const current = sections.find((section) => section.id === category);
   const available = catalog.filter(
     (scene) =>
@@ -156,6 +167,17 @@ export function PracticeHome({
               )}
             </p>
           </div>
+          {book && (
+            <section className="daily-practice" aria-label={t("今日练习", "Daily practice")}>
+              <div className="daily-heading"><span>{t("今日练习", "Daily practice")}</span><small>{today ? t("今天已练习", "Practiced today") : t("每天一点", "A little every day")}{practiceStreak(history) > 0 ? t(" · 连续 ", " · Streak ") + practiceStreak(history) + t(" 天", " days") : ""}</small></div>
+              <button className="daily-main" disabled={disabled} onClick={() => onStart(lesson.topic, {scene: language === "zh" ? lesson.title : lesson.french, situation: lesson.situation, goals: language === "zh" ? lesson.goals : [],})}>
+                <span><strong>{language === "zh" ? lesson.title : lesson.french}</strong><small>{t("约 ", "About ")}{lesson.minutes}{t(" 分钟", " min")}</small></span><ArrowUpRight size={20}/>
+              </button>
+              {due.length > 0 && onReview && <button className="daily-secondary" disabled={disabled} onClick={() => onReview(due[0])}>{t("复习 ", "Review ")}{due.length}{t(" 个表达", " expressions")} <ArrowUpRight size={15}/></button>}
+              {onStudy && <button className="daily-secondary" onClick={onStudy}>{t("我的学习", "My learning")} <ArrowUpRight size={15}/></button>}
+            </section>
+          )}
+          {canResume && <button className="resume-session" disabled={disabled} onClick={onResume}>{t("继续上次对话", "Resume previous conversation")} →</button>}
           <button
             type="button"
             className="home-quick free-chat-entry"
@@ -186,17 +208,6 @@ export function PracticeHome({
                   ]
                 : current?.[language === "en" ? "en" : "zh"]}
             </h2>
-            <p>
-              {category === "challenge"
-                ? t(
-                    "选择玩法，再选题目和难度，就可以开始。",
-                    "Choose a challenge, then a prompt and difficulty to begin.",
-                  )
-                : t(
-                    "点击具体场景，即可进入对话。",
-                    "Choose a situation to enter the conversation.",
-                  )}
-            </p>
           </div>
           {showSurprise && (
             <label className="scenario-surprise scene-surprise-option">
@@ -210,6 +221,7 @@ export function PracticeHome({
                 <button
                   className="subscene-card"
                   key={id}
+                  aria-label={`${groups[id as keyof typeof groups][language === "en" ? 1 : 0]} ${t("查看具体事项", "Choose a situation")}`}
                   onClick={() => setGroup(id)}
                 >
                   <span>
@@ -219,7 +231,7 @@ export function PracticeHome({
                       ]
                     }
                   </span>
-                  <small>{t("查看具体事项", "Choose a situation")}</small>
+
                   <ArrowUpRight size={18} />
                 </button>
               ))}
@@ -229,6 +241,7 @@ export function PracticeHome({
                 <button
                   className="subscene-card"
                   key={scene.id}
+                  aria-label={scene.category === "challenge" ? undefined : `${scene[language]} ${t("进入对话", "Enter conversation")}`}
                   disabled={disabled}
                   onClick={() =>
                     scene.category === "challenge"
@@ -237,13 +250,7 @@ export function PracticeHome({
                   }
                 >
                   <span>{scene[language]}</span>
-                  <small>
-                    {scene.category === "challenge"
-                      ? language === "en"
-                        ? challengeFor(scene.id)?.descriptionEn
-                        : challengeFor(scene.id)?.descriptionZh
-                      : t("进入对话", "Enter conversation")}
-                  </small>
+                  {scene.category === "challenge" && <small>{language === "en" ? challengeFor(scene.id)?.descriptionEn : challengeFor(scene.id)?.descriptionZh}</small>}
                   <ArrowUpRight size={18} />
                 </button>
               ))}
@@ -251,7 +258,7 @@ export function PracticeHome({
         </>
       ) : (
         <div className="category-grid">
-          {sections.map(({ icon: Icon, ...section }, index) => (
+          {sections.map(({ icon: Icon, ...section }) => (
             <button
               aria-label={section[language]}
               className={`category-card category-${section.id}`}
@@ -263,14 +270,11 @@ export function PracticeHome({
                 <span className="category-icon">
                   <Icon size={25} />
                 </span>
-                <small>0{index + 1}</small>
+
               </div>
               <h2>{section[language]}</h2>
               <p>{section[language === "en" ? "subEn" : "subZh"]}</p>
               <span className="category-footer">
-                {section.id === "challenge"
-                    ? t("探索挑战", "Explore challenges")
-                    : t("探索场景", "Explore situations")}
                 <ArrowUpRight size={18} />
               </span>
             </button>
@@ -309,15 +313,6 @@ export function PracticeHome({
             </button>
           </form>
         </details>
-      )}
-      {canResume && (
-        <button
-          className="resume-session"
-          disabled={disabled}
-          onClick={onResume}
-        >
-          {t("继续上次对话", "Resume previous conversation")} →
-        </button>
       )}
     </main>
   );

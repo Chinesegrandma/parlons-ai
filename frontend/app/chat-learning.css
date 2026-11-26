@@ -919,3 +919,20 @@ html.parlons-chat-open, html.parlons-chat-open body {
   background: var(--sage-deep);
   color: white;
 }
+
+/* Product-wide compact navigation and daily practice. */
+.parlons-app .daily-practice{display:grid;gap:8px;padding:14px 16px;margin:12px 0;border:1px solid var(--sage-border);border-radius:22px;background:rgba(255,255,255,.55)}
+.daily-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--sage-muted)}
+.daily-heading small{font-size:11px}
+.daily-main,.daily-secondary{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:8px;border:0;width:100%;color:var(--sage-ink)}
+.daily-main{background:var(--sage-deep);color:white;padding:11px 14px;border-radius:16px;min-height:54px}
+.daily-main span{display:grid;gap:3px}.daily-main small{opacity:.82;font-size:11px}.daily-main strong{font-size:16px;font-weight:600}
+.daily-secondary{background:transparent;padding:7px 2px;border-top:1px solid rgba(95,125,94,.15);font-size:13px;min-height:36px}
+.parlons-app .category-card{min-height:0;padding:16px;gap:8px}
+.parlons-app .category-card .category-footer{justify-content:flex-end;margin-top:3px;padding-top:5px;border-top:0}
+.parlons-app .category-card h2{margin:8px 0 2px}.parlons-app .category-card p{margin:0;min-height:0}
+.parlons-app .subscene-card{min-height:76px;padding:15px;gap:7px}
+.parlons-app .resume-session{margin:8px 0 0;padding:8px 0}
+.advanced-preferences{margin:10px 0}.advanced-preferences summary{cursor:pointer;padding:9px 0;color:var(--sage-ink)}
+.advanced-preferences[open]{display:grid;gap:8px}
+@media(max-width:700px){.parlons-app .category-card{padding:13px;min-height:120px}.parlons-app .category-card .category-footer{margin:0}.parlons-app .home-intro{padding-bottom:0}.parlons-app .daily-practice{margin:10px 0;padding:12px}}

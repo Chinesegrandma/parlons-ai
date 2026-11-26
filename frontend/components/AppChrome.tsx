@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AudioLines, Settings2, X, BookOpen, WifiOff } from "lucide-react";
+import { InstallApp } from "./InstallApp";
 import type { Language, PracticeOptions, Voice } from "../lib/types";
 const translate = (language: Language) => (zh: string, en: string) =>
   language === "en" ? en : zh;
@@ -7,7 +8,6 @@ export function StudioHeader({
   language,
   status,
   offline,
-  privateSite,
   settings,
   onHome,
   onSettings,
@@ -37,7 +37,7 @@ export function StudioHeader({
         parlons<span className="brand-period">.</span>
       </button>
       <div className="app-header-actions">
-        {(!offline || dismissedStatus !== status) && (
+        {status !== t("真实练习", "Live practice") && (!offline || dismissedStatus !== status) && (
           <div className={`connection-pill ${offline ? "unavailable" : ""}`}>
             <span role="status">
               {offline ? (
@@ -56,11 +56,6 @@ export function StudioHeader({
               </button>
             )}
           </div>
-        )}
-        {privateSite && (
-          <form method="post" action="/auth/logout">
-            <button>{t("退出", "Log out")}</button>
-          </form>
         )}
         {onNotebook && (
           <button aria-label={t("笔记本", "Notebook")} onClick={onNotebook}>
@@ -91,7 +86,9 @@ export function PracticeSettings({
   voices = [],
   voice = "default",
   onVoice,
+  privateSite = false,
 }: {
+  privateSite?: boolean;
   language: Language;
   autoplay: boolean;
   slow: boolean;
@@ -125,12 +122,6 @@ export function PracticeSettings({
           <option value="en">English</option>
         </select>
       </label>
-      <p>
-        {t(
-          "同时应用于界面和新生成的反馈。法语练习内容保持法语。",
-          "Applies to the interface and new feedback. Practice conversations stay in French.",
-        )}
-      </p>
       <h3>{t("练习偏好", "Practice preferences")}</h3>
       {options && onOptions && (
         <>
@@ -189,6 +180,7 @@ export function PracticeSettings({
           </label>
         </>
       )}
+      <details className="advanced-preferences"><summary>{t("语音设置", "Voice settings")}</summary>
       {onVoice && (
         <label>
           {t("声音", "Voice")}
@@ -239,6 +231,9 @@ export function PracticeSettings({
           onChange={(event) => onSlow(event.target.checked)}
         />
       </label>
+      </details>
+      <InstallApp language={language} />
+      {privateSite && <form method="post" action="/auth/logout"><button className="text-button">{t("退出登录", "Log out")}</button></form>}
     </section>
   );
 }

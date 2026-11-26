@@ -12,7 +12,6 @@ import { PracticeHome } from "./PracticeHome";
 import { ReviewPanel } from "./ReviewPanel";
 import { useLearning } from "../hooks/useLearning";
 import { NotebookPanel } from "./NotebookPanel";
-import { InstallApp } from "./InstallApp";
 import { useConversation } from "../hooks/useConversation";
 import { useRecorder } from "../hooks/useRecorder";
 import { useSpeech } from "../hooks/useSpeech";
@@ -532,6 +531,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           }}
           onAutoplay={speech.toggleAutoplay}
           onSlow={speech.toggleSlow}
+          privateSite={Boolean(health?.private_site)}
         />
       )}
       {page === "notebook" ? (
@@ -545,7 +545,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             void speech.speak(text);
           }}
           onPractice={(card) =>
-            void begin(card.topic, {
+            void begin(card.topic.startsWith("challenge_") ? "daily" : card.topic, {
               scene: t("复习表达", "Review an expression"),
               situation:
                 "Propose une nouvelle situation pour pratiquer une expression déjà apprise.",
@@ -561,6 +561,9 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               situation: text,
             })
           }
+          book={learning.book}
+          onStudy={() => setPage("notebook")}
+          onReview={(card) => void begin(card.topic.startsWith("challenge_") ? "daily" : card.topic, {scene: t("复习表达", "Review an expression"), situation: "Propose une situation nouvelle qui invite à employer la structure cible sans donner la réponse.", review_targets: [card.corrected || card.sent]})}
           canResume={canResume}
           language={language}
           disabled={busy}
@@ -906,21 +909,6 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             />
           )}
         </main>
-      )}
-      {page === "home" && (
-        <div className="app-install">
-          <InstallApp language={language} />
-        </div>
-      )}
-      {page !== "chat" && (
-        <footer className="app-bottom">
-          <span>
-            {t(
-              "少一点犹豫，多一点表达。",
-              "A little less hesitation. A little more conversation.",
-            )}
-          </span>
-        </footer>
       )}
     </div>
   );

@@ -174,6 +174,7 @@ export type Notebook = {
   seen: string[];
   mistakes?: import("./mistakes").Mistake[];
   ignoredMistakes?: string[];
+  practiceHistory?: PracticeRecord[];
 };
 /** Preserve dismissed event IDs: navigating back to a session must not resurrect a deleted card. */
 export function collectMemories(
@@ -233,4 +234,35 @@ export function reviewMemory(
   const reviews = remembered ? card.reviews + 1 : 0;
   const days = remembered ? [1, 3, 7, 14, 30][Math.min(reviews - 1, 4)] : 0;
   return { ...card, accepted: true, reviews, due: now + days * 86400000 };
+}
+
+export type PracticeRecord = { id: string; topic: Topic; scene: string; day: string; updated: number; turns: number; spokenTurns: number; messages: Session["messages"]; };
+export function localDay(date = new Date()) {
+  return [date.getFullYear(), String(date.getMonth()+1).padStart(2,"0"), String(date.getDate()).padStart(2,"0")].join("-");
+}
+export function trackPractice(book: Notebook, session: Session, now = new Date()): Notebook {
+  const user = session.messages.filter(m => m.role === "user");
+  if (!user.length) return book;
+  const history = book.practiceHistory || [];
+  const day = localDay(now);
+  const previous = history.find(r => r.id === session.id);
+  if (previous && previous.turns === user.length && previous.messages.length === Math.min(session.messages.length,100)) return book;
+  const record: PracticeRecord = { id: session.id, topic: session.topic, scene: session.options?.scene || "", day, updated: now.getTime(), turns: user.length, spokenTurns: user.filter(m => m.original_transcript != null).length, messages: session.messages.slice(-100) };
+  return { ...book, practiceHistory: [record, ...history.filter(r => !(r.id === record.id && r.day === day))].slice(0, 60) };
+}
+export function practiceStreak(history: PracticeRecord[], today = new Date()) {
+  const days = new Set(history.map(r => r.day));
+  const date = new Date(today);
+  if (!days.has(localDay(date))) date.setDate(date.getDate()-1);
+  let count = 0;
+  while (days.has(localDay(date))) { count++; date.setDate(date.getDate()-1); }
+  return count;
+}
+export function dailyLesson(history: PracticeRecord[], today = new Date()) {
+  const day = localDay(today);
+  const recent = new Set(history.filter(r => r.day !== day).slice(0,4).map(r => r.topic));
+  const choices = lessons.filter(l => !recent.has(l.topic));
+  const pool = choices.length ? choices : lessons;
+  const index = Math.floor(Date.UTC(today.getFullYear(),today.getMonth(),today.getDate())/86400000);
+  return pool[index % pool.length];
 }

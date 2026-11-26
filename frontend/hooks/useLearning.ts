@@ -6,6 +6,7 @@ import {
   type Notebook,
   type Memory,
   reviewMemory,
+  trackPractice,
 } from "../lib/learning";
 import { collectMistakes } from "../lib/mistakes";
 import type { PracticeOptions, Session, Language, Review } from "../lib/types";
@@ -45,7 +46,7 @@ export function useLearning(
   }, [prefix]);
   useEffect(() => {
     if (ready && session)
-      setBook((previous) => collectMistakes(collectMemories(previous, session), session));
+      setBook((previous) => trackPractice(collectMistakes(collectMemories(previous, session), session), session));
   }, [ready, session]);
   useEffect(() => {
     if (!ready) return;
