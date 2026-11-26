@@ -31,6 +31,7 @@ export type Session = {
   topic: Topic;
   messages: Message[];
   options?: PracticeOptions;
+  event_status?: "pending" | "introduced" | "resolved";
 };
 export type Health = {
   mode: "mock" | "demo" | "ai";

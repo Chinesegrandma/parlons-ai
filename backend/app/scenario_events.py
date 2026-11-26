@@ -200,7 +200,8 @@ EXTRA_EVENTS = {
 EVENTS = {topic: events + tuple(EXTRA_EVENTS[topic]) for topic, events in EVENTS.items()}
 
 def scenario_event_prompt(
-    topic: str, session_id: str, previous_turns: int, level: str = "B1-B2"
+    topic: str, session_id: str, previous_turns: int, level: str = "B1-B2",
+    state: str | None = None,
 ) -> str:
     events = EVENTS.get(topic)
     if not events:
@@ -208,18 +209,26 @@ def scenario_event_prompt(
     digest = hashlib.sha256(session_id.encode()).digest()
     trigger = 1 + digest[0] % 5
     event = events[digest[1] % len(events)]
-    if previous_turns < trigger:
+    if previous_turns < trigger or state == "resolved":
         return ""
     difficulty = {
         "A1-A2": "une difficulté simple avec vocabulaire accessible",
         "C1": "une contrainte à négocier avec nuances",
     }.get(level, "une difficulté concrète à résoudre")
-    if previous_turns == trigger:
-        return (" ÉVÉNEMENT FICTIF: introduis clairement maintenant, sans donner la solution : "
-                + event + " Adapte la formulation : " + difficulty +
-                ". Donne à l’apprenant une occasion de clarifier, négocier ou proposer "
-                "une solution.")
-    return (" Événement prévu précédemment : " + event +
-            " Ne le réintroduis pas s’il a déjà été abordé. Vérifie le contexte : s’il reste à résoudre, "
-            "réponds à la tentative réelle de l’apprenant et avance vers une solution; "
-            "s’il est résolu, poursuis naturellement.")
+    if previous_turns == trigger or state == "pending":
+        return (
+            " ÉVÉNEMENT FICTIF: introduis clairement maintenant, sans donner la solution : "
+            + event + " Adapte la formulation : " + difficulty
+            + ". Si déjà introduit dans le contexte, ne le répète pas. "
+            "Donne une occasion de clarifier, négocier ou proposer une solution. "
+            "Si réellement introduit, ajoute event_state=introduced et event_evidence="
+            "une citation exacte de la réplique assistant qui introduit cet événement."
+        )
+    return (
+        " Événement prévu précédemment : " + event
+        + " Ne le réintroduis pas s’il a déjà été abordé. Vérifie le contexte : "
+        "s’il reste à résoudre, réponds à la tentative réelle de l’apprenant. "
+        "Si l’apprenant a réellement résolu le problème, poursuis naturellement et ajoute "
+        "event_state=resolved et event_evidence=une citation exacte du dernier message user "
+        "qui montre la résolution. Sinon, laisse ces champs vides."
+    )

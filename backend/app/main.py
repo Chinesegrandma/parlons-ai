@@ -91,6 +91,10 @@ def init_db():
         session_columns = {row["name"] for row in db.execute("PRAGMA table_info(sessions)")}
         if "options" not in session_columns:
             db.execute("ALTER TABLE sessions ADD COLUMN options TEXT NOT NULL DEFAULT '{}'")
+        if "event_status" not in session_columns:
+            db.execute(
+                "ALTER TABLE sessions ADD COLUMN event_status TEXT NOT NULL DEFAULT 'pending'"
+            )
         message_columns = {row["name"] for row in db.execute("PRAGMA table_info(messages)")}
         for name in ("corrected_text", "review_prompt"):
             if name not in message_columns:
@@ -290,6 +294,10 @@ def create_session(payload: SessionCreate):
         "topic": payload.topic,
         "messages": messages,
         "options": json.loads(session["options"]),
+        **(
+                {"event_status": session["event_status"]}
+                if load_options(session["options"]).scenario_variant == "surprise" else {}
+            ),
     }
 
 
@@ -302,6 +310,10 @@ def get_session(session_id: str):
             "topic": session["topic"],
             "options": json.loads(session["options"]),
             "messages": session_messages(db, session_id),
+            **(
+                {"event_status": session["event_status"]}
+                if load_options(session["options"]).scenario_variant == "surprise" else {}
+            ),
         }
 
 
@@ -372,15 +384,18 @@ async def chat(payload: MessageCreate):
             " Conversation libre : accepte tout sujet proposé par l’apprenant, "
             "sans le ramener systématiquement à sa journée. Suis ses intérêts."
         )
-    if options.scenario_variant == "surprise" and not options.situation:
+    event_active = options.scenario_variant == "surprise" and not options.situation
+    event_prompt = ""
+    if event_active:
         with connect() as db:
             count = db.execute(
                 "SELECT COUNT(*) FROM messages WHERE session_id=? AND role='user'",
                 (payload.session_id,),
             ).fetchone()[0]
-        instructions += scenario_event_prompt(
-            session["topic"], payload.session_id, count, options.level
+        event_prompt = scenario_event_prompt(
+            session["topic"], payload.session_id, count, options.level, session["event_status"]
         )
+        instructions += event_prompt
     if session["topic"] in BY_TOPIC:
         instructions += challenge_prompt(session["topic"], options)
     if (
@@ -421,6 +436,7 @@ async def chat(payload: MessageCreate):
         *context,
         {"role": "user", "content": payload.message},
     ]
+    event_update = None
     if providers.mock_enabled() or providers.configured_openai_key():
         try:
             result = await providers.tutor_reply(app, messages)
@@ -460,6 +476,20 @@ async def chat(payload: MessageCreate):
         if payload.practice_mode == "conversation":
             correction = corrected_text = review_prompt = ""
             correction_details = []
+        if event_prompt and result.event_evidence.strip():
+            evidence = result.event_evidence
+            if (
+                session["event_status"] == "pending" and result.event_state == "introduced"
+                and (evidence in reply or any(
+                    row["role"] == "assistant" and evidence in row["content"] for row in recent
+                ))
+            ):
+                event_update = "introduced"
+            elif (
+                session["event_status"] == "introduced" and result.event_state == "resolved"
+                and evidence in payload.message
+            ):
+                event_update = "resolved"
         mode = "mock" if providers.mock_enabled() else "ai"
     else:
         reply = "Merci ! Peux-tu m’en dire un peu plus ?"
@@ -469,6 +499,11 @@ async def chat(payload: MessageCreate):
         correction_details = []
     with connect() as db:
         require_session(db, payload.session_id)
+        if event_update:
+            db.execute(
+                "UPDATE sessions SET event_status=? WHERE id=? AND event_status=?",
+                (event_update, payload.session_id, session["event_status"]),
+            )
         user_row = db.execute(
             "INSERT INTO messages(session_id, role, content, created_at, transcript_id, "
             "original_transcript, edited_transcript) VALUES (?, 'user', ?, ?, ?, ?, ?)",
@@ -612,7 +647,11 @@ async def review(session_id: str, payload: ReviewRequest):
                 app, context, payload.language, guidance=review_guidance(session["topic"])
             )
         else:
-            goals = load_options(session["options"]).goals
+            options = load_options(session["options"])
+            goals = list(options.goals)
+            if options.scenario_variant == "surprise" and session["event_status"] == "resolved":
+                event_goal = "解决突发状况" if payload.language == "zh" else "Handle the unexpected event"
+                goals = goals[:2] + [event_goal]
             if goals:
                 result = await providers.review_session(
                     app, context, payload.language, goals=goals

@@ -258,6 +258,8 @@ class TutorReply(BaseModel):
     review_prompt: str = Field(default="", max_length=500)
     correction_source: str = Field(default="", max_length=2000)
     correction_details: list[CorrectionDetail] = Field(default_factory=list, max_length=20)
+    event_state: Literal["introduced", "resolved"] | None = None
+    event_evidence: str = Field(default="", max_length=1200)
 
 
 def configured_openai_key() -> str:

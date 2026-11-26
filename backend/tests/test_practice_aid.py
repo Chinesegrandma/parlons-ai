@@ -71,3 +71,33 @@ def test_category_is_retained_and_unknown_category_is_not_fatal(api, session, tr
     assert providers.CorrectionDetail(
         original="a", suggestion="b", explanation="test", category="unknown"
     ).category is None
+
+
+def test_surprise_state_requires_grounded_evidence_and_persists(api, transport):
+    from app.scenario_events import scenario_event_prompt
+
+    session = api.post("/sessions", json={
+        "topic": "cafe", "options": {"scenario_variant": "surprise"}
+    }).json()["id"]
+    trigger = next(n for n in range(1, 6) if scenario_event_prompt("cafe", session, n))
+    def respond(request):
+        body = providers.mock_response(request).json()
+        prompt = json.loads(request.content)["messages"][0]["content"]
+        data = {"reply": "Très bien.", "correction": ""}
+        if "ÉVÉNEMENT FICTIF" in prompt:
+            data.update(reply="La boisson est indisponible.", event_state="introduced",
+                        event_evidence="La boisson est indisponible.")
+        elif "event_state=resolved" in prompt:
+            data.update(event_state="resolved", event_evidence="Je prends un thé.")
+        body["choices"][0]["message"]["content"] = json.dumps(data)
+        return httpx.Response(200, json=body)
+    transport(respond)
+    for _ in range(trigger + 1):
+        assert api.post("/chat", json={
+            "session_id": session, "message": "Bonjour"
+        }).status_code == 200
+    assert api.get(f"/sessions/{session}").json()["event_status"] == "introduced"
+    assert api.post("/chat", json={
+        "session_id": session, "message": "Je prends un thé."
+    }).status_code == 200
+    assert api.get(f"/sessions/{session}").json()["event_status"] == "resolved"

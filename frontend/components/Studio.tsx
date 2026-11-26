@@ -655,6 +655,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               </span>
               <ChevronDown size={14} aria-hidden="true" />
             </button>
+            {session?.event_status === "introduced" && <span className="event-status" role="status">{t("突发状况","Unexpected event")}</span>}
+            {session?.event_status === "resolved" && <span className="event-status resolved" role="status">{t("意外已处理","Event handled")}</span>}
             {modeMenuOpen && (
               <div id="chat-mode-options" className="chat-mode-options">
                 <button className="mode-preset" disabled={aidBusy} aria-pressed={mode==="guided"&&feedback==="each_turn"} onClick={()=>{switchMode("guided");learning.setOptions(old=>({...old,feedback:"each_turn"}));setModeMenuOpen(false);modeMenuButton.current?.focus();}}><strong>{t("学习模式","Learning mode")}</strong><small>{t("逐句练习 · 即时纠错","Review each turn")}</small></button>
