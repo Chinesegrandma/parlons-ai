@@ -60,7 +60,9 @@ export function CorrectionCard({
   onSpeak,
   speechReady = false,
   inline = false,
+  registerContext,
 }: {
+  registerContext?: "formal" | "casual" | "neutral";
   inline?: boolean;
   onSpeak?: (text: string, rate?: 0.8 | 1) => void;
   speechReady?: boolean;
@@ -150,10 +152,13 @@ export function CorrectionCard({
       active = false;
     };
   }, [style, onRewrite, alternative, key, rewriteText, language, retry]);
-  const modes = [
-    { value: "polite", label: t("更礼貌", "More polite"), icon: MessageCircle },
-    { value: "slang", label: t("俚语", "Slang"), icon: Users },
-  ] as const;
+  const modes: {value:RewriteStyle;label:string;icon:typeof MessageCircle}[] = registerContext === "formal"
+    ? [{value:"natural",label:t("更自然","More natural"),icon:MessageCircle},{value:"polite",label:t("更礼貌 / 得体","More tactful"),icon:Users}]
+    : registerContext === "casual"
+      ? [{value:"natural",label:t("更口语化","More conversational"),icon:MessageCircle},{value:"slang",label:t("俚语","Slang"),icon:Users}]
+      : registerContext === "neutral"
+        ? [{value:"natural",label:t("更自然","More natural"),icon:MessageCircle},{value:"polite",label:t("更礼貌","More polite"),icon:Users}]
+        : [{value:"polite",label:t("更礼貌","More polite"),icon:MessageCircle},{value:"slang",label:t("俚语","Slang"),icon:Users}];
   return (
     <aside
       className={`correction-card hierarchy-a${inline ? " compact-inline" : ""}`}
@@ -269,11 +274,10 @@ export function CorrectionCard({
           </p>
         )}
       </section>
-      <section
-        className="expression-exploration"
+      <details className="expression-exploration" open={registerContext === undefined ? true : undefined}
         aria-label={t("换一种表达", "Explore another expression")}
       >
-        <h3>{t("换一种表达", "Explore another expression")}</h3>
+        <summary>{t("其他说法", "Other ways to say it")}</summary>
         <div className="exploration-actions">
           {modes.map((mode) => (
             <button
@@ -303,7 +307,7 @@ export function CorrectionCard({
             aria-label={
               style === "polite"
                 ? t("更礼貌的表达", "Polite alternative")
-                : t("俚语表达", "Slang alternative")
+                : style === "natural" ? t("自然表达","Natural alternative") : t("俚语表达", "Slang alternative")
             }
             aria-live="polite"
             aria-busy={pending === key && !alternative && failed !== key}
@@ -348,7 +352,7 @@ export function CorrectionCard({
             )}
           </div>
         )}
-      </section>
+      </details>
     </aside>
   );
 }

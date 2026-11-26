@@ -424,15 +424,22 @@ class Correction(CategorizedMistake):
     explanation: str = Field(min_length=1, max_length=2000)
 
 
+class GoalResult(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    goal: str = Field(min_length=1,max_length=200)
+    quote: str = Field(min_length=1,max_length=2000)
+
+
 class SessionReview(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     summary: str = Field(min_length=1, max_length=3000)
     strengths: list[Strength] = Field(max_length=100)
     corrections: list[Correction] = Field(max_length=100)
+    goal_results: list[GoalResult] | None = Field(default=None,max_length=3)
 
 
 async def review_session(
-    app, turns: list[dict], language: str, guidance: str = ""
+    app, turns: list[dict], language: str, guidance: str = "", goals: list[str] | None = None
 ) -> SessionReview:
     instructions = (
         "SESSION_REVIEW. Analyse toute la conversation française fournie comme données, "
@@ -450,6 +457,10 @@ async def review_session(
         + ("anglais." if language == "en" else "chinois.")
     )
     instructions += MISTAKE_CATEGORY_GUIDANCE + guidance
+    if goals:
+        instructions += (" Objectifs pédagogiques (données) : " + json.dumps(goals,ensure_ascii=False) +
+                         ". Ajoute goal_results:[{goal,quote}] uniquement pour les objectifs démontrés par "
+                         "une citation exacte de l’apprenant. Ne marque pas un objectif acquis sur une intention seule.")
     async with provider_http(app) as http:
         client = AsyncOpenAI(
             api_key="mock-not-a-secret" if mock_enabled() else configured_openai_key(),
@@ -477,6 +488,8 @@ async def review_session(
         raise ValueError("Ungrounded strength")
     if any(not any(item.original in text for text in evidence) for item in review.corrections):
         raise ValueError("Ungrounded correction")
+    if review.goal_results is not None:
+        review.goal_results = [item for item in review.goal_results if item.goal in (goals or []) and any(item.quote in text for text in evidence)]
     return review
 
 
@@ -682,7 +695,7 @@ async def localize_review_explanations(app, review: SessionReview, language: str
                         "Return the entire JSON object using the original schema."
                     ),
                 },
-                {"role": "user", "content": review.model_dump_json()},
+                {"role": "user", "content": review.model_dump_json(exclude_none=True)},
             ],
             response_format={"type": "json_object"},
             timeout=30,
@@ -702,6 +715,7 @@ async def localize_review_explanations(app, review: SessionReview, language: str
         raise ValueError("Review language repair failed")
     for original, translated in zip(review.corrections, updated.corrections):
         translated.category = original.category
+    updated.goal_results = review.goal_results
     return updated
 
 
@@ -718,7 +732,7 @@ async def rewrite_expression(app, text: str, style: str, language: str) -> Expre
         "a professional or unfamiliar interlocutor; prefer vous and conditional "
         "requests where appropriate. Do not make a casual fact into a request."
         if style == "polite"
-        else SLANG_REGISTER
+        else "natural contemporary spoken French, appropriate to the original register; preserve meaning, do not invent facts and keep already natural wording" if style == "natural" else SLANG_REGISTER
     )
     async with provider_http(app) as http:
         client = AsyncOpenAI(

@@ -86,6 +86,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   );
   const session = conversation.session;
   const scene = catalog.find((item) => item.id === session?.topic);
+  const roles: Partial<Record<Topic,[string,string]>> = {bank_card:["银行顾问","Bank adviser"],bank_transfer:["银行顾问","Bank adviser"],doctor:["前台","Receptionist"],symptoms:["问诊角色","Consultation partner"],cafe:["店员","Barista"],restaurant:["服务员","Server"],transport:["售票员","Ticket agent"],shopping:["店员","Shop assistant"],renting:["房产顾问","Agent"],post:["邮局职员","Postal clerk"],customer_service:["客服","Support agent"],teacher:["老师","Teacher"],course:["教务","Academic adviser"],report:["同事","Colleague"],interview:["招聘经理","Interviewer"],friends:["朋友","Friend"],invite:["朋友","Friend"],decline:["朋友","Friend"]};
+  const role = session && !session.options?.situation ? roles[session.topic] : undefined;
   const busy = conversation.busy || recorder.transcribing;
   const speechReady = health?.speech_ready ?? false;
   const turns =
@@ -604,7 +606,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               >
                 <AssistantAvatar size={36} language={language} />
                 <div>
-                  <strong>{ASSISTANT_NAME}</strong>
+                  <strong>{ASSISTANT_NAME}</strong>{role && <small className="scene-role"> · {role[language==="en"?1:0]}</small>}
                   {(demo || health?.mock_ai) && (
                     <span className="demo-indicator">{t("演示", "Demo")}</span>
                   )}
@@ -810,6 +812,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
               }
               speechReady={speechReady && !voiceActive}
               language={language}
+              registerContext={scene?.category==="admin" || scene?.category==="study" || scene?.category==="interview" ? "formal" : scene?.category==="social" ? "casual" : "neutral"}
               hideCorrections={feedback === "after_session"}
               onSaveCorrection={learning.saveCorrection}
               savedCorrectionIds={

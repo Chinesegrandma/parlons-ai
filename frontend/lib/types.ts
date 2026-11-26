@@ -5,6 +5,7 @@ export type PracticeMode = "guided" | "conversation";
 export type MistakeCategory = "tense" | "conjugation" | "agreement" | "article" | "preposition" | "pronoun" | "syntax" | "vocabulary" | "spelling" | "other";
 export type Review = {
   summary: string;
+  goal_results?: {goal:string;quote:string}[];
   strengths: { quote: string; reason: string }[];
   corrections: { original: string; suggestion: string; explanation: string; category?: MistakeCategory | null }[];
 };
@@ -67,7 +68,7 @@ export type PracticeOptions = {
 };
 export type Voice = { id: string; name: string };
 
-export type RewriteStyle = "polite" | "slang";
+export type RewriteStyle = "polite" | "slang" | "natural";
 export type RewriteSuggestion = { expression: string; explanation: string };
 
 export type LookupResult = { meaning: string; example: string };

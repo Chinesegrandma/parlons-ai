@@ -54,6 +54,7 @@ export function ReviewPanel({
         <>
           <div className="study-stats"><div><strong>{turns}</strong><small>{t("表达次数","Turns")}</small></div><div><strong>{spokenTurns}</strong><small>{t("语音表达","Spoken turns")}</small></div><div><strong>{review.corrections.length}</strong><small>{t("待复习","Corrections")}</small></div></div>
           <p className="review-intro">{review.summary}</p>
+          {!!review.goal_results?.length && <section className="goal-outcomes"><h3>{t("你完成的任务","What you accomplished")}</h3>{review.goal_results.map((g,i)=><div key={i}><strong>{g.goal}</strong><p lang="fr">{g.quote}</p></div>)}</section>}
           <h3>
             <CheckCircle2 size={18} />
             {t("你做得好的地方", "What you did well")}

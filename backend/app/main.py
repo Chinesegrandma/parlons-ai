@@ -532,7 +532,7 @@ async def assist(payload: AssistRequest):
 
 class RewriteRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
-    style: Literal["polite", "slang", "local"]
+    style: Literal["polite", "slang", "local", "natural"]
     language: Literal["zh", "en"] = "zh"
 
     @field_validator("text")
@@ -609,7 +609,8 @@ async def review(session_id: str, payload: ReviewRequest):
                 app, context, payload.language, guidance=review_guidance(session["topic"])
             )
         else:
-            result = await providers.review_session(app, context, payload.language)
+            goals = load_options(session["options"]).goals
+            result = await providers.review_session(app, context, payload.language, goals=goals) if goals else await providers.review_session(app, context, payload.language)
     except Exception as exc:
         raise HTTPException(502, providers.failure_detail("OpenAI", "review", exc)) from exc
     return result.model_dump(exclude_none=True)

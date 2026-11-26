@@ -70,7 +70,7 @@ export function Composer({
     <div className="composerarea">
       {error && (
         <div className="error" role="alert">
-          {error}
+          {error.includes("HTTP") || error.includes("[") ? <><span>{t("暂时无法完成请求，请重试。","Request failed. Please retry.")}</span><details><summary>{t("详情","Details")}</summary>{error}</details></> : error}
         </div>
       )}
       {transcript && (
@@ -78,7 +78,7 @@ export function Composer({
           <div>
             <strong>
               <ScanText size={15} />
-              {t("原始转写 · 已保留", "Original transcript · preserved")}
+              {t("语音转写", "Transcript")}
             </strong>
             <button
               disabled={disabled}
@@ -88,13 +88,7 @@ export function Composer({
               <X size={15} />
             </button>
           </div>
-          <p>{transcript.original_text}</p>
-          <small>
-            {t(
-              "在下方修改后再发送，原始转写不会被覆盖。",
-              "Edit below before sending. The original stays unchanged.",
-            )}
-          </small>
+          {input !== transcript.original_text && <details><summary>{t("原始转写","Original transcript")}</summary><p>{transcript.original_text}</p></details>}
         </section>
       )}
       {listening && (
@@ -124,8 +118,8 @@ export function Composer({
         <div className="transcription-status" role="status">
           <ScanText size={16} />{" "}
           {t(
-            "正在转写，完成后可以检查和编辑，暂未发送。",
-            "Transcribing. You can edit before sending.",
+            "正在转写…",
+            "Transcribing…",
           )}
         </div>
       )}

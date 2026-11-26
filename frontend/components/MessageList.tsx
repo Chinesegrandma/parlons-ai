@@ -20,6 +20,7 @@ import type {
 } from "../lib/types";
 export function MessageList({
   language = "zh",
+  registerContext,
   onSaveCorrection,
   savedCorrectionIds = [],
   hideCorrections = false,
@@ -38,6 +39,7 @@ export function MessageList({
     language: Language,
   ) => Promise<import("../lib/types").LookupResult>;
   language?: Language;
+  registerContext?: "formal" | "casual" | "neutral";
   onSaveCorrection?: (id: number) => void;
   savedCorrectionIds?: number[];
   hideCorrections?: boolean;
@@ -86,6 +88,7 @@ export function MessageList({
       key={`${selectedUser.id}:${language}`}
       language={language}
       inline={!wide}
+      registerContext={registerContext}
       original={selectedUser.content}
       onSpeak={onSpeak}
       speechReady={speechReady}
