@@ -912,7 +912,6 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       )}
       {page !== "chat" && (
         <footer className="app-bottom">
-          UN PEU, CHAQUE JOUR.{" "}
           <span>
             {t(
               "少一点犹豫，多一点表达。",
