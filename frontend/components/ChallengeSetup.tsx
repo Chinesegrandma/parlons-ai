@@ -71,7 +71,6 @@ export function ChallengeSetup({
         <ArrowLeft size={17} />
         {t("返回挑战", "Back to challenges")}
       </button>
-      <p className="eyebrow">PARLONS · CHALLENGE</p>
       <h1>{definition[language]}</h1>
       <p>{language === "en" ? definition.howEn : definition.howZh}</p>
       <form
@@ -90,6 +89,8 @@ export function ChallengeSetup({
           });
         }}
       >
+        <button type="button" className="daily-main" disabled={disabled} onClick={()=>onStart(topic,{level:initialLevel,challenge:{seed:Math.floor(Math.random()*definition.seeds.length),side:"for",timer_seconds:topic==="challenge_opinion"?60:0}})}>{t("随机开始","Quick start")} <Shuffle size={17}/></button>
+        <details className="advanced-preferences"><summary>{t("自选题目与难度","Choose prompt & difficulty")}</summary>
         {topic === "challenge_describe" && (
           <>
             <label>
@@ -302,12 +303,6 @@ export function ChallengeSetup({
             />
           </label>
         )}
-        <p className="challenge-note">
-          {t(
-            "难度是练习设置，不是水平测评。可打字或说话，任何时候都可以结束并总结。",
-            "Difficulty is a practice setting, not a proficiency assessment. Type or speak and finish for feedback whenever ready.",
-          )}
-        </p>
         <button
           type="submit"
           className="challenge-start"
@@ -315,6 +310,7 @@ export function ChallengeSetup({
         >
           {t("开始挑战", "Start challenge")} →
         </button>
+        </details>
       </form>
     </section>
   );

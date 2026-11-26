@@ -300,6 +300,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     const options: PracticeOptions = {
       ...learning.options,
       scene: target?.[language] || "",
+      opening: undefined,
       situation: "",
       goals: [],
       review_targets: [],
@@ -611,7 +612,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                     {session?.options?.situation
                       ? session.options.review_targets?.length
                         ? t("复习表达", "Review an expression")
-                        : t("自定义情境", "Your scenario")
+                        : session.options.scene || t("自定义情境", "Your scenario")
                       : scene?.[language] || t("自由聊天", "Free chat")}
                   </h1>
                 </div>

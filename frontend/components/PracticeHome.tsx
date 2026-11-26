@@ -12,6 +12,7 @@ import {
 import { ChallengeSetup } from "./ChallengeSetup";
 import { challengeFor } from "../lib/challenges";
 import { catalog } from "../lib/catalog";
+import { sceneVariants } from "../lib/scene-variants";
 import { dailyLesson, localDay, practiceStreak, type Notebook, type Memory } from "../lib/learning";
 import type { Language, Topic, PracticeOptions } from "../lib/types";
 const sections = [
@@ -255,6 +256,7 @@ export function PracticeHome({
                 </button>
               ))}
           </div>
+          {!group && sceneVariants.some(v=>v.category===category) && <details className="more-scenes"><summary>{t("更多具体情境","More situations")}</summary><div className="subscene-grid">{sceneVariants.filter(v=>v.category===category).map(v=><button key={v.zh} className="subscene-card" disabled={disabled} onClick={()=>onStart(v.topic,{scene:v[language],situation:v.situation,opening:v.opening,goals:v.goals})}><span>{v[language]}</span><ArrowUpRight size={18}/></button>)}</div></details>}
         </>
       ) : (
         <div className="category-grid">

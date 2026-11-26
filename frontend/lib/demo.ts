@@ -135,7 +135,7 @@ export const demoApi: typeof api = {
               ? assistantOpening(challengeOpening(topic, options?.challenge))
               : options?.situation
                 ? assistantOpening(
-                    "Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?",
+                    options.opening || "Bonjour ! Je vous écoute.",
                   )
                 : openings[topic],
           },

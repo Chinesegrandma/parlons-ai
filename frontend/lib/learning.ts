@@ -175,7 +175,6 @@ export type Notebook = {
   mistakes?: import("./mistakes").Mistake[];
   ignoredMistakes?: string[];
   practiceHistory?: PracticeRecord[];
-  reviewQueue?: Memory[];
 };
 /** Preserve dismissed event IDs: navigating back to a session must not resurrect a deleted card. */
 export function collectMemories(
@@ -234,7 +233,7 @@ export function reviewMemory(
 ): Memory {
   const reviews = remembered ? card.reviews + 1 : 0;
   const days = remembered ? [1, 3, 7, 14, 30][Math.min(reviews - 1, 4)] : 0;
-  return { ...card, accepted: true, reviews, due: now + days * 86400000 };
+  return { ...card, reviews, due: now + days * 86400000 };
 }
 
 export type PracticeRecord = { id: string; topic: Topic; scene: string; day: string; updated: number; turns: number; spokenTurns: number; messages: Session["messages"]; };

@@ -19,6 +19,7 @@ class PracticeOptions(BaseModel):
     challenge: ChallengeOptions | None = None
     scenario_variant: Literal["standard", "surprise"] | None = None
     scene: str = Field(default="", max_length=100)
+    opening: str | None = Field(default=None, max_length=300)
     situation: str = Field(default="", max_length=1000)
     goals: list[Annotated[str, Field(max_length=200)]] = Field(default_factory=list, max_length=3)
     level: Literal["A1-A2", "B1-B2", "C1"] = "B1-B2"

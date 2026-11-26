@@ -116,7 +116,7 @@ def opening_text(db, session_id, topic):
             "Que souhaitez-vous demander dans cette situation ?"
         )
     if options.situation:
-        return introduce("Bonjour ! On joue cette situation ensemble. De quoi avez-vous besoin ?")
+        return introduce(options.opening or "Bonjour ! Je vous écoute.")
     return OPENERS[topic]
 
 
@@ -378,7 +378,7 @@ async def chat(payload: MessageCreate):
                 "SELECT COUNT(*) FROM messages WHERE session_id=? AND role='user'",
                 (payload.session_id,),
             ).fetchone()[0]
-        instructions += scenario_event_prompt(session["topic"], payload.session_id, count)
+        instructions += scenario_event_prompt(session["topic"], payload.session_id, count, options.level)
     if session["topic"] in BY_TOPIC:
         instructions += challenge_prompt(session["topic"], options)
     if (
