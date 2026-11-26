@@ -12,7 +12,7 @@ import {
 import { ChallengeSetup } from "./ChallengeSetup";
 import { challengeFor } from "../lib/challenges";
 import { catalog } from "../lib/catalog";
-import { sceneVariants } from "../lib/scene-variants";
+import { practiceGroups, groupContent, sceneTitle } from "../lib/practice-navigation";
 import { dailyLesson, localDay, practiceStreak, type Notebook, type Memory } from "../lib/learning";
 import type { Language, Topic, PracticeOptions } from "../lib/types";
 const sections = [
@@ -20,7 +20,7 @@ const sections = [
     id: "admin",
     zh: "办事",
     en: "Life admin",
-    subZh: "银行、医院、租房与日常事务",
+    subZh: "银行、医疗、住房与行政手续",
     subEn: "Banking, appointments, housing & services",
     icon: Building2,
   },
@@ -28,7 +28,7 @@ const sections = [
     id: "daily",
     zh: "日常",
     en: "Everyday life",
-    subZh: "用餐、购物、交通与问路",
+    subZh: "餐饮、购物、出行与个人服务",
     subEn: "Dining, shopping, transport & directions",
     icon: Coffee,
   },
@@ -36,7 +36,7 @@ const sections = [
     id: "social",
     zh: "社交",
     en: "Social life",
-    subZh: "认识新朋友，轻松开启话题",
+    subZh: "认识朋友、相处与邀约",
     subEn: "Introductions, conversations & invitations",
     icon: MessagesSquare,
   },
@@ -44,7 +44,7 @@ const sections = [
     id: "study",
     zh: "学业与工作",
     en: "Study & work",
-    subZh: "学校沟通与工作汇报",
+    subZh: "学校、职场沟通",
     subEn: "University conversations & project updates",
     icon: GraduationCap,
   },
@@ -52,7 +52,7 @@ const sections = [
     id: "interview",
     zh: "面试",
     en: "Interviews",
-    subZh: "自信表达经历与优势",
+    subZh: "求职面试、录用与薪资",
     subEn: "Talk about your experience with confidence",
     icon: BriefcaseBusiness,
   },
@@ -65,11 +65,6 @@ const sections = [
     icon: Sparkles,
   },
 ];
-const groups = {
-  bank: ["银行", "Bank"],
-  hospital: ["医院", "Hospital"],
-  school: ["学校", "School"],
-};
 export function PracticeHome({
   language,
   onStart,
@@ -113,15 +108,9 @@ export function PracticeHome({
   const lesson = dailyLesson(history);
   const due = (book?.cards || []).filter(c => c.due <= Date.now() && (c.corrected || c.sent));
   const current = sections.find((section) => section.id === category);
-  const available = catalog.filter(
-    (scene) =>
-      scene.category === category &&
-      scene.id !== "daily" &&
-      (!group || scene.group === group),
-  );
-  const grouped = [
-    ...new Set(available.map((scene) => scene.group).filter(Boolean)),
-  ];
+  const subgroups = practiceGroups.filter(g=>g.category===category);
+  const activeGroup = subgroups.find(g=>g.id===group);
+  const content = activeGroup ? groupContent(activeGroup) : {scenes:catalog.filter(s=>s.category==="challenge" && category==="challenge"),variants:[]};
   if (selected)
     return (
       <main ref={mainRef} tabIndex={-1} className="practice-home scene-selection">
@@ -187,54 +176,30 @@ export function PracticeHome({
               <ArrowLeft size={16} />
               {t("返回", "Back")}
             </button>
-            <h2>
-              {group
-                ? groups[group as keyof typeof groups][
-                    language === "en" ? 1 : 0
-                  ]
-                : current?.[language === "en" ? "en" : "zh"]}
-            </h2>
+            <div className="scene-path">
+              {activeGroup && <small>{current?.[language]}</small>}
+              <h2>{activeGroup?.[language] || current?.[language]}</h2>
+            </div>
           </div>
           <div className="subscene-grid">
-            {!group &&
-              grouped.map((id) => (
-                <button
-                  className="subscene-card"
-                  key={id}
-                  aria-label={`${groups[id as keyof typeof groups][language === "en" ? 1 : 0]} ${t("查看具体事项", "Choose a situation")}`}
-                  onClick={() => setGroup(id)}
-                >
-                  <span>
-                    {
-                      groups[id as keyof typeof groups][
-                        language === "en" ? 1 : 0
-                      ]
-                    }
-                  </span>
-
-                  <ArrowUpRight size={18} />
-                </button>
-              ))}
-            {available
-              .filter((scene) => group || !scene.group)
-              .map((scene) => (
-                <button
-                  className="subscene-card"
-                  key={scene.id}
-                  aria-label={scene.category === "challenge" ? undefined : `${scene[language]} ${t("进入对话", "Enter conversation")}`}
-                  disabled={disabled}
-                  onClick={() =>
-                    scene.category === "challenge"
-                      ? setSelected(scene.id)
-                      : onStart(scene.id)
-                  }
-                >
-                  <span>{scene[language]}</span>
-                  {scene.category === "challenge" && <small>{language === "en" ? challengeFor(scene.id)?.descriptionEn : challengeFor(scene.id)?.descriptionZh}</small>}
-                  <ArrowUpRight size={18} />
-                </button>
-              ))}
-            {!group && sceneVariants.filter(v=>v.category===category).map(v=>(<button key={v.zh} className="subscene-card" disabled={disabled} onClick={()=>onStart(v.topic,{scene:v[language],situation:v.situation,opening:v.opening,goals:language==="zh"?v.goals:[]})}><span>{v[language]}</span><ArrowUpRight size={18}/></button>))}
+            {!activeGroup && subgroups.map(g=>{
+              const items=groupContent(g);
+              const names=[...items.scenes.map(s=>sceneTitle(s.id,language)),...items.variants.map(v=>v[language])];
+              return <button className="subscene-card navigation-group" key={g.id} aria-label={g[language]+" "+t("查看具体事项","Choose a situation")} onClick={()=>setGroup(g.id)}>
+                <span>{g[language]}</span><small>{names.join(" · ")}</small><ArrowUpRight size={18}/>
+              </button>;
+            })}
+            {content.scenes.map(scene=>(
+              <button className="subscene-card" key={scene.id}
+                aria-label={scene.category==="challenge"?undefined:sceneTitle(scene.id,language)+" "+t("进入对话","Enter conversation")}
+                disabled={disabled}
+                onClick={()=>scene.category==="challenge"?setSelected(scene.id):scene.id==="interview"?onStart(scene.id,{scene:sceneTitle(scene.id,language)}):onStart(scene.id)}>
+                <span>{sceneTitle(scene.id,language)}</span>
+                {scene.category==="challenge" && <small>{language==="en"?challengeFor(scene.id)?.descriptionEn:challengeFor(scene.id)?.descriptionZh}</small>}
+                <ArrowUpRight size={18}/>
+              </button>
+            ))}
+            {content.variants.map(v=><button key={v.zh} className="subscene-card" disabled={disabled} onClick={()=>onStart(v.topic,{scene:v[language],situation:v.situation,opening:v.opening,goals:language==="zh"?v.goals:[]})}><span>{v[language]}</span><ArrowUpRight size={18}/></button>)}
           </div>
 
         </>
@@ -263,7 +228,7 @@ export function PracticeHome({
           ))}
         </div>
       )}
-      {onCustom && category !== "challenge" && (
+      {onCustom && !category && (
         <details className="custom-practice">
           <summary>
             {t("自定义一个真实情境", "Create your own situation")}

@@ -946,3 +946,5 @@ html.parlons-chat-open, html.parlons-chat-open body {
 .sage-conversation .event-status{display:block;text-align:center;font-size:11px;color:#8b653e;margin:3px 0 0}.sage-conversation .event-status.resolved{color:var(--sage-muted)}
 
 .chat-surprise-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px;font-size:13px;border-top:1px solid var(--sage-border);color:var(--sage-ink)}.chat-surprise-toggle input{accent-color:var(--sage-deep);width:17px;height:17px;flex:none}
+
+.scene-path{display:grid;gap:3px}.scene-path>small{font-size:11px;color:var(--sage-muted)}.scene-path h2{margin:0}.parlons-app .navigation-group{min-height:86px}.parlons-app .navigation-group small{font-size:12px;line-height:1.45;color:var(--sage-muted);max-width:95%}

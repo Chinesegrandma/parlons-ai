@@ -119,6 +119,7 @@ it("keeps word-level correction cards and saving them to the notebook", async ()
   const user = userEvent.setup();
   render(<Studio demo />);
   await user.click(screen.getByRole("button", { name: "日常" }));
+  await user.click(screen.getByRole("button", { name: /餐饮.*查看具体事项/ }));
   await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
   await screen.findByRole("heading", { name: "咖啡馆" });
   await user.type(
