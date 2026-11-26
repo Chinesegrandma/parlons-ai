@@ -156,21 +156,20 @@ export function PracticeHome({
               )}
             </p>
           </div>
-          <div className="home-quick">
-            <div>
-              <span className="quick-mark">✦</span>
-              <h2>{t("自由聊天 · 任何话题", "Free chat · Any topic")}</h2>
-              <p>
-                {t(
-                  "从今天发生的小事开始，AI 会主动带你聊下去。",
-                  "Start with your day. Your partner will ask the next question.",
-                )}
-              </p>
-            </div>
-            <button disabled={disabled} onClick={() => onStart("daily")}>
-              {t("直接开始聊天", "Start chatting")} <ArrowUpRight size={18} />
-            </button>
-          </div>
+          <button
+            type="button"
+            className="home-quick free-chat-entry"
+            aria-label={t("自由聊天", "Free chat")}
+            disabled={disabled}
+            onClick={() => onStart("daily")}
+          >
+            <span className="free-chat-icon" aria-hidden="true">✦</span>
+            <span className="free-chat-copy">
+              <strong>{t("自由聊天", "Free chat")}</strong>
+              <small>{t("想聊什么，就聊什么。", "Talk about anything.")}</small>
+            </span>
+            <ArrowUpRight size={20} aria-hidden="true" />
+          </button>
         </>
       )}
       {category ? (

@@ -46,9 +46,9 @@ it("switches the entire demo interface to English and keeps French practice cont
     "en",
   );
   expect(
-    screen.getByRole("button", { name: "Start chatting" }),
+    screen.getByRole("button", { name: "Free chat" }),
   ).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Start chatting" }));
+  await user.click(screen.getByRole("button", { name: "Free chat" }));
   await screen.findByText(
     assistantOpening("Salut ! Comment s’est passée ta journée ?"),
   );

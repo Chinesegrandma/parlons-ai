@@ -147,7 +147,7 @@ beforeEach(() => {
 async function enter() {
   const user = userEvent.setup();
   render(<Home />);
-  await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
+  await user.click(screen.getByRole("button", { name: "自由聊天" }));
   await screen.findByText(assistantOpening(catalog[0].opening));
   await waitFor(() => expect(api.synthesize).toHaveBeenCalledOnce());
   act(() => MockAudio.current.onended?.());
@@ -200,7 +200,7 @@ it("preserves text-only practice without speech configuration", async () => {
   });
   const user = userEvent.setup();
   render(<Home />);
-  await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
+  await user.click(screen.getByRole("button", { name: "自由聊天" }));
   await screen.findByText(assistantOpening(catalog[0].opening));
   expect(
     screen.getByRole("button", { name: /^(Record French|录制法语)$/ }),
@@ -277,7 +277,7 @@ it("supports opening autoplay opt-out", async () => {
   localStorage.setItem("parlons-autoplay", "false");
   const user = userEvent.setup();
   render(<Home />);
-  await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
+  await user.click(screen.getByRole("button", { name: "自由聊天" }));
   await screen.findByText(assistantOpening(catalog[0].opening));
   expect(api.synthesize).not.toHaveBeenCalled();
 });

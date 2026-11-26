@@ -814,3 +814,43 @@ html.parlons-chat-open, html.parlons-chat-open body {
   .parlons-keyboard-open .sage-conversation .practice-aid { max-height: 24%; }
   .parlons-keyboard-open .sage-conversation .focused-chat .composerarea { max-height: 55%; }
 }
+
+/* Single compact free-chat entry. */
+.parlons-app .home-quick.free-chat-entry {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 76px;
+  margin: 20px 0 22px;
+  padding: 14px 18px;
+  gap: 12px;
+  border-radius: 22px;
+  color: var(--sage-ink);
+  text-align: left;
+}
+.free-chat-entry .free-chat-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #79915e;
+  font-size: 30px;
+  line-height: 1;
+}
+.free-chat-entry .free-chat-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.free-chat-copy strong { font-size: 16px; font-weight: 600; line-height: 1.4; }
+.free-chat-copy small { color: var(--sage-muted); font-size: 12px; line-height: 1.45; }
+.free-chat-entry > svg { flex: none; color: var(--sage-deep); }
+.parlons-app .home-quick.free-chat-entry:hover:not(:disabled) { background: rgba(255,255,255,.7); }
+@media (max-width: 700px) {
+  .parlons-app .home-quick.free-chat-entry { min-height: 70px; padding: 11px 14px; margin: 18px 0 20px; gap: 10px; }
+}

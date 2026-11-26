@@ -93,7 +93,7 @@ it("API sends learning preferences and selected voices", async () => {
 it("defers inline corrections in conversation mode and offers an end review", async () => {
   const user = userEvent.setup();
   render(<Studio demo />);
-  await user.click(screen.getByRole("button", { name: "直接开始聊天" }));
+  await user.click(screen.getByRole("button", { name: "自由聊天" }));
   await screen.findByText(
     assistantOpening("Salut ! Comment s’est passée ta journée ?"),
   );
