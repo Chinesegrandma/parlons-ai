@@ -28,7 +28,7 @@ it("stores individual mistakes once and builds a targeted quiz", () => {
   const questions = questionsFor("article", book.mistakes!);
   expect(questions[0].options[questions[0].answer]).toBe("un");
   expect(questions[0].prompt).toContain("___");
-  expect(questions).toHaveLength(3);
+  expect(questions).toHaveLength(6);
 });
 
 it("collects summary-only feedback", () => {

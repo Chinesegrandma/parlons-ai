@@ -97,6 +97,297 @@ const examples: Record<Exclude<MistakeCategory, "other">, Question[]> = {
   ],
 };
 
+const extraExamples: Record<Exclude<MistakeCategory, "other">, Question[]> = {
+  "tense": [
+    {
+      "prompt": "Demain, je ___ le train à huit heures.",
+      "options": [
+        "prendrai",
+        "prenais"
+      ],
+      "answer": 0,
+      "zh": "明天的计划用将来时。",
+      "en": "Use the future for tomorrow's plan."
+    },
+    {
+      "prompt": "Si j’avais le temps, je ___ plus souvent.",
+      "options": [
+        "voyageais",
+        "voyagerais"
+      ],
+      "answer": 1,
+      "zh": "si + 未完成过去时，主句用条件式。",
+      "en": "Use the conditional after si + imperfect."
+    },
+    {
+      "prompt": "Il faut que vous ___ ce formulaire.",
+      "options": [
+        "remplissiez",
+        "remplissez"
+      ],
+      "answer": 0,
+      "zh": "il faut que 后接虚拟式。",
+      "en": "Il faut que requires the subjunctive."
+    }
+  ],
+  "conjugation": [
+    {
+      "prompt": "Vous ___ un rendez-vous ?",
+      "options": [
+        "avez",
+        "avons"
+      ],
+      "answer": 0,
+      "zh": "vous 对应 avez。",
+      "en": "Vous takes avez."
+    },
+    {
+      "prompt": "Mes amis ___ demain.",
+      "options": [
+        "vient",
+        "viennent"
+      ],
+      "answer": 1,
+      "zh": "复数主语使用 viennent。",
+      "en": "Use viennent with a plural subject."
+    },
+    {
+      "prompt": "Je ___ vous aider ?",
+      "options": [
+        "peux",
+        "peut"
+      ],
+      "answer": 0,
+      "zh": "je 对应 peux。",
+      "en": "Je takes peux."
+    }
+  ],
+  "agreement": [
+    {
+      "prompt": "Les portes sont ___.",
+      "options": [
+        "fermées",
+        "fermés"
+      ],
+      "answer": 0,
+      "zh": "portes 为阴性复数。",
+      "en": "Portes is feminine plural."
+    },
+    {
+      "prompt": "Ces billets sont ___.",
+      "options": [
+        "valide",
+        "valides"
+      ],
+      "answer": 1,
+      "zh": "billets 为复数。",
+      "en": "Valides agrees with billets."
+    },
+    {
+      "prompt": "Cette soupe est ___.",
+      "options": [
+        "chaude",
+        "chaud"
+      ],
+      "answer": 0,
+      "zh": "soupe 为阴性。",
+      "en": "Soupe is feminine."
+    }
+  ],
+  "article": [
+    {
+      "prompt": "Je prends ___ soupe.",
+      "options": [
+        "de la",
+        "du"
+      ],
+      "answer": 0,
+      "zh": "soupe 为阴性，使用 de la。",
+      "en": "Soupe is feminine; use de la."
+    },
+    {
+      "prompt": "Je voudrais ___ baguette.",
+      "options": [
+        "un",
+        "une"
+      ],
+      "answer": 1,
+      "zh": "baguette 为阴性。",
+      "en": "Baguette is feminine."
+    },
+    {
+      "prompt": "Il n’y a pas ___ lait.",
+      "options": [
+        "de",
+        "du"
+      ],
+      "answer": 0,
+      "zh": "否定句中部分冠词通常变为 de。",
+      "en": "Partitive articles usually become de after negation."
+    }
+  ],
+  "preposition": [
+    {
+      "prompt": "Je vais ___ médecin.",
+      "options": [
+        "chez le",
+        "dans le"
+      ],
+      "answer": 0,
+      "zh": "去医生那里使用 chez。",
+      "en": "Use chez for going to a doctor."
+    },
+    {
+      "prompt": "Le train part ___ Lyon.",
+      "options": [
+        "à",
+        "pour"
+      ],
+      "answer": 1,
+      "zh": "pour 表示目的地。",
+      "en": "Pour indicates the destination."
+    },
+    {
+      "prompt": "Merci ___ votre aide.",
+      "options": [
+        "pour",
+        "sur"
+      ],
+      "answer": 0,
+      "zh": "merci pour 表示感谢某事。",
+      "en": "Merci pour expresses thanks for something."
+    }
+  ],
+  "pronoun": [
+    {
+      "prompt": "Tu veux du pain ? Oui, j’___ veux.",
+      "options": [
+        "y",
+        "en"
+      ],
+      "answer": 1,
+      "zh": "en 替代 du pain。",
+      "en": "En replaces du pain."
+    },
+    {
+      "prompt": "Vous allez à la banque ? Oui, j’___ vais.",
+      "options": [
+        "y",
+        "en"
+      ],
+      "answer": 0,
+      "zh": "y 替代地点 à la banque。",
+      "en": "Y replaces the place à la banque."
+    },
+    {
+      "prompt": "Je donne le dossier à Léa. Je ___ donne le dossier.",
+      "options": [
+        "la",
+        "lui"
+      ],
+      "answer": 1,
+      "zh": "lui 替代间接宾语 à Léa。",
+      "en": "Lui replaces the indirect object à Léa."
+    }
+  ],
+  "syntax": [
+    {
+      "prompt": "Quelle phrase est correcte ?",
+      "options": [
+        "Je voudrais réserver une table.",
+        "Je voudrais une table réserver."
+      ],
+      "answer": 0,
+      "zh": "vouloir 后接不定式，再接宾语。",
+      "en": "Put the infinitive after vouloir, then the object."
+    },
+    {
+      "prompt": "Quelle phrase est correcte ?",
+      "options": [
+        "Il a arrivé hier.",
+        "Il est arrivé hier."
+      ],
+      "answer": 1,
+      "zh": "arriver 的复合过去时使用 être。",
+      "en": "Arriver uses être in the passé composé."
+    },
+    {
+      "prompt": "Quelle phrase est correcte ?",
+      "options": [
+        "Je ne l’ai pas vu.",
+        "Je ne pas l’ai vu."
+      ],
+      "answer": 0,
+      "zh": "ne 和 pas 包围助动词及其前置代词。",
+      "en": "Ne and pas surround the auxiliary and preceding pronoun."
+    }
+  ],
+  "vocabulary": [
+    {
+      "prompt": "Je voudrais ___ rendez-vous.",
+      "options": [
+        "prendre",
+        "faire"
+      ],
+      "answer": 0,
+      "zh": "固定搭配 prendre rendez-vous。",
+      "en": "Use prendre rendez-vous."
+    },
+    {
+      "prompt": "Est-ce que je peux ___ une question ?",
+      "options": [
+        "demander",
+        "poser"
+      ],
+      "answer": 1,
+      "zh": "固定搭配 poser une question。",
+      "en": "Use poser une question."
+    },
+    {
+      "prompt": "Je vais ___ attention.",
+      "options": [
+        "faire",
+        "prendre"
+      ],
+      "answer": 0,
+      "zh": "固定搭配 faire attention。",
+      "en": "Use faire attention."
+    }
+  ],
+  "spelling": [
+    {
+      "prompt": "Vous avez rendez-vous ___ quelle heure ?",
+      "options": [
+        "à",
+        "a"
+      ],
+      "answer": 0,
+      "zh": "介词 à 有重音符号。",
+      "en": "The preposition à has a grave accent."
+    },
+    {
+      "prompt": "Je voudrais savoir ___ se trouve la gare.",
+      "options": [
+        "ou",
+        "où"
+      ],
+      "answer": 1,
+      "zh": "表示地点的疑问词 où 有重音符号。",
+      "en": "Où meaning where has a grave accent."
+    },
+    {
+      "prompt": "Ils ___ en retard.",
+      "options": [
+        "sont",
+        "son"
+      ],
+      "answer": 0,
+      "zh": "être 的复数变位是 sont。",
+      "en": "Sont is the plural form of être."
+    }
+  ]
+};
+
 export function questionsFor(category: MistakeCategory, mistakes: Mistake[]): Question[] {
   const personal = mistakes.filter((item) => item.category === category).slice(0, 8).map((item, index): Question => ({
     prompt: item.context.replace(item.original, "___"),
@@ -106,5 +397,5 @@ export function questionsFor(category: MistakeCategory, mistakes: Mistake[]): Qu
     en: item.explanation,
     personal: true,
   }));
-  return [...personal, ...(category === "other" ? [] : examples[category])];
+  return [...personal, ...(category === "other" ? [] : [...examples[category], ...extraExamples[category]])];
 }
