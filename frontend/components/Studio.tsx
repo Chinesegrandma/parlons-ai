@@ -5,6 +5,8 @@ import { StudioHeader, PracticeSettings } from "./AppChrome";
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { ChallengePanel } from "./ChallengePanel";
 import { challengeFor } from "../lib/challenges";
+import { BookOpen } from "lucide-react";
+import { BrasserieMenu, MenuInvitation } from "./BrasserieMenu";
 import { Composer } from "./Composer";
 import { PracticeAid } from "./PracticeAid";
 import { MessageList } from "./MessageList";
@@ -89,6 +91,9 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     mode === "conversation",
   );
   const session = conversation.session;
+  const [menuSession, setMenuSession] = useState<string | null>(null);
+  const dining = session?.topic === "restaurant" && !session.options?.situation && !session.options?.review_targets?.length;
+  const menuOpen = page === "chat" && dining && menuSession === session?.id;
   const scene = catalog.find((item) => item.id === session?.topic);
   const roles: Partial<Record<Topic,[string,string]>> = {bank_card:["银行顾问","Bank adviser"],bank_transfer:["银行顾问","Bank adviser"],doctor:["前台","Receptionist"],symptoms:["问诊角色","Consultation partner"],cafe:["店员","Barista"],restaurant:["服务员","Server"],transport:["售票员","Ticket agent"],shopping:["店员","Shop assistant"],renting:["房产顾问","Agent"],post:["邮局职员","Postal clerk"],customer_service:["客服","Support agent"],teacher:["老师","Teacher"],course:["教务","Academic adviser"],report:["同事","Colleague"],interview:["招聘经理","Interviewer"],friends:["朋友","Friend"],invite:["朋友","Friend"],decline:["朋友","Friend"]};
   const role = session && !session.options?.situation ? roles[session.topic] : undefined;
@@ -313,6 +318,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     setReviewError("");
   }
   async function begin(topic?: Topic, extra?: Partial<PracticeOptions>, cardId?: string) {
+    setMenuSession(null);
     setSurprise(undefined);
     setReviewCardId(cardId || null);
     pauseVoice();
@@ -533,7 +539,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   );
   return (
     <div
-      className={`parlons-app ${page === "chat" ? "sage-conversation" : ""}`}
+      className={`parlons-app ${page === "chat" ? (menuOpen ? "sage-conversation with-menu" : "sage-conversation") : ""}`}
     >
       <div className="sage-atmosphere" aria-hidden="true">
         <span />
@@ -853,6 +859,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             aria-label={t("法语对话", "French conversation")}
           >
             <MessageList
+              openingCard={dining && session ? <MenuInvitation open={()=>setMenuSession(session.id)} /> : undefined}
               key={session?.id ?? "empty"}
               messages={session?.messages || []}
               busy={busy}
@@ -909,6 +916,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                 {localizedError(speech.notice)}
               </GlassNotice>
             )}
+            {dining && session && !menuOpen && <button className="menu-reopen" onClick={()=>setMenuSession(session.id)}><BookOpen size={15}/> La carte</button>}
             {!voiceActive && session && (
               <PracticeAid
                 key={session.id}
@@ -973,6 +981,10 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           )}
         </main>
       )}
+      {menuOpen && <BrasserieMenu language={language} close={()=>setMenuSession(null)} ask={text=>{
+        setMenuSession(null);
+        conversation.setInput(conversation.input ? conversation.input + " " + text : text);
+      }}/>}
     </div>
   );
 }

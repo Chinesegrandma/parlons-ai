@@ -1,0 +1,164 @@
+{
+  "Les entrées": [
+    {
+      "name": "Œufs mayonnaise",
+      "detail": "Ciboulette fraîche",
+      "zh": "蛋黄酱鸡蛋配香葱",
+      "en": "Eggs with mayonnaise and chives",
+      "price": 7.0
+    },
+    {
+      "name": "Poireaux vinaigrette",
+      "detail": "Noisettes torréfiées",
+      "zh": "油醋汁大葱配烤榛子",
+      "en": "Leeks with vinaigrette and toasted hazelnuts",
+      "price": 9.0
+    },
+    {
+      "name": "Soupe à l’oignon gratinée",
+      "detail": "Croûton au fromage",
+      "zh": "焗芝士洋葱汤",
+      "en": "Onion soup with a cheese crouton",
+      "price": 12.0
+    },
+    {
+      "name": "Escargots de Bourgogne",
+      "detail": "Par six, beurre persillé",
+      "zh": "六只欧芹蒜香黄油蜗牛",
+      "en": "Six snails with parsley and garlic butter",
+      "price": 14.0
+    },
+    {
+      "name": "Pâté en croûte",
+      "detail": "Cornichons",
+      "zh": "酥皮肉派配酸黄瓜",
+      "en": "Meat pâté in pastry with gherkins",
+      "price": 13.0
+    }
+  ],
+  "Les plats": [
+    {
+      "name": "Steak-frites",
+      "detail": "Sauce au poivre",
+      "zh": "牛排薯条配黑胡椒汁",
+      "en": "Steak and fries with pepper sauce",
+      "price": 25.0
+    },
+    {
+      "name": "Confit de canard",
+      "detail": "Pommes sarladaises",
+      "zh": "油封鸭腿配蒜香鸭油土豆",
+      "en": "Duck confit with garlic potatoes",
+      "price": 26.0
+    },
+    {
+      "name": "Blanquette de veau",
+      "detail": "À l’ancienne, riz pilaf",
+      "zh": "白汁炖小牛肉配米饭",
+      "en": "Creamy veal stew with rice pilaf",
+      "price": 24.0
+    },
+    {
+      "name": "Bœuf bourguignon",
+      "detail": "Purée maison",
+      "zh": "红酒炖牛肉配土豆泥",
+      "en": "Beef braised in red wine with mashed potatoes",
+      "price": 25.0
+    },
+    {
+      "name": "Suprême de volaille",
+      "detail": "Sauce aux champignons",
+      "zh": "蘑菇汁鸡胸",
+      "en": "Chicken breast with mushroom sauce",
+      "price": 22.0
+    },
+    {
+      "name": "Filet de sole meunière",
+      "detail": "Pommes vapeur",
+      "zh": "黄油柠檬汁煎鳎鱼柳配蒸土豆",
+      "en": "Sole with lemon butter and steamed potatoes",
+      "price": 32.0
+    },
+    {
+      "name": "Croque-monsieur",
+      "detail": "Jambon de Paris, salade verte",
+      "zh": "巴黎火腿芝士烤三明治配生菜",
+      "en": "Grilled ham and cheese sandwich with salad",
+      "price": 16.0
+    },
+    {
+      "name": "Fricassée de champignons",
+      "detail": "Œuf poché, brioche toastée",
+      "zh": "炒蘑菇配水波蛋与布里欧修",
+      "en": "Sautéed mushrooms with poached egg and brioche",
+      "price": 19.0
+    }
+  ],
+  "Les douceurs": [
+    {
+      "name": "Crème brûlée",
+      "detail": "À la vanille",
+      "zh": "香草焦糖布蕾",
+      "en": "Vanilla crème brûlée",
+      "price": 9.0
+    },
+    {
+      "name": "Mousse au chocolat noir",
+      "detail": "Chocolat intense",
+      "zh": "黑巧克力慕斯",
+      "en": "Dark chocolate mousse",
+      "price": 8.0
+    },
+    {
+      "name": "Île flottante",
+      "detail": "Crème anglaise, caramel",
+      "zh": "蛋白浮岛配蛋奶酱和焦糖",
+      "en": "Poached meringue with custard and caramel",
+      "price": 9.0
+    },
+    {
+      "name": "Tarte Tatin",
+      "detail": "Servie tiède, crème fraîche",
+      "zh": "温热焦糖反烤苹果挞配法式鲜奶油",
+      "en": "Warm upside-down apple tart with crème fraîche",
+      "price": 10.0
+    },
+    {
+      "name": "Profiteroles",
+      "detail": "Glace vanille, sauce au chocolat chaud",
+      "zh": "香草冰淇淋泡芙配热巧克力酱",
+      "en": "Ice cream puffs with warm chocolate sauce",
+      "price": 11.0
+    }
+  ],
+  "Les boissons": [
+    {
+      "name": "Vin rouge",
+      "detail": "Au verre",
+      "zh": "杯装红葡萄酒",
+      "en": "Glass of red wine",
+      "price": 6.0
+    },
+    {
+      "name": "Eau pétillante",
+      "detail": "50 cl",
+      "zh": "气泡水，500 毫升",
+      "en": "Sparkling water, 500 ml",
+      "price": 4.0
+    },
+    {
+      "name": "Expresso",
+      "detail": "Au comptoir ou à table",
+      "zh": "浓缩咖啡",
+      "en": "Espresso",
+      "price": 2.5
+    },
+    {
+      "name": "Carafe d’eau",
+      "detail": "Eau du robinet",
+      "zh": "免费自来水",
+      "en": "Complimentary tap water",
+      "price": 0.0
+    }
+  ]
+}

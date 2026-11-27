@@ -4,6 +4,7 @@ import "./sage-glass.css";
 import "./chat-learning.css";
 import "./challenges.css";
 import "./cloud-auth.css";
+import "./brasserie.css";
 export const viewport = {
   themeColor: "#faf9f6",
   width: "device-width",

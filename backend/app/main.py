@@ -31,6 +31,15 @@ SCENE_OPENINGS = {scene["id"]: scene["opening"] for scene in CATALOG}
 OPENERS = {scene["id"]: introduce(scene["opening"]) for scene in CATALOG}
 
 
+BRASSERIE_MENU = json.loads(Path(__file__).with_name("brasserie.json").read_text(encoding="utf-8"))
+BRASSERIE_CARTE = "\n".join(
+    section + " : " + " ; ".join(
+        f"{dish['name']} ({dish['detail']}, {dish['price']:g} €)" for dish in dishes
+    )
+    for section, dishes in BRASSERIE_MENU.items()
+)
+
+
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -429,6 +438,13 @@ async def chat(payload: MessageCreate):
             update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
         )
     instructions += options.prompt()
+    if session["topic"] == "restaurant" and not options.situation and not options.review_targets:
+        instructions += (
+            " Tu sers à la Brasserie des Lilas. Voici la carte que voit la clientèle. "
+            "Prends les commandes selon cette carte et ses prix. Laisse le temps de choisir. "
+            "Réponds aux questions sur les plats. Pour une allergie, vérifie en cuisine. "
+            + BRASSERIE_CARTE
+        )
     if session["topic"] == "daily" and not options.situation and not options.review_targets:
         instructions += (
             " Conversation libre : accepte tout sujet proposé par l’apprenant, "

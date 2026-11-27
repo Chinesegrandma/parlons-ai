@@ -21,6 +21,7 @@ import type {
 } from "../lib/types";
 export function MessageList({
   language = "zh",
+  openingCard,
   registerContext,
   onSaveCorrection,
   savedCorrectionIds = [],
@@ -34,6 +35,7 @@ export function MessageList({
   onRewrite,
   onLookup,
 }: {
+  openingCard?: React.ReactNode;
   onLookup?: (
     text: string,
     context: string,
@@ -227,6 +229,7 @@ export function MessageList({
                 >
                   {message.content}
                 </div>
+                {index === 0 && message.role === "assistant" && openingCard}
                 {message.role === "assistant" && (
                   <div className="reply-actions">
                     <button

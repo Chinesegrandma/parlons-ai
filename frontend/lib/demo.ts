@@ -217,7 +217,7 @@ export const demoApi: typeof api = {
       challenge_debate:
         "Cette solution ne convient peut-être pas à tout le monde. Comment réponds-tu à cette objection ?",
       restaurant:
-        "Bien sûr ! Je vous recommande le plat du jour. Souhaitez-vous voir la carte ?",
+        "Si vous aimez les plats mijotés, je vous conseille le bœuf bourguignon, servi avec notre purée maison.",
       shopping:
         "Avec plaisir ! Quelle taille cherchez-vous ? Vous pouvez l’essayer ici.",
       doctor:

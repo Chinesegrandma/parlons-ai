@@ -24,6 +24,7 @@ let css = (
       "sage-glass.css",
       "chat-learning.css",
       "challenges.css",
+      "brasserie.css",
     ].map((file) => readFile(path.join(root, "app", file), "utf8")),
   )
 ).join("\n");
@@ -38,6 +39,7 @@ for (const name of ["inter", "fraunces"]) {
     );
   }
 }
+css = css.replace("/icons/brasserie.webp", "data:image/webp;base64," + (await readFile(path.join(root,"public/icons/brasserie.webp"))).toString("base64"));
 const portrait = await readFile(path.join(root, "public/icons/noe.webp"));
 const js = result.outputFiles[0].text.replaceAll("/icons/noe.webp", "data:image/webp;base64," + portrait.toString("base64")).replace(/<\/script/gi, "<\\/script");
 await mkdir(path.join(root, "public"), { recursive: true });
