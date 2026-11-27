@@ -1,0 +1,122 @@
+{
+  "Les classiques": [
+    {
+      "name": "Expresso",
+      "detail": "Court et intense",
+      "zh": "浓缩咖啡",
+      "en": "Espresso",
+      "price": 3.0
+    },
+    {
+      "name": "Double expresso",
+      "detail": "Deux doses de café",
+      "zh": "双份浓缩",
+      "en": "Double espresso",
+      "price": 5.0
+    },
+    {
+      "name": "Café allongé",
+      "detail": "Expresso et eau chaude",
+      "zh": "加热水的长咖啡",
+      "en": "Espresso with hot water",
+      "price": 3.5
+    },
+    {
+      "name": "Café filtre au pot",
+      "detail": "Servi en petit pot",
+      "zh": "小壶手冲滤泡咖啡",
+      "en": "Filter coffee served in a pot",
+      "price": 5.0
+    },
+    {
+      "name": "Décaféiné",
+      "detail": "En petite tasse",
+      "zh": "低因浓缩咖啡",
+      "en": "Decaf espresso",
+      "price": 3.0
+    }
+  ],
+  "Les cafés au lait": [
+    {
+      "name": "Café noisette",
+      "detail": "Expresso, une touche de lait",
+      "zh": "加少许牛奶的浓缩咖啡",
+      "en": "Espresso with a dash of milk",
+      "price": 3.5
+    },
+    {
+      "name": "Café crème",
+      "detail": "Café et lait chaud",
+      "zh": "法式热牛奶咖啡",
+      "en": "Coffee with hot milk",
+      "price": 5.0
+    },
+    {
+      "name": "Cappuccino",
+      "detail": "Expresso et mousse de lait",
+      "zh": "卡布奇诺",
+      "en": "Espresso with foamed milk",
+      "price": 5.5
+    },
+    {
+      "name": "Café latte",
+      "detail": "Lait chaud, mousse fine",
+      "zh": "拿铁",
+      "en": "Espresso with steamed milk",
+      "price": 5.5
+    }
+  ],
+  "Les spécialités": [
+    {
+      "name": "Café viennois",
+      "detail": "Café chaud, chantilly",
+      "zh": "加打发奶油的维也纳咖啡",
+      "en": "Hot coffee with whipped cream",
+      "price": 6.0
+    },
+    {
+      "name": "Café glacé",
+      "detail": "Café sur glaçons",
+      "zh": "冰咖啡",
+      "en": "Coffee over ice",
+      "price": 5.0
+    },
+    {
+      "name": "Café mocha",
+      "detail": "Café, lait et chocolat",
+      "zh": "摩卡咖啡",
+      "en": "Coffee with chocolate and milk",
+      "price": 6.0
+    },
+    {
+      "name": "Chocolat chaud à l’ancienne",
+      "detail": "Chocolat noir, sans café",
+      "zh": "传统浓热巧克力，不含咖啡",
+      "en": "Traditional dark hot chocolate, without coffee",
+      "price": 6.5
+    }
+  ],
+  "Les gourmandises": [
+    {
+      "name": "Croissant au beurre",
+      "detail": "Feuilletage pur beurre",
+      "zh": "黄油可颂",
+      "en": "Butter croissant",
+      "price": 2.5
+    },
+    {
+      "name": "Pain au chocolat",
+      "detail": "Chocolat noir, pâte feuilletée",
+      "zh": "巧克力面包",
+      "en": "Chocolate pastry",
+      "price": 3.0
+    },
+    {
+      "name": "Éclair au café",
+      "detail": "Pâte à choux, crème au café",
+      "zh": "咖啡味闪电泡芙",
+      "en": "Coffee éclair",
+      "price": 5.5
+    }
+  ]
+}

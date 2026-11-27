@@ -92,7 +92,8 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   );
   const session = conversation.session;
   const [menuSession, setMenuSession] = useState<string | null>(null);
-  const dining = session?.topic === "restaurant" && !session.options?.situation && !session.options?.review_targets?.length;
+  const cafe = session?.topic === "cafe";
+  const dining = (session?.topic === "restaurant" || cafe) && !session.options?.situation && !session.options?.review_targets?.length;
   const [narrowMenu, setNarrowMenu] = useState(false);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 899px)");
@@ -545,7 +546,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       onSettings={() => setSettings(!settings)}
     />
   );
-  const menuPanel = menuOpen && <BrasserieMenu language={language} close={()=>setMenuSession(null)} ask={text=>{
+  const menuPanel = menuOpen && <BrasserieMenu cafe={cafe} language={language} close={()=>setMenuSession(null)} ask={text=>{
         setMenuSession(null);
         conversation.setInput(conversation.input ? conversation.input + " " + text : text);
       }}/>;
@@ -872,7 +873,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           >
             {narrowMenu && menuPanel}
             <MessageList
-              openingCard={dining && session ? <MenuInvitation open={()=>setMenuSession(session.id)} /> : undefined}
+              openingCard={dining && session ? <MenuInvitation cafe={cafe} open={()=>setMenuSession(session.id)} /> : undefined}
               key={"history-" + (session?.id ?? "empty")}
               messages={session?.messages || []}
               busy={busy}

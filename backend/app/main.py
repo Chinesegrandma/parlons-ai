@@ -31,13 +31,20 @@ SCENE_OPENINGS = {scene["id"]: scene["opening"] for scene in CATALOG}
 OPENERS = {scene["id"]: introduce(scene["opening"]) for scene in CATALOG}
 
 
-BRASSERIE_MENU = json.loads(Path(__file__).with_name("brasserie.json").read_text(encoding="utf-8"))
-BRASSERIE_CARTE = "\n".join(
-    section + " : " + " ; ".join(
-        f"{dish['name']} ({dish['detail']}, {dish['price']:g} €)" for dish in dishes
+def menu_prompt(filename):
+    menu = json.loads(Path(__file__).with_name(filename).read_text(encoding="utf-8"))
+    return "\n".join(
+        section + " : " + " ; ".join(
+            f"{item['name']} ({item['detail']}, {item['price']:g} €)" for item in items
+        )
+        for section, items in menu.items()
     )
-    for section, dishes in BRASSERIE_MENU.items()
-)
+
+
+VENUE_MENUS = {
+    "restaurant": ("à la Brasserie de Paris", menu_prompt("brasserie.json")),
+    "cafe": ("au Café de Paris", menu_prompt("cafe.json")),
+}
 
 
 def now() -> str:
@@ -438,12 +445,13 @@ async def chat(payload: MessageCreate):
             update={"explanation_language": "English" if payload.language == "en" else "Chinese"}
         )
     instructions += options.prompt()
-    if session["topic"] == "restaurant" and not options.situation and not options.review_targets:
+    if session["topic"] in VENUE_MENUS and not options.situation and not options.review_targets:
+        venue, carte = VENUE_MENUS[session["topic"]]
         instructions += (
-            " Tu sers à la Brasserie de Paris. Voici la carte que voit la clientèle. "
+            f" Tu sers {venue}. Voici la carte que voit la clientèle. "
             "Prends les commandes selon cette carte et ses prix. Laisse le temps de choisir. "
             "Réponds aux questions sur les plats. Pour une allergie, vérifie en cuisine. "
-            + BRASSERIE_CARTE
+            + carte
         )
     if session["topic"] == "daily" and not options.situation and not options.review_targets:
         instructions += (
