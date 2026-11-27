@@ -94,6 +94,10 @@ it("keeps the draft and remembers Noé for the next visit", async () => {
   await user.type(draft, "Bonjour");
   await user.click(screen.getByLabelText("Camille 与聊天设置"));
   await user.click(screen.getByRole("button", { name: /Noé.*轻松/ }));
+  await screen.findByText("Bonjour, moi c’est Noé ! On continue ensemble ?");
+  await user.click(screen.getByLabelText("Noé 与聊天设置"));
+  await user.click(screen.getByRole("button", { name: /Noé.*轻松/ }));
+  expect(screen.getAllByText("Bonjour, moi c’est Noé ! On continue ensemble ?")).toHaveLength(1);
   expect(draft).toHaveValue("Bonjour");
   expect(screen.getByText(/Camille ·/)).toBeInTheDocument();
   page.unmount();

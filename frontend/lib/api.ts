@@ -55,6 +55,8 @@ export const api = {
   health: () => request<Health>("/health"),
   session: (id: string, topic: Topic, options?: PracticeOptions) =>
     request<Session>("/sessions", json({ id, topic, options })),
+  greetPartner: (id: string, partner: Partner, switchId: string) =>
+    request<Session["messages"][number]>(`/sessions/${id}/partner`, json({ partner, switch_id: switchId })),
   voices: () => request<{ voices: Voice[] }>("/voices"),
   history: (id: string) => request<Session>(`/sessions/${id}`),
   chat: (

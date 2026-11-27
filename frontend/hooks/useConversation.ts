@@ -88,6 +88,33 @@ export function useConversation(
     };
   }, [start, autoStart]);
 
+  const switchAttempt = useRef<{session: string; partner: Partner; id: string} | null>(null);
+  async function greetPartner(partner: Partner) {
+    if (!session || busy || sending.current) return;
+    const current = generation.current;
+    let attempt = switchAttempt.current;
+    if (!attempt || attempt.session !== session.id || attempt.partner !== partner) {
+      attempt = {session: session.id, partner, id: crypto.randomUUID()};
+      switchAttempt.current = attempt;
+    }
+    sending.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      const message = await client.greetPartner(session.id, partner, attempt.id);
+      if (current !== generation.current) return;
+      switchAttempt.current = null;
+      setSession(previous => previous && !previous.messages.some(m => m.id === message.id)
+        ? {...previous, messages: [...previous.messages, message]} : previous);
+      return message.content;
+    } catch {
+      if (current === generation.current) setError("切换失败，请重试。 / Please try switching again.");
+    } finally {
+      sending.current = false;
+      if (current === generation.current) setBusy(false);
+    }
+  }
+
   async function send(override?: {
     text: string;
     transcriptId?: string | null;
@@ -173,6 +200,7 @@ export function useConversation(
     setError,
     start,
     send,
+    greetPartner,
     acceptTranscript,
     discard,
   };

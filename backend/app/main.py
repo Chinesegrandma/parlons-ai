@@ -78,9 +78,14 @@ def init_db():
             "edited_transcript": "TEXT",
             "correction_details": "TEXT",
             "feedback_for": "INTEGER",
+            "switch_id": "TEXT",
         }.items():
             if name not in columns:
                 db.execute(f"ALTER TABLE messages ADD COLUMN {name} {definition}")
+        db.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS one_greeting_per_switch "
+            "ON messages(session_id, switch_id) WHERE switch_id IS NOT NULL"
+        )
         db.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS one_opening_per_session "
             "ON messages(session_id) WHERE is_opening = 1"
@@ -326,6 +331,31 @@ def get_session(session_id: str):
                 if load_options(session["options"]).scenario_variant == "surprise" else {}
             ),
         }
+
+
+class PartnerSwitch(BaseModel):
+    partner: Literal["camille", "noe"]
+    switch_id: uuid.UUID
+
+
+@app.post("/sessions/{session_id}/partner")
+def greet_partner(session_id: str, payload: PartnerSwitch):
+    greeting = (
+        "Bonjour, moi c’est Noé ! On continue ensemble ?"
+        if payload.partner == "noe" else "Bonjour, c’est Camille. Je vous écoute !"
+    )
+    with connect() as db:
+        require_session(db, session_id)
+        db.execute(
+            "INSERT OR IGNORE INTO messages(session_id, role, content, created_at, partner, "
+            "switch_id) VALUES (?, 'assistant', ?, ?, ?, ?)",
+            (session_id, greeting, now(), payload.partner, str(payload.switch_id)),
+        )
+        row = db.execute(
+            "SELECT id, role, content, partner FROM messages WHERE session_id=? AND switch_id=?",
+            (session_id, str(payload.switch_id)),
+        ).fetchone()
+        return dict(row)
 
 
 @app.get("/sessions/{session_id}/messages")

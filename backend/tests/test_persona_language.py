@@ -198,3 +198,18 @@ def test_noe_switch_preserves_history_and_routes_to_selected_voice(api, transpor
     assert [m["partner"] for m in history if m["role"] == "assistant"] == ["noe", "noe", "camille"]
     assert api.post("/speech/synthesize", json={"voice": "noe", "text": "Bonjour"}).is_success
     assert requests[-1].url.path.endswith("/vCsptCe91UKbZe2sIB2T")
+
+
+def test_partner_greetings_survive_reload_and_retries(api):
+    import uuid
+
+    session = api.post("/sessions", json={"topic": "cafe"}).json()
+    path = f"/sessions/{session['id']}"
+    for partner in ("noe", "camille", "noe"):
+        switch = {"partner": partner, "switch_id": str(uuid.uuid4())}
+        first = api.post(path + "/partner", json=switch)
+        assert first.is_success
+        assert api.post(path + "/partner", json=switch).json() == first.json()
+        assert first.json()["partner"] == partner
+    history = api.get(path).json()["messages"]
+    assert [m["partner"] for m in history] == ["camille", "noe", "camille", "noe"]

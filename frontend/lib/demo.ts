@@ -117,6 +117,17 @@ export const demoApi: typeof api = {
     stt_ready: true,
     mock_ai: true,
   }),
+  greetPartner: async (id, partner) => {
+    const session = sessions.get(id);
+    if (!session) throw new Error("Demo session not found");
+    const greeting = {
+      id: session.messages.length + 1, role: "assistant" as const, partner,
+      content: partner === "noe" ? "Bonjour, moi c’est Noé ! On continue ensemble ?" : "Bonjour, c’est Camille. Je vous écoute !",
+    };
+    session.messages.push(greeting);
+    save();
+    return greeting;
+  },
   voices: async () => ({
     voices: [{ id: "default", name: "Demo tone (not a voice)" }, { id: "noe", name: "Noé" }],
   }),

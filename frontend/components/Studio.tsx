@@ -223,6 +223,22 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           ? "The request failed. Your draft is retained; check the service and retry."
           : message;
   }
+  async function selectVoice(value: string) {
+    if (busy || value === learning.voice) return;
+    pauseVoice();
+    const nextPartner = value === "noe" ? "noe" : "camille";
+    if (page !== "chat" || !session || nextPartner === partner) {
+      learning.setVoice(value);
+      return;
+    }
+    const current = epoch.current;
+    if (speechReady && speech.autoplay) speech.unlock();
+    const greeting = await conversation.greetPartner(nextPartner);
+    if (!greeting) return;
+    learning.setVoice(value);
+    if (epoch.current === current) await speech.playResponse(greeting, speechReady, value);
+  }
+
   function pauseVoice() {
     pauseAfterTurn.current = false;
     setPausing(false);
@@ -532,10 +548,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           onOptions={learning.setOptions}
           voices={voices}
           voice={learning.voice}
-          onVoice={(value) => {
-            pauseVoice();
-            learning.setVoice(value);
-          }}
+          onVoice={selectVoice}
           autoplay={speech.autoplay}
           slow={speech.slow}
           onClose={() => setSettings(false)}
@@ -636,8 +649,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                     <div key={id}>
                       <button type="button" disabled={busy} aria-pressed={partner === id}
                         onClick={event => {
-                          pauseVoice();
-                          learning.setVoice(id === "noe" ? "noe" : "default");
+                          void selectVoice(id === "noe" ? "noe" : "default");
                           event.currentTarget.closest("details")?.removeAttribute("open");
                         }}>
                         <AssistantAvatar partner={id} language={language} />
