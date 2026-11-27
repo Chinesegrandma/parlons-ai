@@ -8,8 +8,8 @@ const euro = new Intl.NumberFormat("fr-FR", {maximumFractionDigits: 2, minimumFr
 
 export function MenuInvitation({open}: {open: () => void}) {
   return <button className="menu-invitation" onClick={open} lang="fr">
-    <span className="menu-mini-cover" aria-hidden="true">B<span>des</span>L</span>
-    <span><strong>Brasserie des Lilas</strong><small>Œufs mayonnaise · Steak-frites</small>
+    <span className="menu-mini-cover" aria-hidden="true">B<span>de</span>P</span>
+    <span><strong>Brasserie de Paris</strong><small>Œufs mayonnaise · Steak-frites</small>
     <b>Voir la carte <BookOpen size={14}/></b></span>
   </button>;
 }
@@ -33,7 +33,7 @@ export function BrasserieMenu({language, close, ask}: {
     return () => {window.removeEventListener("keydown", escape); previous?.focus({preventScroll:true});};
   }, []);
   const [title, dishes] = Object.entries(menu)[section];
-  return <aside className={'brasserie-sheet' + (tall ? ' tall' : '')} aria-label="La carte de la Brasserie des Lilas" lang="fr">
+  return <aside className={'brasserie-sheet' + (tall ? ' tall' : '')} aria-label="La carte de la Brasserie de Paris" lang="fr">
     <button className="menu-handle" aria-label={tall ? "Réduire la carte" : "Agrandir la carte"} onClick={()=>setTall(!tall)}
       onTouchStart={e=>{startY.current=e.touches[0].clientY;}}
       onTouchEnd={e=>{const delta=e.changedTouches[0].clientY-startY.current; if(delta < -32)setTall(true); if(delta > 32){if(tall)setTall(false);else close();}}}><span/></button>
@@ -41,7 +41,7 @@ export function BrasserieMenu({language, close, ask}: {
     <header className="menu-mast">
       <div className="brasserie-etching" aria-hidden="true"/>
       <p>CUISINE FRANÇAISE TRADITIONNELLE</p>
-      <h2>Brasserie <em>des</em> Lilas</h2>
+      <h2>Brasserie <em>de</em> Paris</h2>
       <div className="menu-fleur" aria-hidden="true">✿</div>
     </header>
     <nav className="menu-sections" aria-label="Rubriques de la carte">{tabs.map((label,i)=>

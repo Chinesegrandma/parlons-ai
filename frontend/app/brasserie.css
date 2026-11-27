@@ -35,10 +35,18 @@
 .with-menu .conversation-page{width:100%;margin:0;min-width:0;padding-inline:0}
 }
 @media(max-width:899px){
-.brasserie-sheet{position:fixed;inset:auto 0 0;height:60dvh;max-height:90dvh;border-radius:20px 20px 0 0;box-shadow:0 -6px 28px #37261938;padding-bottom:env(safe-area-inset-bottom)}
+.brasserie-sheet{position:fixed;inset:auto 0 0;height:76dvh;max-height:90dvh;border-radius:20px 20px 0 0;box-shadow:0 -6px 28px #37261938;padding-bottom:env(safe-area-inset-bottom)}
 .brasserie-sheet.tall{height:90dvh}
 .menu-handle{display:grid;place-items:center;flex:none;height:22px;background:none;border:0;touch-action:none}
 .menu-handle span{width:36px;border-top:4px solid #bead95;border-radius:8px}
-.menu-mast{padding:0 16px}.brasserie-etching{height:56px}.menu-mast p{margin-top:4px;font-size:8px}.menu-mast h2{font-size:34px}.menu-fleur{margin:3px auto}
-.menu-sections button{padding:9px 8px}.menu-items h3{margin-top:12px;font-size:25px}
+.menu-mast{padding:0 48px 8px}
+.brasserie-etching,.menu-mast p,.menu-fleur,.menu-items h3{display:none}
+.menu-mast h2{font-size:26px;letter-spacing:-.035em}
+.menu-dismiss{top:9px;right:12px}
+.menu-sections button{flex:1;min-height:40px;padding:7px 3px}
+.menu-items{padding:2px 12px 9px}
+.menu-dish>button{min-height:44px;padding:6px 0}
+.menu-dish strong{font-size:17px;line-height:1.18}
+.menu-dish small{font-size:13px;line-height:1.2;margin-top:1px}
+.menu-price{font-size:16px}
 }

@@ -440,7 +440,7 @@ async def chat(payload: MessageCreate):
     instructions += options.prompt()
     if session["topic"] == "restaurant" and not options.situation and not options.review_targets:
         instructions += (
-            " Tu sers à la Brasserie des Lilas. Voici la carte que voit la clientèle. "
+            " Tu sers à la Brasserie de Paris. Voici la carte que voit la clientèle. "
             "Prends les commandes selon cette carte et ses prix. Laisse le temps de choisir. "
             "Réponds aux questions sur les plats. Pour une allergie, vérifie en cuisine. "
             + BRASSERIE_CARTE

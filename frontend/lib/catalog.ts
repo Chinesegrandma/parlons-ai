@@ -82,7 +82,7 @@ export const catalog = [
     zh: "用餐",
     en: "Dining out",
     role: "commander au restaurant ; tu joues le serveur ou la serveuse",
-    opening: "Bonsoir, bienvenue à la Brasserie des Lilas ! Voici la carte. Je vous laisse regarder ?",
+    opening: "Bonsoir, bienvenue à la Brasserie de Paris ! Voici la carte. Je vous laisse regarder ?",
   },
   {
     id: "cafe",
