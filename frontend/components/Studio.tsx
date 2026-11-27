@@ -5,7 +5,7 @@ import { StudioHeader, PracticeSettings } from "./AppChrome";
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { ChallengePanel } from "./ChallengePanel";
 import { challengeFor } from "../lib/challenges";
-import { BookOpen } from "lucide-react";
+import { ArrowUp, BookOpen } from "lucide-react";
 import { BrasserieMenu, MenuInvitation } from "./BrasserieMenu";
 import { Composer } from "./Composer";
 import { PracticeAid } from "./PracticeAid";
@@ -981,7 +981,21 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           )}
         </main>
       )}
-      {menuOpen && <BrasserieMenu language={language} close={()=>setMenuSession(null)} ask={text=>{
+      {menuOpen && <BrasserieMenu language={language} controls={<>
+        {conversation.error && <small role="alert">{localizedError(conversation.error)}</small>}
+        {conversation.input && !voiceActive && <input aria-label={t("点单草稿","Order draft")} value={conversation.input} onChange={e=>conversation.setInput(e.target.value)} />}
+        {mode === "conversation" && (voiceActive || !conversation.input.trim()) ? <button
+          disabled={demo || !health?.stt_ready || !speechReady || (!voiceActive && (busy || aidBusy || speech.working || speech.blocked))}
+          onClick={()=>voiceActive ? requestPause() : startVoice()}>
+          {voiceActive ? <Pause size={18}/> : <Mic size={18}/>}
+          {voiceActive ? status + " · " + t("暂停","Pause") : t("开启语音点单","Start voice ordering")}
+        </button> : <button
+          disabled={busy || aidBusy || (!conversation.input.trim() && !health?.stt_ready)}
+          onClick={()=>{if (demoListening || recorder.listening || !conversation.input.trim()) record(); else void send();}}>
+          {conversation.input.trim() && !recorder.listening && !demoListening ? <ArrowUp size={18}/> : <Mic size={18}/>}
+          {recorder.transcribing ? t("正在转写…","Transcribing…") : recorder.listening || demoListening ? t("说完了","Finish recording") : conversation.input.trim() ? t("发送点单","Send order") : t("按一下，说出点单","Tap to order by voice")}
+        </button>}
+      </>} close={()=>setMenuSession(null)} ask={text=>{
         setMenuSession(null);
         conversation.setInput(conversation.input ? conversation.input + " " + text : text);
       }}/>}
