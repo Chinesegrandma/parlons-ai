@@ -153,8 +153,8 @@ export function ChallengeSetup({
                 </label>
                 <p>
                   {t(
-                    "只向你显示，不把答案交给 Camille。请用法语描述它。",
-                    "Only you see the answer; Camille receives your clues. Describe it in French.",
+                    "只向你显示，不把答案交给搭档。请用法语描述它。",
+                    "Only you see the answer; your partner receives your clues. Describe it in French.",
                   )}
                 </p>
                 <button

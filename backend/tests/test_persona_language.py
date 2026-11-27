@@ -175,3 +175,26 @@ def test_conversation_mode_does_not_translate_hidden_feedback(api, session, tran
     assert response.status_code == 200
     assert not response.json()["correction"]
     assert len(requests) == 1
+
+
+def test_noe_switch_preserves_history_and_routes_to_selected_voice(api, transport):
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return providers.mock_response(request)
+
+    transport(handler)
+    session = api.post("/sessions", json={"topic": "cafe", "options": {"partner": "noe"}}).json()
+    assert session["messages"][0]["partner"] == "noe"
+    for partner in ("noe", "camille"):
+        response = api.post("/chat", json={
+            "session_id": session["id"], "message": "Bonjour", "partner": partner,
+        })
+        assert response.status_code == 200
+        prompt = json.loads(requests[-1].content)["messages"][0]["content"]
+        assert ("Tu t’appelles Noé" in prompt) == (partner == "noe")
+    history = api.get(f"/sessions/{session['id']}").json()["messages"]
+    assert [m["partner"] for m in history if m["role"] == "assistant"] == ["noe", "noe", "camille"]
+    assert api.post("/speech/synthesize", json={"voice": "noe", "text": "Bonjour"}).is_success
+    assert requests[-1].url.path.endswith("/vCsptCe91UKbZe2sIB2T")

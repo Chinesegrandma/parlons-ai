@@ -5,7 +5,7 @@ import type { api } from "./api";
 import type { Session, Topic } from "./types";
 
 const openings = Object.fromEntries(
-  catalog.map((scene) => [scene.id, assistantOpening(scene.opening)]),
+  catalog.map((scene) => [scene.id, scene.opening]),
 ) as Record<Topic, string>;
 const sessions = new Map<string, Session>();
 const KEY = "parlons-local-demo-data";
@@ -118,7 +118,7 @@ export const demoApi: typeof api = {
     mock_ai: true,
   }),
   voices: async () => ({
-    voices: [{ id: "default", name: "Demo tone (not a voice)" }],
+    voices: [{ id: "default", name: "Demo tone (not a voice)" }, { id: "noe", name: "Noé" }],
   }),
   session: async (id, topic, options) => {
     restore();
@@ -131,13 +131,10 @@ export const demoApi: typeof api = {
           {
             id: 1,
             role: "assistant",
-            content: challengeFor(topic)
-              ? assistantOpening(challengeOpening(topic, options?.challenge))
-              : options?.situation
-                ? assistantOpening(
-                    options.opening || "Bonjour ! Je vous écoute.",
-                  )
-                : openings[topic],
+            partner: options?.partner,
+            content: assistantOpening(challengeFor(topic)
+              ? challengeOpening(topic, options?.challenge)
+              : options?.situation ? options.opening || "Bonjour ! Je vous écoute." : openings[topic], options?.partner),
           },
         ],
       });
@@ -261,6 +258,7 @@ export const demoApi: typeof api = {
       },
       {
         id: nextId + 1,
+        partner: preferences?.partner,
         role: "assistant",
         content: reply,
         correction,

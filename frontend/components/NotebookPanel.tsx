@@ -102,7 +102,7 @@ export function NotebookPanel({
           {!history.length && <p>{t("还没有练习记录。","No practice yet.")}</p>}
           {history.filter((r,i)=>history.findIndex(x=>x.id===r.id)===i).map(r=><article className="notebook-entry" key={r.id}>
             <button className="history-entry" aria-expanded={openedHistory===r.id} onClick={()=>setOpenedHistory(openedHistory===r.id?null:r.id)}><span><strong>{r.scene || catalog.find(s=>s.id===r.topic)?.[language] || r.topic}</strong><small>{r.day} · {r.turns} {t("次表达","turns")}</small></span><span>{openedHistory===r.id?"−":"+"}</span></button>
-            {openedHistory===r.id && <div className="history-transcript">{r.messages.map(m=><p key={m.id} lang="fr"><small>{m.role==="user"?t("我","Me"):"Camille"}</small>{m.content}</p>)}</div>}
+            {openedHistory===r.id && <div className="history-transcript">{r.messages.map(m=><p key={m.id} lang="fr"><small>{m.role==="user"?t("我","Me"):m.partner==="noe"?"Noé":"Camille"}</small>{m.content}</p>)}</div>}
           </article>)}
         </section>
       ) : view === "mistakes" ? (

@@ -29,8 +29,8 @@
     "id": "challenge_describe",
     "zh": "描述猜词",
     "en": "Describe & guess",
-    "descriptionZh": "不说出目标词，让 Camille 根据线索猜出来。",
-    "descriptionEn": "Describe a hidden word and let Camille guess from your clues.",
+    "descriptionZh": "不说出目标词，让搭档根据线索猜出来。",
+    "descriptionEn": "Describe a hidden word and let your partner guess from your clues.",
     "howZh": "目标词只有你在玩法卡里看到。用用途、外观或场景描述，不直接说词，也不直接翻译；AI 不会提前拿到答案。",
     "howEn": "Only you see the target in the guide. Describe its use, appearance or context without saying or translating it. The AI is not given the answer.",
     "seeds": [
@@ -406,7 +406,7 @@
     "id": "challenge_story",
     "zh": "故事接龙",
     "en": "Story relay",
-    "descriptionZh": "和 Camille 轮流接一两句，把故事讲下去。",
+    "descriptionZh": "和搭档轮流接一两句，把故事讲下去。",
     "descriptionEn": "Take turns adding one or two sentences to a shared story.",
     "howZh": "保留已经发生的情节，每次增加一两句；可以说“结束故事”来收尾。没有标准答案。",
     "howEn": "Keep earlier events consistent and add one or two sentences per turn. Ask to end the story when ready. There is no single right answer.",
@@ -434,7 +434,7 @@
     "en": "Discussion & debate",
     "descriptionZh": "选择立场，回应不同意见，练习解释与让步。",
     "descriptionEn": "Choose a side, respond to objections and practise explaining or conceding.",
-    "howZh": "你和 Camille 持不同立场，每轮回应一个论点。评价清晰度、理由和回应，不以赞同 AI 或输赢打分。",
+    "howZh": "你和搭档持不同立场，每轮回应一个论点。评价清晰度、理由和回应，不以赞同 AI 或输赢打分。",
     "howEn": "Take opposite sides and address one argument each turn. Feedback focuses on clarity, reasons and responses, not agreement or winning.",
     "seeds": [
       {

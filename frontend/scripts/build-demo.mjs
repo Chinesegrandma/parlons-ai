@@ -38,7 +38,8 @@ for (const name of ["inter", "fraunces"]) {
     );
   }
 }
-const js = result.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
+const portrait = await readFile(path.join(root, "public/icons/noe.webp"));
+const js = result.outputFiles[0].text.replaceAll("/icons/noe.webp", "data:image/webp;base64," + portrait.toString("base64")).replace(/<\/script/gi, "<\\/script");
 await mkdir(path.join(root, "public"), { recursive: true });
 await writeFile(
   path.join(root, "public/parlons-demo.html"),

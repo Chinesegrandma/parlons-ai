@@ -46,9 +46,11 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const feedbackMode: PracticeMode =
     feedback === "after_session" ? "conversation" : "guided";
   const [voices, setVoices] = useState<Voice[]>([]);
+  const partner = learning.voice === "noe" ? "noe" : "camille";
+  const partnerName = partner === "noe" ? "Noé" : ASSISTANT_NAME;
   const speech = useSpeech(
     client,
-    voices.some((item) => item.id === learning.voice)
+    partner === "noe" || voices.some((item) => item.id === learning.voice)
       ? learning.voice
       : "default",
   );
@@ -151,7 +153,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     const opening = session.messages.find(
       (message) => message.role === "assistant",
     );
-    if (opening) void speech.playResponse(opening.content, speechReady);
+    if (opening) void speech.playResponse(opening.content, speechReady, opening.partner === "noe" ? "noe" : learning.voice === "noe" ? "default" : undefined);
     // Only the chosen session opening is played; render changes never repeat it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.id, openingId, health, speechReady]);
@@ -258,6 +260,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     setPhase("thinking");
     conversation.acceptTranscript(value);
     const request = conversation.send({
+      ...(partner === "noe" && {partner}),
       text: value.original_text,
       transcriptId: value.id,
       language,
@@ -314,6 +317,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       feedback,
       scenario_variant: "standard",
       ...extra,
+      partner,
     };
     const result = await conversation.start(topic, topic ? options : undefined);
     if (current === epoch.current && result?.messages.length === 1)
@@ -331,6 +335,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
     speech.stop();
     const current = epoch.current;
     const request = conversation.send({
+      ...(partner === "noe" && {partner}),
       text: suggestion ?? conversation.input,
       transcriptId: suggestion === undefined ? conversation.transcript?.id : null,
       language,
@@ -605,13 +610,13 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             <details className="identity-menu">
               <summary
                 aria-label={t(
-                  "Camille 与聊天设置",
-                  "Camille and chat settings",
+                  partnerName + " 与聊天设置",
+                  partnerName + " and chat settings",
                 )}
               >
-                <AssistantAvatar size={36} language={language} />
+                <AssistantAvatar partner={partner} size={36} language={language} />
                 <div>
-                  <strong>{ASSISTANT_NAME}</strong>{role && <small className="scene-role"> · {role[language==="en"?1:0]}</small>}
+                  <strong>{partnerName}</strong>{role && <small className="scene-role"> · {role[language==="en"?1:0]}</small>}
                   {(demo || health?.mock_ai) && (
                     <span className="demo-indicator">{t("演示", "Demo")}</span>
                   )}
@@ -625,7 +630,33 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                 </div>
                 <ChevronDown size={13} aria-hidden="true" />
               </summary>
-              <div className="chat-navigation">{navigation}</div>
+              <div className="chat-navigation">
+                <div className="partner-choices" aria-label={t("切换搭档", "Change partner")}>
+                  {(["camille", "noe"] as const).map(id => (
+                    <div key={id}>
+                      <button type="button" disabled={busy} aria-pressed={partner === id}
+                        onClick={event => {
+                          pauseVoice();
+                          learning.setVoice(id === "noe" ? "noe" : "default");
+                          event.currentTarget.closest("details")?.removeAttribute("open");
+                        }}>
+                        <AssistantAvatar partner={id} language={language} />
+                        <span><strong>{id === "noe" ? "Noé" : "Camille"}</strong>
+                          <small>{id === "noe" ? t("轻松，带点幽默", "Relaxed and witty") : t("温柔，耐心倾听", "Warm and attentive")}</small>
+                        </span>
+                      </button>
+                      {!demo && speechReady && <button type="button" disabled={busy}
+                        aria-label={t("试听 ", "Preview ") + (id === "noe" ? "Noé" : "Camille")}
+                        onClick={() => {
+                          pauseVoice();
+                          speech.unlock();
+                          void speech.speakAtRate("Salut ! Tu me racontes ta journée ?", 1, id === "noe" ? "noe" : "default");
+                        }}>▷ {t("试听", "Listen")}</button>}
+                    </div>
+                  ))}
+                </div>
+                {navigation}
+              </div>
             </details>
             <button
               className="end-review"
@@ -834,10 +865,10 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
                   )
                   .map((message) => message.id) || []
               }
-              onSpeak={(text, playbackRate) => {
+              onSpeak={(text, playbackRate, author) => {
                 pauseVoice();
                 speech.unlock();
-                void speech.speakAtRate(text, playbackRate ?? 1);
+                void speech.speakAtRate(text, playbackRate ?? 1, author === "noe" ? "noe" : learning.voice === "noe" ? "default" : undefined);
               }}
               onRewrite={async (text, style, targetLanguage) => {
                 return client.rewrite(text, style, targetLanguage);

@@ -27,6 +27,7 @@ DB_PATH = Path(
 )
 CATALOG = json.loads(Path(__file__).with_name("catalog.json").read_text(encoding="utf-8"))
 TOPICS = {scene["id"]: scene["role"] for scene in CATALOG}
+SCENE_OPENINGS = {scene["id"]: scene["opening"] for scene in CATALOG}
 OPENERS = {scene["id"]: introduce(scene["opening"]) for scene in CATALOG}
 
 
@@ -71,6 +72,7 @@ def init_db():
         columns = {row["name"] for row in db.execute("PRAGMA table_info(messages)")}
         for name, definition in {
             "is_opening": "INTEGER NOT NULL DEFAULT 0",
+            "partner": "TEXT NOT NULL DEFAULT 'camille'",
             "transcript_id": "TEXT",
             "original_transcript": "TEXT",
             "edited_transcript": "TEXT",
@@ -113,22 +115,26 @@ def opening_text(db, session_id, topic):
     row = db.execute("SELECT options FROM sessions WHERE id=?", (session_id,)).fetchone()
     options = load_options(row["options"]) if row else PracticeOptions()
     if topic in BY_TOPIC:
-        return introduce(challenge_opening(topic, options))
+        return options.partner, introduce(challenge_opening(topic, options), options.partner)
     if options.review_targets:
-        return introduce(
+        return options.partner, introduce(
             "Bonjour ! On va réutiliser une expression dans une nouvelle situation. "
-            "Que souhaitez-vous demander dans cette situation ?"
+            "Que souhaitez-vous demander dans cette situation ?", options.partner
         )
     if options.situation:
-        return introduce(options.opening or "Bonjour ! Je vous écoute.")
-    return OPENERS[topic]
+        return options.partner, introduce(
+            options.opening or "Bonjour ! Je vous écoute.", options.partner
+        )
+    return options.partner, introduce(SCENE_OPENINGS[topic], options.partner)
 
 
 def insert_opening(db, session_id: str, topic: str, created_at: str):
+    partner, text = opening_text(db, session_id, topic)
     db.execute(
         "INSERT OR IGNORE INTO messages "
-        "(session_id, role, content, created_at, is_opening) VALUES (?, 'assistant', ?, ?, 1)",
-        (session_id, opening_text(db, session_id, topic), created_at),
+        "(session_id, role, content, created_at, is_opening, partner) "
+        "VALUES (?, 'assistant', ?, ?, 1, ?)",
+        (session_id, text, created_at, partner),
     )
 
 
@@ -174,6 +180,7 @@ class MessageCreate(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     transcript_id: str | None = None
     language: Literal["zh", "en"] | None = None
+    partner: Literal["camille", "noe"] = "camille"
     practice_mode: Literal["guided", "conversation"] = "guided"
     surprise: bool | None = None
 
@@ -214,7 +221,7 @@ def session_messages(db, session_id: str) -> list[dict]:
     result = [
         dict(row)
         for row in db.execute(
-            "SELECT id, role, content, correction, created_at, is_opening, "
+            "SELECT id, role, content, correction, created_at, is_opening, partner, "
             "transcript_id, original_transcript, edited_transcript, "
             "corrected_text, review_prompt, correction_details, feedback_for FROM messages "
             "WHERE session_id=? ORDER BY is_opening DESC, id",
@@ -281,7 +288,10 @@ def create_session(payload: SessionCreate):
                 session_id,
                 payload.topic,
                 now(),
-                payload.options.model_dump_json(exclude_none=True),
+                payload.options.model_dump_json(
+                    exclude_none=True,
+                    exclude={"partner"} if payload.options.partner == "camille" else set(),
+                ),
                 cloud_auth.user_id(),
             ),
         )
@@ -358,8 +368,17 @@ async def chat(payload: MessageCreate):
                 raise HTTPException(404, "Transcript not found for this session")
             original = transcript["original_text"]
     options = load_options(session["options"])
-    instructions = (
-        "Tu t’appelles Camille. Dans un jeu de rôle, incarne le personnage de la situation, "
+    identity = (
+        "Tu t’appelles Noé. Tu parles avec une légèreté souriante, en phrases vives. "
+        "Rebondis sur un détail précis. À l’occasion, glisse une pointe d’autodérision. "
+        "Face à une inquiétude, écoute d’abord. Adapte tu ou vous au contexte. "
+        "Ton métier et ton rôle dépendent de la scène. "
+        if payload.partner == "noe" else "Tu t’appelles Camille, une assistante IA de français. "
+    )
+    instructions = identity + (
+        "L’historique peut contenir des tours d’un autre partenaire. "
+        "Ta présentation est faite ; ne la répète pas. "
+        "Dans un jeu de rôle, incarne le personnage de la situation, "
         "pas une professeure de français. Ne te présente pas comme une IA à chaque échange. "
         "Tu es un partenaire de français chaleureux. Adapte le vocabulaire au niveau observé "
         "et utilise des phrases courtes et accessibles. "
@@ -529,8 +548,8 @@ async def chat(payload: MessageCreate):
         )
         db.execute(
             "INSERT INTO messages(session_id, role, content, correction, created_at, "
-            "corrected_text, review_prompt, correction_details, feedback_for) "
-            "VALUES (?, 'assistant', ?, ?, ?, ?, ?, ?, ?)",
+            "corrected_text, review_prompt, correction_details, feedback_for, partner) "
+            "VALUES (?, 'assistant', ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 payload.session_id,
                 reply,
@@ -540,6 +559,7 @@ async def chat(payload: MessageCreate):
                 review_prompt,
                 json.dumps(correction_details, ensure_ascii=False),
                 user_row.lastrowid,
+                payload.partner,
             ),
         )
     return {

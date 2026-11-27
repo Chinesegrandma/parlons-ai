@@ -111,6 +111,7 @@ export function useSpeech(client = api, voice = "default") {
     text: string,
     wait = false,
     playbackRate?: 0.8 | 1,
+    playbackVoice = voice,
   ): Promise<boolean> {
     stop();
     explicitRate.current = playbackRate ?? null;
@@ -121,9 +122,9 @@ export function useSpeech(client = api, voice = "default") {
     controller.current = abort;
     try {
       const blob =
-        voice === "default"
+        playbackVoice === "default"
           ? await client.synthesize(text, abort.signal)
-          : await client.synthesize(text, abort.signal, voice);
+          : await client.synthesize(text, abort.signal, playbackVoice);
       if (current !== generation.current) return false;
       const url = URL.createObjectURL(blob);
       objectUrl.current = url;
@@ -197,8 +198,8 @@ export function useSpeech(client = api, voice = "default") {
       .finally(() => URL.revokeObjectURL(silentUrl));
   }
 
-  async function playResponse(text: string, ready: boolean) {
-    if (autoplayEnabled.current && ready) await speak(text);
+  async function playResponse(text: string, ready: boolean, playbackVoice = voice) {
+    if (autoplayEnabled.current && ready) await speak(text, false, undefined, playbackVoice);
   }
   return {
     autoplay,
@@ -211,8 +212,8 @@ export function useSpeech(client = api, voice = "default") {
     blocked,
     stop,
     speak,
-    speakAtRate: (text: string, playbackRate: 0.8 | 1) =>
-      speak(text, false, playbackRate),
+    speakAtRate: (text: string, playbackRate: 0.8 | 1, playbackVoice = voice) =>
+      speak(text, false, playbackRate, playbackVoice),
     playResponse,
     toggleAutoplay,
     toggleSlow,

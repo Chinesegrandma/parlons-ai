@@ -966,3 +966,9 @@ html.parlons-chat-open, html.parlons-chat-open body {
 .parlons-app .scene-menu-item:focus-visible,.parlons-app .scene-category-tabs>button:focus-visible{outline:2px solid #567e58;outline-offset:-2px}
 .parlons-app .scene-menu-item:disabled,.parlons-app .scene-category-tabs>button:disabled{opacity:.55;cursor:default}
 @media(min-width:701px){.parlons-app .scene-menu{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:22px}.parlons-app .scene-menu>.scene-menu-card{grid-column:1/-1}}
+
+.partner-choices { display: flex; flex-wrap: wrap; gap: .65rem; padding: .85rem; }
+.partner-choices > div { display: grid; gap: .25rem; flex: 1; }
+.partner-choices button { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .5rem; color: var(--sage-ink); background: white; border: 1px solid var(--sage-border); border-radius: .85rem; font: inherit; text-align: left; cursor: pointer; }
+.partner-choices button[aria-pressed=true] { border-color: var(--sage-deep); background: #e5eddc; }
+.partner-choices small { display: block; font-size: .8rem; }

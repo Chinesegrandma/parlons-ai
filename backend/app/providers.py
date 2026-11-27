@@ -303,7 +303,7 @@ def voice_id() -> str:
 
 
 def voice_catalog():
-    catalog = {}
+    catalog = {"noe": {"name": "Noé", "provider_id": "vCsptCe91UKbZe2sIB2T"}}
     if voice_id():
         catalog["default"] = {"name": "Signature voice", "provider_id": voice_id()}
     # Explicit server-side allowlist; browser never supplies a provider voice ID.
@@ -320,7 +320,7 @@ def voice_catalog():
                 raise ValueError("Invalid voice list")
             for alias, entry in extra.items():
                 if (
-                    alias == "default"
+                    alias in ("default", "noe")
                     or not re.fullmatch(r"[a-z][a-z0-9_-]{0,39}", alias)
                     or not isinstance(entry, dict)
                     or not isinstance(entry.get("name"), str)

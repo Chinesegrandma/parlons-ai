@@ -436,7 +436,7 @@ it("Pause submits the current spoken turn, responds and does not restart listeni
 
 it("shows Camille’s female assistant avatar and plays her opening introduction once", async () => {
   await enter();
-  expect(screen.getByText("Camille", { exact: true })).toBeInTheDocument();
+  expect(screen.getByLabelText("Camille 与聊天设置")).toBeInTheDocument();
   expect(
     screen.getAllByRole("img", { name: /Camille/ }).length,
   ).toBeGreaterThan(0);

@@ -8,6 +8,7 @@ import {
   type Topic,
   type Transcript,
   type Language,
+  type Partner,
   type PracticeMode,
 } from "../lib/types";
 
@@ -91,6 +92,7 @@ export function useConversation(
     text: string;
     transcriptId?: string | null;
     language?: Language;
+    partner?: Partner;
     practice_mode?: PracticeMode;
     surprise?: boolean;
   }): Promise<string | null> {
@@ -112,6 +114,7 @@ export function useConversation(
       const preferences = override?.language
         ? {
             language: override.language,
+            ...(override.partner && {partner: override.partner}),
             practice_mode: override.practice_mode || ("guided" as PracticeMode),
             ...(override.surprise === undefined ? {} : {surprise: override.surprise}),
           }

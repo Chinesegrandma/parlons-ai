@@ -9,7 +9,9 @@ export type Review = {
   strengths: { quote: string; reason: string }[];
   corrections: { original: string; suggestion: string; explanation: string; category?: MistakeCategory | null }[];
 };
+export type Partner = "camille" | "noe";
 export type Message = {
+  partner?: Partner;
   id: number;
   role: "user" | "assistant";
   content: string;
@@ -56,6 +58,7 @@ export type ChallengeOptions = {
 export type PracticeOptions = {
   challenge?: ChallengeOptions | null;
   scenario_variant?: "standard" | "surprise";
+  partner?: Partner;
   scene: string;
   opening?: string;
   situation: string;

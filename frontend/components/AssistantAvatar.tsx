@@ -1,12 +1,19 @@
-import type { Language } from "../lib/types";
+import type { Language, Partner } from "../lib/types";
 export const ASSISTANT_NAME = "Camille";
 export function AssistantAvatar({
+  partner = "camille",
   size = 36,
   language = "zh",
 }: {
+  partner?: Partner;
   size?: number;
   language?: Language;
 }) {
+  if (partner === "noe") return (
+    // Small local avatar also bundled into the standalone offline demo.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className="assistant-portrait" src="/icons/noe.webp" alt="Noé" width={size} height={size} style={{borderRadius: "30%"}} />
+  );
   return (
     <svg
       className="assistant-portrait"

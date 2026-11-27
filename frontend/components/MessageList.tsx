@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type {
   Message,
+  Partner,
   Language,
   RewriteStyle,
   RewriteSuggestion,
@@ -47,7 +48,7 @@ export function MessageList({
   busy: boolean;
   busyLabel?: string;
   speechReady: boolean;
-  onSpeak: (text: string, playbackRate?: 0.8 | 1) => void;
+  onSpeak: (text: string, playbackRate?: 0.8 | 1, partner?: Partner) => void;
   onTranslate: (text: string, language: Language) => Promise<string>;
   onRewrite?: (
     text: string,
@@ -199,7 +200,7 @@ export function MessageList({
             >
               <div className="avatar">
                 {message.role === "assistant" ? (
-                  <AssistantAvatar size={30} language={language} />
+                  <AssistantAvatar partner={message.partner} size={30} language={language} />
                 ) : (
                   t("你", "You")
                 )}
@@ -208,8 +209,8 @@ export function MessageList({
                 <div className="message-author">
                   {message.role === "assistant"
                     ? t(
-                        `${ASSISTANT_NAME} · 你的 AI 法语助理`,
-                        `${ASSISTANT_NAME} · Your AI French assistant`,
+                        `${message.partner === "noe" ? "Noé" : ASSISTANT_NAME} · 你的 AI 法语助理`,
+                        `${message.partner === "noe" ? "Noé" : ASSISTANT_NAME} · Your AI French assistant`,
                       )
                     : t("你", "You")}
                   <span>{message.role === "assistant" ? "FR" : "VOUS"}</span>
@@ -232,7 +233,7 @@ export function MessageList({
                       className="speak"
                       aria-label={t("朗读", "Listen")}
                       disabled={!speechReady}
-                      onClick={() => onSpeak(message.content, 1)}
+                      onClick={() => message.partner ? onSpeak(message.content, 1, message.partner) : onSpeak(message.content, 1)}
                     >
                       <Volume2 size={13} /> {t("听一遍", "Listen")}
                     </button>
@@ -244,7 +245,7 @@ export function MessageList({
                         "以 0.8 倍速朗读这条回复",
                         "Play this reply at 0.8× speed",
                       )}
-                      onClick={() => onSpeak(message.content, 0.8)}
+                      onClick={() => message.partner ? onSpeak(message.content, 0.8, message.partner) : onSpeak(message.content, 0.8)}
                     >
                       <Gauge size={13} aria-hidden="true" /> 0.8×
                     </button>

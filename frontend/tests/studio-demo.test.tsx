@@ -83,3 +83,23 @@ it("demonstrates interest in the interview before returning to scheduling in the
   );
   expect(fetch).not.toHaveBeenCalled();
 });
+
+it("keeps the draft and remembers Noé for the next visit", async () => {
+  const user = userEvent.setup();
+  const page = render(<Studio demo />);
+  await user.click(screen.getByRole("button", { name: "日常" }));
+  await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
+  await screen.findByText(assistantOpening("Bonjour ! Qu’est-ce que je vous sers ?"));
+  const draft = screen.getByRole("textbox", { name: /^(Message|输入内容)$/ });
+  await user.type(draft, "Bonjour");
+  await user.click(screen.getByLabelText("Camille 与聊天设置"));
+  await user.click(screen.getByRole("button", { name: /Noé.*轻松/ }));
+  expect(draft).toHaveValue("Bonjour");
+  expect(screen.getByText(/Camille ·/)).toBeInTheDocument();
+  page.unmount();
+  render(<Studio demo />);
+  await user.click(screen.getByRole("button", { name: "日常" }));
+  await user.click(screen.getByRole("button", { name: /咖啡馆.*进入对话/ }));
+  await screen.findByLabelText("Noé 与聊天设置");
+  expect(screen.getByText(/Noé ·/)).toBeInTheDocument();
+});

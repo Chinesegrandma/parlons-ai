@@ -6,6 +6,7 @@ import type {
   Topic,
   Transcript,
   Language,
+  Partner,
   PracticeMode,
   Review,
   PracticeOptions,
@@ -60,7 +61,7 @@ export const api = {
     session_id: string,
     message: string,
     transcript_id?: string,
-    preferences?: { language: Language; practice_mode: PracticeMode; surprise?: boolean },
+    preferences?: { partner?: Partner; language: Language; practice_mode: PracticeMode; surprise?: boolean },
   ) =>
     request<{ reply: string; correction: string; mode: string }>(
       "/chat",
