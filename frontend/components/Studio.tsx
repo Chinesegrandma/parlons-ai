@@ -5,7 +5,7 @@ import { StudioHeader, PracticeSettings } from "./AppChrome";
 import { AssistantAvatar, ASSISTANT_NAME } from "./AssistantAvatar";
 import { ChallengePanel } from "./ChallengePanel";
 import { challengeFor } from "../lib/challenges";
-import { ArrowUp, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { BrasserieMenu, MenuInvitation } from "./BrasserieMenu";
 import { Composer } from "./Composer";
 import { PracticeAid } from "./PracticeAid";
@@ -93,6 +93,14 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
   const session = conversation.session;
   const [menuSession, setMenuSession] = useState<string | null>(null);
   const dining = session?.topic === "restaurant" && !session.options?.situation && !session.options?.review_targets?.length;
+  const [narrowMenu, setNarrowMenu] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 899px)");
+    const update = () => setNarrowMenu(media.matches);
+    update();
+    media.addEventListener?.("change", update);
+    return () => media.removeEventListener?.("change", update);
+  }, []);
   const menuOpen = page === "chat" && dining && menuSession === session?.id;
   const scene = catalog.find((item) => item.id === session?.topic);
   const roles: Partial<Record<Topic,[string,string]>> = {bank_card:["银行顾问","Bank adviser"],bank_transfer:["银行顾问","Bank adviser"],doctor:["前台","Receptionist"],symptoms:["问诊角色","Consultation partner"],cafe:["店员","Barista"],restaurant:["服务员","Server"],transport:["售票员","Ticket agent"],shopping:["店员","Shop assistant"],renting:["房产顾问","Agent"],post:["邮局职员","Postal clerk"],customer_service:["客服","Support agent"],teacher:["老师","Teacher"],course:["教务","Academic adviser"],report:["同事","Colleague"],interview:["招聘经理","Interviewer"],friends:["朋友","Friend"],invite:["朋友","Friend"],decline:["朋友","Friend"]};
@@ -537,6 +545,10 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
       onSettings={() => setSettings(!settings)}
     />
   );
+  const menuPanel = menuOpen && <BrasserieMenu language={language} close={()=>setMenuSession(null)} ask={text=>{
+        setMenuSession(null);
+        conversation.setInput(conversation.input ? conversation.input + " " + text : text);
+      }}/>;
   return (
     <div
       className={`parlons-app ${page === "chat" ? (menuOpen ? "sage-conversation with-menu" : "sage-conversation") : ""}`}
@@ -858,9 +870,10 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
             className="focused-chat"
             aria-label={t("法语对话", "French conversation")}
           >
+            {narrowMenu && menuPanel}
             <MessageList
               openingCard={dining && session ? <MenuInvitation open={()=>setMenuSession(session.id)} /> : undefined}
-              key={session?.id ?? "empty"}
+              key={"history-" + (session?.id ?? "empty")}
               messages={session?.messages || []}
               busy={busy}
               busyLabel={
@@ -981,24 +994,7 @@ export function Studio({ demo = false, userId }: { demo?: boolean; userId?: stri
           )}
         </main>
       )}
-      {menuOpen && <BrasserieMenu language={language} controls={<>
-        {conversation.error && <small role="alert">{localizedError(conversation.error)}</small>}
-        {conversation.input && !voiceActive && <input aria-label={t("点单草稿","Order draft")} value={conversation.input} onChange={e=>conversation.setInput(e.target.value)} />}
-        {mode === "conversation" && (voiceActive || !conversation.input.trim()) ? <button
-          disabled={demo || !health?.stt_ready || !speechReady || (!voiceActive && (busy || aidBusy || speech.working || speech.blocked))}
-          onClick={()=>voiceActive ? requestPause() : startVoice()}>
-          {voiceActive ? <Pause size={18}/> : <Mic size={18}/>}
-          {voiceActive ? status + " · " + t("暂停","Pause") : t("开启语音点单","Start voice ordering")}
-        </button> : <button
-          disabled={busy || aidBusy || (!conversation.input.trim() && !health?.stt_ready)}
-          onClick={()=>{if (demoListening || recorder.listening || !conversation.input.trim()) record(); else void send();}}>
-          {conversation.input.trim() && !recorder.listening && !demoListening ? <ArrowUp size={18}/> : <Mic size={18}/>}
-          {recorder.transcribing ? t("正在转写…","Transcribing…") : recorder.listening || demoListening ? t("说完了","Finish recording") : conversation.input.trim() ? t("发送点单","Send order") : t("按一下，说出点单","Tap to order by voice")}
-        </button>}
-      </>} close={()=>setMenuSession(null)} ask={text=>{
-        setMenuSession(null);
-        conversation.setInput(conversation.input ? conversation.input + " " + text : text);
-      }}/>}
+      {!narrowMenu && menuPanel}
     </div>
   );
 }

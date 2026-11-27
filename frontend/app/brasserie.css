@@ -35,10 +35,8 @@
 .with-menu .conversation-page{width:100%;margin:0;min-width:0;padding-inline:0}
 }
 @media(max-width:899px){
-.brasserie-sheet{position:fixed;inset:auto 0 0;height:76dvh;max-height:90dvh;border-radius:20px 20px 0 0;box-shadow:0 -6px 28px #37261938;padding-bottom:env(safe-area-inset-bottom)}
-.brasserie-sheet.tall{height:90dvh}
-.menu-handle{display:grid;place-items:center;flex:none;height:22px;background:none;border:0;touch-action:none}
-.menu-handle span{width:36px;border-top:4px solid #bead95;border-radius:8px}
+.with-menu .focused-chat > .brasserie-sheet{position:relative;flex:1 1 0;min-height:0;width:100%;border-radius:14px;padding:10px 0 0}
+.with-menu .focused-chat > .lookup-surface{display:none}
 .menu-mast{padding:0 48px 8px}
 .brasserie-etching,.menu-mast p,.menu-fleur,.menu-items h3{display:none}
 .menu-mast h2{font-size:26px;letter-spacing:-.035em}
@@ -50,8 +48,3 @@
 .menu-dish small{font-size:13px;line-height:1.2;margin-top:1px}
 .menu-price{font-size:16px}
 }
-.menu-order{flex:none;margin:auto 12px 10px;padding:6px 7px 4px;border-top:1px solid #cfbfa3;display:grid;gap:5px}
-.menu-order button{min-height:40px;display:flex;align-items:center;justify-content:center;gap:8px;background:#71323c;color:#fff8ec;border:0;border-radius:20px;font:600 14px Inter,sans-serif}
-.menu-order button:disabled{opacity:.55}
-.menu-order input{min-width:0;width:100%;box-sizing:border-box;border-radius:8px;border:1px solid #ccb99e;padding:7px;font-size:16px}
-@media(max-width:899px){.brasserie-sheet:not(.tall){height:min(calc(76dvh + 50px),86dvh)}}

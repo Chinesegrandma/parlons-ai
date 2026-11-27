@@ -14,8 +14,8 @@ export function MenuInvitation({open}: {open: () => void}) {
   </button>;
 }
 
-export function BrasserieMenu({language, close, ask, controls}: {
-  controls: React.ReactNode; language: Language; close: () => void; ask: (text: string) => void;
+export function BrasserieMenu({language, close, ask}: {
+  language: Language; close: () => void; ask: (text: string) => void;
 }) {
   const [section, setSection] = useState(0);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -56,6 +56,5 @@ export function BrasserieMenu({language, close, ask, controls}: {
         {expanded===dish.name && <div className="dish-meaning"><span>{dish[language]}</span><button onClick={()=>ask('Pouvez-vous me parler de ce choix sur la carte : « '+dish.name+' » ?')}>{language==="zh"?"问问这道菜":"Ask about this item"}</button></div>}
       </div>)}
     </div>
-    <footer className="menu-order">{controls}</footer>
   </aside>;
 }
